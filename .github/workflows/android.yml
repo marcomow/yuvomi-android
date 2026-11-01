@@ -1,0 +1,85 @@
+# Build, unit tests and lint on every push and pull request, plus the contract
+# tests against upstream's real server at the pinned version (ADR 0008,
+# docs/UPSTREAM-SYNC.md). The debug APK is kept as a build artifact (ADR 0009).
+name: Android
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Unit, Robolectric and contract-file tests
+        run: ./gradlew --no-daemon testDebugUnitTest
+      - name: Lint
+        run: ./gradlew --no-daemon lintDebug
+      - name: Debug APK
+        run: ./gradlew --no-daemon assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: yuvomi-android-debug
+          path: app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-reports
+          path: app/build/reports
+
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Start upstream Yuvomi at the pinned version
+        run: |
+          version="$(tr -d '[:space:]' < upstream/VERSION)"
+          docker run -d --name yuvomi -p 3000:3000 \
+            -e SESSION_SECRET="$(openssl rand -hex 32)" \
+            -e DB_ENCRYPTION_KEY= \
+            -e DB_PATH=/data/yuvomi.db \
+            -e RATE_LIMIT_MAX_ATTEMPTS=50 \
+            "ghcr.io/ulsklyc/yuvomi:${version}"
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3000/api/v1/version && break
+            sleep 2
+          done
+      - name: Seed it with upstream's own demo data
+        run: |
+          version="$(tr -d '[:space:]' < upstream/VERSION)"
+          # The image does not ship scripts/; take them from the same tag.
+          git clone --quiet --depth 1 --branch "v${version}" https://github.com/ulsklyc/yuvomi "$RUNNER_TEMP/upstream"
+          docker cp "$RUNNER_TEMP/upstream/scripts/." yuvomi:/app/scripts/
+          docker exec yuvomi node scripts/seed-demo.js --db /data/yuvomi.db --locale en
+          docker restart yuvomi
+          for i in $(seq 1 60); do
+            curl -sf http://localhost:3000/api/v1/version | grep -q '"setup_required":false' && break
+            sleep 2
+          done
+      - name: Contract tests
+        env:
+          YUVOMI_CONTRACT_URL: http://localhost:3000
+        run: ./gradlew --no-daemon testDebugUnitTest --tests 'io.github.marcomow.yuvomi.contract.*'
+      - name: Server log on failure
+        if: failure()
+        run: docker logs yuvomi | tail -200
