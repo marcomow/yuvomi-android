@@ -10,6 +10,7 @@ datepicker
 emptyHint
 dashboard
 tasks
+meals
 rrule
 markdown
 category
