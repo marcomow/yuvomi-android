@@ -1,0 +1,8 @@
+{
+  "android": {
+    "shopping": {
+      "errorReadOnly": "You have read-only access to this module - changes aren't possible.",
+      "categoriesHint": "Add, rename, delete or reorder categories."
+    }
+  }
+}
