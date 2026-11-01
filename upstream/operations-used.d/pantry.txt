@@ -1,3 +1,14 @@
 # The upstream operations of docs/spec/pantry.md, as `METHOD /api/v1/path` with
 # OpenAPI path templates. Must match the module's operation enum exactly
 # (ContractFilesTest); the weekly sync report checks every line.
+POST /api/v1/pantry
+PUT /api/v1/pantry/{itemId}
+PATCH /api/v1/pantry/{itemId}
+DELETE /api/v1/pantry/{itemId}
+DELETE /api/v1/pantry/products/{productId}
+GET /api/v1/pantry/locations
+POST /api/v1/pantry/locations
+PUT /api/v1/pantry/locations/{locId}
+PATCH /api/v1/pantry/locations/reorder
+DELETE /api/v1/pantry/locations/{locId}
+POST /api/v1/shopping/{listId}/import-pantry

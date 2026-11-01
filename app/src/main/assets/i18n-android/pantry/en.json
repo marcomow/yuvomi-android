@@ -1,0 +1,8 @@
+{
+  "android": {
+    "pantry": {
+      "locationExists": "This storage location already exists.",
+      "locationLast": "The last storage location cannot be deleted."
+    }
+  }
+}
