@@ -17,7 +17,8 @@ CI. See the [plan](docs/PLAN.md) for what is next.
 Download `yuvomi-android-<version>.apk` from the latest
 [release](https://github.com/marcomow/yuvomi-android/releases) on the phone and open it
 (Android 8.0 or newer; allow installing from your browser when asked). Releases are
-pre-releases of a proof of concept. How they are made: [RELEASING.md](docs/RELEASING.md).
+pre-releases of a proof of concept; every change to the app merged into `main` publishes a new
+one. How they are made: [RELEASING.md](docs/RELEASING.md).
 
 ## MVP
 
@@ -52,7 +53,7 @@ points Gradle at the SDK.
 ```
 
 CI (`.github/workflows/android.yml`) runs the same, keeps the debug APK as an artifact, and runs
-the contract tests against `ghcr.io/ulsklyc/yuvomi` at the pinned version. Pushing a `v*` tag
+the contract tests against `ghcr.io/ulsklyc/yuvomi` at the pinned version. Every app change on `main`
 publishes a signed release APK (`.github/workflows/release.yml`, [RELEASING.md](docs/RELEASING.md)).
 
 ## Staying in sync with upstream

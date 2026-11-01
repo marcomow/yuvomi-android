@@ -20,6 +20,7 @@ Not done yet, in order of value:
 - Convert upstream's module glyphs (`public/nav-icons.js`) to vector drawables in the sync.
 - Apply overview tile options (OVERVIEW-R15) as query parameters.
 - Upgrade to AGP 9 and compile SDK 37 to take the newest AndroidX and OkHttp releases (ADR 0012).
-- Add the release signing key to the repository secrets, then tag `v0.1.0` (docs/RELEASING.md).
+- Add the release signing key to the repository secrets (docs/RELEASING.md); until then every
+  automatic release needs an uninstall first.
 - Repository setting for the weekly sync: *Settings → Actions → General → Allow GitHub Actions
   to create and approve pull requests*.

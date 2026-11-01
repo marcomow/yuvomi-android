@@ -1,14 +1,31 @@
 # Releasing an APK
 
 `.github/workflows/release.yml` tests, builds a minified release APK, signs it, and attaches it to
-a GitHub pre-release. Start it by pushing a version tag, or from the Actions tab, which works from a
-phone's browser. Decision record: [ADR 0013](adr/0013-apk-releases.md).
+a GitHub pre-release. Decision records: [ADR 0013](adr/0013-apk-releases.md),
+[ADR 0014](adr/0014-continuous-delivery.md).
+
+## How a release happens
+
+| What you do | What gets released |
+|---|---|
+| Merge a change to the app into `main` | The next patch version, e.g. `0.1.4` after `0.1.3` (the first one is `0.1.0`) |
+| Merge docs only | Nothing |
+| *Actions → Release → Run workflow* on `main`, version empty | The next patch version now |
+| *Run workflow* with a version, e.g. `0.2.0` | That version; automatic releases continue from it (`0.2.1`) |
+| Push a tag `v0.2.0` | That version |
+
+*Run workflow* works from a phone's browser. In the GitHub mobile app, use *… → Open in browser*
+if the app has no *Run workflow* button.
+
+Versions are `<major>.<minor>.<patch>` with minor and patch at most 999, and each must be higher
+than the last release, because Android refuses an update with a lower version code
+(`major * 1000000 + minor * 1000 + patch`). Releases run one at a time in push order.
 
 ## One-time setup: the signing key
 
-This is optional for a first try and needs a computer with a JDK (`keytool`). Without it the
-first releases are signed with a throwaway key; switching to the real key later means one
-uninstall.
+Needed for automatic releases to be useful, and needs a computer with a JDK (`keytool`). Without
+it every release is signed with a throwaway key and must be uninstalled before the next one
+installs; switching to the real key later means one last uninstall.
 
 Android only installs an update that is signed with the same key as the installed app, so make
 one key and keep it. Without it, releases are signed with a throwaway debug key and every release
@@ -32,30 +49,19 @@ Store `yuvomi-release.jks` and its password somewhere safe outside the repositor
 
 Delete `yuvomi-release.jks.b64` afterwards.
 
-## Each release
+## Before a minor or major release
 
-1. Make sure `main` is green.
-2. Try the release build on a device (it is minified, unlike the CI debug APK):
-   build it as below, install it, sign in, open the overview and tasks, tick off a task.
-3. Start the release, either way:
-
-   - **From the browser (also on a phone):** *Actions → Release → Run workflow*, branch `main`,
-     version `0.2.0`, *Run workflow*. The workflow creates the tag `v0.2.0` on the commit it built.
-     In the GitHub mobile app, open the repository in the browser instead
-     (*… → Open in browser*) if the app has no *Run workflow* button.
-   - **From a computer:** `git tag v0.2.0 && git push origin v0.2.0`.
-
-   The version must be `v<major>.<minor>.<patch>`, with minor and patch at most 99, and higher than the
-   last release, because the version code is derived from it.
-4. The release appears under *Releases* with `yuvomi-android-0.2.0.apk`. Its notes give the
-   signing certificate's SHA-256, which stays the same from release to release with the real key.
+The APK is minified, unlike the CI debug APK, and can fail where the debug build does not. Before
+announcing a version, install it, sign in, open the overview and tasks, and tick off a task. Its
+release notes give the signing certificate's SHA-256, which stays the same from release to release
+with the real key.
 
 ## Building a signed release locally
 
 ```bash
 YUVOMI_KEYSTORE_PATH=/path/to/yuvomi-release.jks \
 YUVOMI_KEYSTORE_PASSWORD=... YUVOMI_KEY_ALIAS=yuvomi YUVOMI_KEY_PASSWORD=... \
-./gradlew assembleRelease -Pyuvomi.versionName=0.2.0 -Pyuvomi.versionCode=200
+./gradlew assembleRelease -Pyuvomi.versionName=0.2.0 -Pyuvomi.versionCode=2000
 # app/build/outputs/apk/release/app-release.apk
 ```
 

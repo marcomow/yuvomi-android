@@ -1,24 +1,36 @@
-# Publishes an installable APK to GitHub Releases (docs/RELEASING.md, ADR 0013).
-# Start it either by pushing a tag v<major>.<minor>.<patch> (e.g. v0.2.0), or from
-# Actions -> Release -> Run workflow on main, giving the version; the workflow then
-# creates the tag itself, which also works from a phone's browser.
+# Continuous delivery of the APK to GitHub Releases (docs/RELEASING.md, ADR 0013, ADR 0014).
+#
+# - Every push to main that changes the app publishes the next patch version
+#   (v0.1.0, v0.1.1, ...), after the tests pass.
+# - Actions -> Release -> Run workflow on main publishes now; give a version to
+#   jump (e.g. 0.2.0 or 1.0.0) or leave it empty for the next patch.
+# - Pushing a tag v<major>.<minor>.<patch> publishes that version.
 name: Release
 
 on:
   push:
+    branches: [main]
     tags: ['v*.*.*']
+    paths:
+      - 'app/**'
+      - 'gradle/**'
+      - '*.gradle.kts'
+      - 'gradle.properties'
+      - 'upstream/VERSION'
+      - '.github/workflows/release.yml'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version to release, e.g. 0.1.0'
-        required: true
+        description: 'Version, e.g. 0.2.0 (empty: next patch)'
+        required: false
         type: string
 
 permissions:
   contents: write
 
+# One release at a time, in order; a newer push waits rather than racing for a tag.
 concurrency:
-  group: release-${{ github.ref }}
+  group: release
   cancel-in-progress: false
 
 jobs:
@@ -35,40 +47,67 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Version from the tag or the input
+      - name: Pick the version
         id: version
         env:
           INPUT_VERSION: ${{ inputs.version }}
           DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+          tags="$(git ls-remote --tags --refs origin 'v*' | sed 's#.*refs/tags/##')"
+          if [[ "$GITHUB_REF_TYPE" == 'tag' ]]; then
+            tag="$GITHUB_REF_NAME"; create=false
+          else
             if [[ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]]; then
-              echo "::error::Run the release from $DEFAULT_BRANCH, not $GITHUB_REF_NAME"; exit 1
+              echo "::error::Release from $DEFAULT_BRANCH, not $GITHUB_REF_NAME"; exit 1
             fi
             version="${INPUT_VERSION//[[:space:]]/}"
-            tag="v${version#v}"
-            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+            # This commit is already released and no version was asked for (a re-run): nothing to do.
+            if [[ -z "$version" ]] && git ls-remote --tags --refs origin 'v*' | grep -q "^$GITHUB_SHA"; then
+              echo "Commit $GITHUB_SHA is already released."; echo "skip=true" >> "$GITHUB_OUTPUT"; exit 0
+            fi
+            if [[ -n "$version" ]]; then
+              tag="v${version#v}"
+            else
+              last="$(grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' <<<"$tags" | sort -V | tail -1)"
+              if [[ -z "$last" ]]; then
+                tag="v0.1.0"
+              else
+                IFS=. read -r ma mi pa <<<"${last#v}"
+                tag="v${ma}.${mi}.$((pa + 1))"
+              fi
+            fi
+            if grep -qx "$tag" <<<"$tags"; then
               echo "::error::Tag $tag already exists; pick a higher version"; exit 1
             fi
-          else
-            tag="${GITHUB_REF_NAME}"
+            create=true
           fi
           if [[ ! "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
-            echo "::error::Tag '$tag' is not v<major>.<minor>.<patch>"; exit 1
+            echo "::error::'$tag' is not v<major>.<minor>.<patch>"; exit 1
           fi
           major="${BASH_REMATCH[1]}"; minor="${BASH_REMATCH[2]}"; patch="${BASH_REMATCH[3]}"
-          if (( minor > 99 || patch > 99 )); then
-            echo "::error::minor and patch must be at most 99 (versionCode scheme)"; exit 1
+          # versionCode = major*1000000 + minor*1000 + patch (ADR 0014).
+          if (( major > 2000 || minor > 999 || patch > 999 )); then
+            echo "::error::major <= 2000, minor and patch <= 999 (versionCode scheme)"; exit 1
           fi
-          echo "tag=$tag" >> "$GITHUB_OUTPUT"
-          echo "name=${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
-          echo "code=$(( major * 10000 + minor * 100 + patch ))" >> "$GITHUB_OUTPUT"
+          last="$(grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' <<<"$tags" | grep -vx "$tag" | sort -V | tail -1)"
+          if [[ -n "$last" && "$(printf '%s\n%s\n' "$last" "$tag" | sort -V | tail -1)" != "$tag" ]]; then
+            echo "::error::$tag is not higher than the latest release $last; Android would refuse the update"; exit 1
+          fi
+          {
+            echo "skip=false"
+            echo "tag=$tag"
+            echo "create=$create"
+            echo "name=${major}.${minor}.${patch}"
+            echo "code=$(( 10#$major * 1000000 + 10#$minor * 1000 + 10#$patch ))"
+          } >> "$GITHUB_OUTPUT"
+          echo "Releasing $tag"
 
       - name: Tests
+        if: steps.version.outputs.skip != 'true'
         run: ./gradlew --no-daemon testDebugUnitTest
 
       - name: Release key
-        if: env.HAS_KEY == 'true'
+        if: steps.version.outputs.skip != 'true' && env.HAS_KEY == 'true'
         env:
           KEYSTORE_BASE64: ${{ secrets.YUVOMI_KEYSTORE_BASE64 }}
         run: |
@@ -76,6 +115,7 @@ jobs:
           echo "YUVOMI_KEYSTORE_PATH=$RUNNER_TEMP/release.jks" >> "$GITHUB_ENV"
 
       - name: Release APK
+        if: steps.version.outputs.skip != 'true'
         env:
           YUVOMI_KEYSTORE_PASSWORD: ${{ secrets.YUVOMI_KEYSTORE_PASSWORD }}
           YUVOMI_KEY_ALIAS: ${{ secrets.YUVOMI_KEY_ALIAS }}
@@ -91,6 +131,7 @@ jobs:
             ${fallback:-}
 
       - name: Verify signature and prepare assets
+        if: steps.version.outputs.skip != 'true'
         id: assets
         run: |
           apksigner="$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner"
@@ -103,7 +144,7 @@ jobs:
           {
             echo "Unofficial proof-of-concept Android client for [Yuvomi](https://github.com/ulsklyc/yuvomi). Not affiliated with upstream."
             echo
-            echo "- Version ${{ steps.version.outputs.name }} (code ${{ steps.version.outputs.code }}), built against Yuvomi $(tr -d '[:space:]' < upstream/VERSION)"
+            echo "- Version ${{ steps.version.outputs.name }} (code ${{ steps.version.outputs.code }}), built against Yuvomi $(tr -d '[:space:]' < upstream/VERSION) from ${GITHUB_SHA::7}"
             echo "- Android 8.0 or newer. Install by opening the APK on the phone and allowing installs from that app."
             echo "- Signing certificate SHA-256: \`${cert}\`"
             if [[ "$HAS_KEY" != 'true' ]]; then
@@ -114,13 +155,14 @@ jobs:
           } > notes.md
 
       - name: Publish the release
+        if: steps.version.outputs.skip != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           apk="${{ steps.assets.outputs.apk }}"
           tag="${{ steps.version.outputs.tag }}"
-          # A pushed tag already exists; a manual run creates it on the commit it built.
-          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+          # A pushed tag already exists; otherwise the release creates it on the commit it built.
+          if [[ "${{ steps.version.outputs.create }}" == 'true' ]]; then
             target=(--target "$GITHUB_SHA")
           else
             target=(--verify-tag)
@@ -128,5 +170,6 @@ jobs:
           gh release create "$tag" "$apk" "$apk.sha256" \
             --title "Yuvomi for Android ${{ steps.version.outputs.name }}" \
             --notes-file notes.md \
+            --generate-notes \
             --prerelease \
             "${target[@]}"

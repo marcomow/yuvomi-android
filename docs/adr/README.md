@@ -19,4 +19,5 @@ Template: **Status**, **Context**, **Decision**, **Consequences**, **Alternative
 | 0010 | [MVP scope](0010-mvp-scope.md) | Accepted |
 | 0011 | [Strings come from upstream](0011-strings-from-upstream.md) | Accepted |
 | 0012 | [Fewer libraries than first planned](0012-fewer-libraries.md) | Accepted (supersedes parts of 0001, 0003) |
-| 0013 | [APK releases on GitHub](0013-apk-releases.md) | Accepted (amends 0009) |
+| 0013 | [APK releases on GitHub](0013-apk-releases.md) | Accepted (amends 0009), trigger and version code superseded by 0014 |
+| 0014 | [Continuous delivery of the APK](0014-continuous-delivery.md) | Accepted (supersedes parts of 0013) |

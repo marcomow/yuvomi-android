@@ -1,6 +1,7 @@
 # 0013. APK releases on GitHub
 
-**Status:** Accepted, 2026-11-01. Amends the distribution bullet of 0009.
+**Status:** Accepted, 2026-11-01. Amends the distribution bullet of 0009. Trigger and version code
+superseded by [0014](0014-continuous-delivery.md).
 
 ## Context
 
