@@ -28,6 +28,7 @@ import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 import java.time.LocalDate
+import java.util.concurrent.TimeUnit
 
 /**
  * Drives the signed-in app through Overview, the task list, a task's detail and
@@ -68,7 +69,9 @@ class AppSmokeTest {
                     "categories":[{"key":"household","label_key":"tasks.categoryHousehold","sort_order":0},{"key":"misc","label_key":"tasks.categoryMisc","sort_order":7}],
                     "tags":[{"tag":"Garden","count":1}],"default_points":0}""")
                 "GET /api/v1/tasks/7" -> json("""{"data":$task}""")
+                // Late on purpose: the detail must not depend on comments arriving with the task.
                 "GET /api/v1/tasks/7/comments" -> json("""{"data":[{"id":1,"task_id":7,"user_id":2,"comment":"@Alex Johnson done soon","created_at":"2026-11-01 08:00:00","author_name":"Emma"}]}""")
+                    .newBuilder().headersDelay(750, TimeUnit.MILLISECONDS).build()
                 else -> MockResponse.Builder().code(404).body("""{"error":"Not found"}""").build()
             }
         }
@@ -106,7 +109,10 @@ class AppSmokeTest {
         // Detail: description checklist, subtask, comment with a mention, recurrence in words.
         compose.waitUntil(10_000) { compose.onAllNodesWithText("Rinse").fetchSemanticsNodes().isNotEmpty() }
         compose.onNodeWithText("paper").assertExists()
-        compose.onNodeWithText("@Alex Johnson done soon", substring = true).assertExists()
+        // Comments load in their own request, after the task itself.
+        compose.waitUntil(10_000) {
+            compose.onAllNodesWithText("@Alex Johnson done soon", substring = true).fetchSemanticsNodes().isNotEmpty()
+        }
         compose.onNodeWithText(strings.t("rrule.freqWeekly"), substring = true).assertExists()
 
         // Editor.

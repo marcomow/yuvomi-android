@@ -15,8 +15,10 @@ works from a phone and wants every change on `main` to reach the phone without a
   workflow. Docs-only merges publish nothing.
 - **Minor and major versions** stay manual. *Run workflow* with a version such as `0.2.0`, or a
   pushed tag, publishes that version; the next automatic release continues from it (`0.2.1`).
-- The workflow runs the unit tests itself before building. The contract tests stay in the
-  Android workflow, which runs on the same push.
+- The release does **not** run the tests again. The pull request's checks (unit, Robolectric,
+  lint and contract tests) already passed on the same code, and the Android workflow runs them
+  once more on `main` next to the release. A direct push to `main` skips the pull-request gate;
+  requiring the checks in a branch rule for `main` closes that gap.
 - Releases run one at a time, in push order. The workflow refuses a version that is not higher
   than the latest release, because Android refuses such an update. A re-run on a commit that is
   already released does nothing.
@@ -34,6 +36,11 @@ works from a phone and wants every change on `main` to reach the phone without a
   the point. The key setup in docs/RELEASING.md is a prerequisite for this to be useful.
 
 ## Alternatives considered
+
+- **Run the tests again in the release.** Two more minutes per release for code that already
+  passed, and one more chance for a slow test to block a release.
+- **Release only after the Android workflow passes on `main`** (`workflow_run`). Gates direct
+  pushes too, but loses the path filter and splits one release over two workflows.
 
 - **Release only on a version change in a file.** Still a manual step per release.
 - **Nightly release.** Fewer releases, but a change can wait a day to reach the phone.

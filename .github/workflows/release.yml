@@ -1,7 +1,8 @@
 # Continuous delivery of the APK to GitHub Releases (docs/RELEASING.md, ADR 0013, ADR 0014).
 #
 # - Every push to main that changes the app publishes the next patch version
-#   (v0.1.0, v0.1.1, ...), after the tests pass.
+#   (v0.1.0, v0.1.1, ...). Tests are not repeated here: the pull request's checks
+#   already ran them on the same code (ADR 0014).
 # - Actions -> Release -> Run workflow on main publishes now; give a version to
 #   jump (e.g. 0.2.0 or 1.0.0) or leave it empty for the next patch.
 # - Pushing a tag v<major>.<minor>.<patch> publishes that version.
@@ -51,14 +52,14 @@ jobs:
         id: version
         env:
           INPUT_VERSION: ${{ inputs.version }}
-          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
           tags="$(git ls-remote --tags --refs origin 'v*' | sed 's#.*refs/tags/##')"
           if [[ "$GITHUB_REF_TYPE" == 'tag' ]]; then
             tag="$GITHUB_REF_NAME"; create=false
           else
-            if [[ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]]; then
-              echo "::error::Release from $DEFAULT_BRANCH, not $GITHUB_REF_NAME"; exit 1
+            # main, not the repository's default branch, which can be set to something else.
+            if [[ "$GITHUB_REF_NAME" != 'main' ]]; then
+              echo "::error::Release from main, not $GITHUB_REF_NAME"; exit 1
             fi
             version="${INPUT_VERSION//[[:space:]]/}"
             # This commit is already released and no version was asked for (a re-run): nothing to do.
@@ -101,10 +102,6 @@ jobs:
             echo "code=$(( 10#$major * 1000000 + 10#$minor * 1000 + 10#$patch ))"
           } >> "$GITHUB_OUTPUT"
           echo "Releasing $tag"
-
-      - name: Tests
-        if: steps.version.outputs.skip != 'true'
-        run: ./gradlew --no-daemon testDebugUnitTest
 
       - name: Release key
         if: steps.version.outputs.skip != 'true' && env.HAS_KEY == 'true'

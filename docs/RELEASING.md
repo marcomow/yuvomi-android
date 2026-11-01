@@ -21,6 +21,10 @@ Versions are `<major>.<minor>.<patch>` with minor and patch at most 999, and eac
 than the last release, because Android refuses an update with a lower version code
 (`major * 1000000 + minor * 1000 + patch`). Releases run one at a time in push order.
 
+The release does not repeat the tests; it relies on the pull request's checks. To make sure
+nothing reaches `main` without them, add a branch rule: *Settings → Rules → Rulesets → New branch
+ruleset*, target `main`, *Require status checks to pass* with `build` and `contract`.
+
 ## One-time setup: the signing key
 
 Needed for automatic releases to be useful, and needs a computer with a JDK (`keytool`). Without
