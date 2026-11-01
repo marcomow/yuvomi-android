@@ -13,6 +13,14 @@ val upstreamPin: String = rootProject.file("upstream/VERSION").readText().trim()
 // starts relying on something a newer upstream added (docs/UPSTREAM-SYNC.md).
 val upstreamMin = "2.83.0"
 
+// Release builds (docs/RELEASING.md). The release workflow passes the version from the tag and
+// the upload key through the environment; local builds keep the defaults below.
+val releaseVersionName: String = providers.gradleProperty("yuvomi.versionName").getOrElse("0.1.0")
+val releaseVersionCode: Int = providers.gradleProperty("yuvomi.versionCode").getOrElse("1").toInt()
+val releaseKeystore: String? = System.getenv("YUVOMI_KEYSTORE_PATH")?.takeIf { it.isNotBlank() }
+// Without a release key, the workflow may ask for a debug-signed release (docs/RELEASING.md).
+val debugSignRelease: Boolean = providers.gradleProperty("yuvomi.debugSignRelease").getOrElse("false").toBoolean()
+
 android {
     namespace = "io.github.marcomow.yuvomi"
     compileSdk = 36
@@ -21,14 +29,30 @@ android {
         applicationId = "io.github.marcomow.yuvomi"
         minSdk = 26
         targetSdk = 36
-        versionCode = 1
-        versionName = "0.1.0"
+        versionCode = releaseVersionCode
+        versionName = releaseVersionName
         buildConfigField("String", "UPSTREAM_PIN", "\"$upstreamPin\"")
         buildConfigField("String", "UPSTREAM_MIN", "\"$upstreamMin\"")
     }
 
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = file(releaseKeystore)
+                storePassword = System.getenv("YUVOMI_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("YUVOMI_KEY_ALIAS")
+                keyPassword = System.getenv("YUVOMI_KEY_PASSWORD")
+            }
+        }
+    }
+
     buildTypes {
         release {
+            signingConfig = when {
+                releaseKeystore != null -> signingConfigs.getByName("release")
+                debugSignRelease -> signingConfigs.getByName("debug")
+                else -> null
+            }
             isMinifyEnabled = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }

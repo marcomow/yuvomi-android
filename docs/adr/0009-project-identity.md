@@ -1,6 +1,6 @@
 # 0009. Project identity
 
-**Status:** Accepted, 2026-11-01
+**Status:** Accepted, 2026-11-01. Distribution amended by [0013](0013-apk-releases.md).
 
 ## Context
 

@@ -12,6 +12,13 @@ browser for everything it does not do natively yet.
 it has not yet been tried by hand on a device. Contract tests against a real upstream server run in
 CI. See the [plan](docs/PLAN.md) for what is next.
 
+## Install
+
+Download `yuvomi-android-<version>.apk` from the latest
+[release](https://github.com/marcomow/yuvomi-android/releases) on the phone and open it
+(Android 8.0 or newer; allow installing from your browser when asked). Releases are
+pre-releases of a proof of concept. How they are made: [RELEASING.md](docs/RELEASING.md).
+
 ## MVP
 
 - Sign in with your Yuvomi username and password, plus your second factor if you use one.
@@ -45,7 +52,8 @@ points Gradle at the SDK.
 ```
 
 CI (`.github/workflows/android.yml`) runs the same, keeps the debug APK as an artifact, and runs
-the contract tests against `ghcr.io/ulsklyc/yuvomi` at the pinned version.
+the contract tests against `ghcr.io/ulsklyc/yuvomi` at the pinned version. Pushing a `v*` tag
+publishes a signed release APK (`.github/workflows/release.yml`, [RELEASING.md](docs/RELEASING.md)).
 
 ## Staying in sync with upstream
 

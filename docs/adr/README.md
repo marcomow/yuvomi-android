@@ -15,7 +15,8 @@ Template: **Status**, **Context**, **Decision**, **Consequences**, **Alternative
 | 0006 | [Modules that are not native](0006-non-native-modules.md) | Accepted |
 | 0007 | [Offline behaviour](0007-offline.md) | Accepted |
 | 0008 | [Staying in sync with upstream](0008-upstream-sync.md) | Accepted |
-| 0009 | [Project identity](0009-project-identity.md) | Accepted |
+| 0009 | [Project identity](0009-project-identity.md) | Accepted, distribution amended by 0013 |
 | 0010 | [MVP scope](0010-mvp-scope.md) | Accepted |
 | 0011 | [Strings come from upstream](0011-strings-from-upstream.md) | Accepted |
 | 0012 | [Fewer libraries than first planned](0012-fewer-libraries.md) | Accepted (supersedes parts of 0001, 0003) |
+| 0013 | [APK releases on GitHub](0013-apk-releases.md) | Accepted (amends 0009) |
