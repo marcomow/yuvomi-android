@@ -1,10 +1,18 @@
-# Publishes an installable APK to GitHub Releases when a version tag is pushed
-# (docs/RELEASING.md, ADR 0013). Tag format: v<major>.<minor>.<patch>, e.g. v0.2.0.
+# Publishes an installable APK to GitHub Releases (docs/RELEASING.md, ADR 0013).
+# Start it either by pushing a tag v<major>.<minor>.<patch> (e.g. v0.2.0), or from
+# Actions -> Release -> Run workflow on main, giving the version; the workflow then
+# creates the tag itself, which also works from a phone's browser.
 name: Release
 
 on:
   push:
     tags: ['v*.*.*']
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release, e.g. 0.1.0'
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -27,10 +35,24 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
 
-      - name: Version from the tag
+      - name: Version from the tag or the input
         id: version
+        env:
+          INPUT_VERSION: ${{ inputs.version }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
         run: |
-          tag="${GITHUB_REF_NAME}"
+          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+            if [[ "$GITHUB_REF_NAME" != "$DEFAULT_BRANCH" ]]; then
+              echo "::error::Run the release from $DEFAULT_BRANCH, not $GITHUB_REF_NAME"; exit 1
+            fi
+            version="${INPUT_VERSION//[[:space:]]/}"
+            tag="v${version#v}"
+            if git ls-remote --exit-code --tags origin "refs/tags/$tag" >/dev/null; then
+              echo "::error::Tag $tag already exists; pick a higher version"; exit 1
+            fi
+          else
+            tag="${GITHUB_REF_NAME}"
+          fi
           if [[ ! "$tag" =~ ^v([0-9]+)\.([0-9]+)\.([0-9]+)$ ]]; then
             echo "::error::Tag '$tag' is not v<major>.<minor>.<patch>"; exit 1
           fi
@@ -38,6 +60,7 @@ jobs:
           if (( minor > 99 || patch > 99 )); then
             echo "::error::minor and patch must be at most 99 (versionCode scheme)"; exit 1
           fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
           echo "name=${major}.${minor}.${patch}" >> "$GITHUB_OUTPUT"
           echo "code=$(( major * 10000 + minor * 100 + patch ))" >> "$GITHUB_OUTPUT"
 
@@ -95,8 +118,15 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           apk="${{ steps.assets.outputs.apk }}"
-          gh release create "$GITHUB_REF_NAME" "$apk" "$apk.sha256" \
+          tag="${{ steps.version.outputs.tag }}"
+          # A pushed tag already exists; a manual run creates it on the commit it built.
+          if [[ "$GITHUB_EVENT_NAME" == 'workflow_dispatch' ]]; then
+            target=(--target "$GITHUB_SHA")
+          else
+            target=(--verify-tag)
+          fi
+          gh release create "$tag" "$apk" "$apk.sha256" \
             --title "Yuvomi for Android ${{ steps.version.outputs.name }}" \
             --notes-file notes.md \
             --prerelease \
-            --verify-tag
+            "${target[@]}"

@@ -10,7 +10,8 @@ an APK they can open on the phone. The repository is public, so a release is pub
 
 ## Decision
 
-- Pushing a tag `v<major>.<minor>.<patch>` runs `.github/workflows/release.yml`. It runs the
+- Pushing a tag `v<major>.<minor>.<patch>`, or running the workflow by hand on `main` with a
+  version (which creates that tag, and works from a phone), runs `.github/workflows/release.yml`. It runs the
   tests, builds the **release** variant (R8 on), and publishes a GitHub Release marked
   **pre-release** with `yuvomi-android-<version>.apk` and its SHA-256.
 - The tag sets the version: `versionName` is the tag without `v`, `versionCode` is

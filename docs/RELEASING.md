@@ -1,9 +1,14 @@
 # Releasing an APK
 
-A tag publishes a release: `.github/workflows/release.yml` tests, builds a minified release APK,
-signs it, and attaches it to a GitHub pre-release. Decision record: [ADR 0013](adr/0013-apk-releases.md).
+`.github/workflows/release.yml` tests, builds a minified release APK, signs it, and attaches it to
+a GitHub pre-release. Start it by pushing a version tag, or from the Actions tab, which works from a
+phone's browser. Decision record: [ADR 0013](adr/0013-apk-releases.md).
 
 ## One-time setup: the signing key
+
+This is optional for a first try and needs a computer with a JDK (`keytool`). Without it the
+first releases are signed with a throwaway key; switching to the real key later means one
+uninstall.
 
 Android only installs an update that is signed with the same key as the installed app, so make
 one key and keep it. Without it, releases are signed with a throwaway debug key and every release
@@ -32,13 +37,15 @@ Delete `yuvomi-release.jks.b64` afterwards.
 1. Make sure `main` is green.
 2. Try the release build on a device (it is minified, unlike the CI debug APK):
    build it as below, install it, sign in, open the overview and tasks, tick off a task.
-3. Tag and push:
+3. Start the release, either way:
 
-   ```bash
-   git tag v0.2.0 && git push origin v0.2.0
-   ```
+   - **From the browser (also on a phone):** *Actions → Release → Run workflow*, branch `main`,
+     version `0.2.0`, *Run workflow*. The workflow creates the tag `v0.2.0` on the commit it built.
+     In the GitHub mobile app, open the repository in the browser instead
+     (*… → Open in browser*) if the app has no *Run workflow* button.
+   - **From a computer:** `git tag v0.2.0 && git push origin v0.2.0`.
 
-   The tag must be `v<major>.<minor>.<patch>`, with minor and patch at most 99, and higher than the
+   The version must be `v<major>.<minor>.<patch>`, with minor and patch at most 99, and higher than the
    last release, because the version code is derived from it.
 4. The release appears under *Releases* with `yuvomi-android-0.2.0.apk`. Its notes give the
    signing certificate's SHA-256, which stays the same from release to release with the real key.
