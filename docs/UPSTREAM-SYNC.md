@@ -29,8 +29,8 @@ So the app reads only what the OpenAPI document or upstream's SPEC describes, an
 | Strings | `app/src/main/assets/i18n/<locale>.json` | Upstream's 27 locales, shipped namespaces only. |
 | Colours | `app/src/main/assets/tokens.json` | Public colour tokens from upstream's `tokens.css`, resolved, light and dark. |
 | Weekly job | `.github/workflows/upstream-sync.yml` | Mondays 05:17 UTC: if upstream has a newer release, runs the sync and opens a draft PR. |
-| Contract tests | `app/src/test-contract/` *(arrives with the app scaffold)* | The API client against a real upstream server in Docker. |
-| Runtime gate | `core/session` *(arrives with the app scaffold)* | Compares the server's version with the supported range. |
+| Contract tests | `app/src/test/java/.../contract/UpstreamContractTest.kt`, job `contract` in `.github/workflows/android.yml` | The API client against a real upstream server in Docker. Skipped unless `YUVOMI_CONTRACT_URL` is set. |
+| Runtime gate | `core/session/VersionGate.kt`, `UPSTREAM_MIN` in `app/build.gradle.kts` | Compares the server's version with the supported range. |
 | Parity tracker | [`PARITY.md`](PARITY.md) | Which upstream modules are native, read-only, or in the browser. |
 
 Requirements to run the sync locally: `git`, Node 22 or newer, Python 3. The sync never starts
@@ -90,8 +90,15 @@ The seed is upstream's own: five users, all with the password `demo1234` (`alex`
 admins, `emma` and `leo` children with upstream's child start permissions, `maria` in the `other`
 family role), plus tasks with categories, priorities, statuses, dates, several assignees, tags and
 points. The tests sign in as those users through the app's real API client, so they cover the
-cookie and CSRF handling as well as the response shapes. The CI job itself arrives with the app
-scaffold.
+cookie and CSRF handling as well as the response shapes.
+
+The image does not ship `scripts/`, so the CI job copies upstream's `scripts/` folder from the
+same tag into the container, seeds, and restarts it. To run the contract tests locally against
+such a server:
+
+```bash
+YUVOMI_CONTRACT_URL=http://localhost:3000 ./gradlew testDebugUnitTest --tests 'io.github.marcomow.yuvomi.contract.*'
+```
 
 ## Runtime version gate
 
@@ -102,8 +109,8 @@ scaffold.
 | Newer than the pin | Normal, plus a one-time quiet notice per server version: "This server is newer than the version this app was tested with." |
 
 The **minimum supported version** starts at the pin (2.83.0) and only moves forward when the app
-starts relying on something a newer upstream added. It lives next to the pin in the build
-configuration, generated from `upstream/VERSION`.
+starts relying on something a newer upstream added. It is `upstreamMin` in `app/build.gradle.kts`;
+the pin is read from `upstream/VERSION`. Both reach the app as `BuildConfig` fields.
 
 Independently of the version, a `404` or `405` on an operation from `operations-used.txt` marks
 that feature as unavailable for this session instead of retrying, as upstream's `MODULES.md`

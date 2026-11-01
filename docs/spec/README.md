@@ -7,9 +7,14 @@ spec; fix whichever is wrong.
 
 | Spec | Status | Upstream version checked |
 |---|---|---|
-| [Sign-in and session](signin.md) | Ready for implementation | 2.83.0 |
-| [Overview](overview.md) | Ready for implementation | 2.83.0 |
-| [Tasks](tasks.md) | Ready for implementation | 2.83.0 |
+| [Sign-in and session](signin.md) | Implemented | 2.83.0 |
+| [Overview](overview.md) | Implemented | 2.83.0 |
+| [Tasks](tasks.md) | Implemented (tiers 1 and 2) | 2.83.0 |
+
+Where each acceptance criterion is tested: see the `@Test` names and KDoc in `app/src/test/`,
+which carry the criterion IDs (`SIGNIN-A6`, `TASKS-A17`, ...). Criteria tagged **ui** are covered
+by the Robolectric tests in `app/src/test/java/.../android/` where a dedicated test exists, and
+otherwise by the end-to-end `AppSmokeTest`.
 
 ## Conventions
 

@@ -1,6 +1,6 @@
 # 0001. Native stack
 
-**Status:** Accepted, 2026-11-01
+**Status:** Accepted, 2026-11-01. Library list amended by [0012](0012-fewer-libraries.md): no Room, no Retrofit.
 
 ## Context
 

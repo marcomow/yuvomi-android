@@ -124,8 +124,8 @@ tile's saved `options`; translating those is a follow-up (OVERVIEW-R15).
 
   Every other tile id renders the **generic tile**: module icon and name in the module tone, one
   line `android.overview.openInWebApp`, tap opens the module's web route in the browser
-  (ADR 0006). The exact `countdowns` item fields are confirmed by contract test OVERVIEW-A6 before
-  the tile is built; until then it uses the generic tile.
+  (ADR 0006). The `countdown` tile uses the generic tile in the MVP; contract test OVERVIEW-A6
+  prints the item fields so a native tile can follow.
 - **OVERVIEW-R11** Ticking a task off in the today sheet or the tasks tile follows
   [tasks.md](tasks.md) TASKS-R20 to R23 (who did it, points, recurring follow-up, undo), then
   refreshes the overview.
@@ -162,7 +162,9 @@ tile's saved `options`; translating those is a follow-up (OVERVIEW-R15).
 | OVERVIEW-A11 | Given the `tasks` tile saved as visible then the today sheet has no task rows and the tasks tile shows them; given it hidden then the sheet has them. | unit |
 | OVERVIEW-A10 | Given the calendar tile when an appointment is tapped then the browser opens `<server>/calendar?open=<id>`. | ui |
 
-## Android-only strings
+## Strings
+
+App-only strings live in `app/src/main/assets/i18n-android/en.json`; the original list was:
 
 `android.overview.openInWebApp` "Open in the web app" · `android.overview.filtersIgnored` "Tile
 filters you set in the web app are not applied here yet." · `android.overview.tileUnavailable`

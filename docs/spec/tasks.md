@@ -184,15 +184,18 @@ Error `reason` values the app maps to messages: `tasks_task_not_found` (404), `t
 
 ### Recurrence editing
 
-- **TASKS-R28** The editor's "Repeat" field offers the PWA's vocabulary: never, daily, weekly
+- **TASKS-R28** The editor's "Repeat" field offers the PWA's task vocabulary: never, daily, weekly
   (with weekdays), monthly (on the start day, or on the last day `BYMONTHDAY=-1`), yearly; every
-  N; ends never, on a date (`UNTIL` as a plain date), or after N times (`COUNT`); and "repeat from
-  completion". Saving sends `is_recurring`, `recurrence_rule` (body without `RRULE:` prefix) and
-  `recurrence_from_completion`.
-- **TASKS-R29** A stored rule with parts the form does not model (for example `BYSETPOS`, or a
-  `BYMONTHDAY` other than `-1`, typically from a CalDAV mirror) is shown read-only with
-  "Edit this rule in the web app", and the app never sends `recurrence_rule` for that task. This
-  is upstream's "wording rule" from `rrule-ui.js`, ported with its test cases.
+  N; ends never or on a date (`UNTIL` as a plain date); and "repeat from completion". Upstream's
+  task form offers no "after N times" (`allowCount` is off for tasks), so neither does the app;
+  a stored `COUNT` is kept by TASKS-R29. Saving sends `is_recurring`, `recurrence_rule` (body
+  without `RRULE:` prefix) and `recurrence_from_completion`.
+- **TASKS-R29** Upstream's "wording rule" (#756, `getRRuleValues` in `rrule-ui.js`): the form shows
+  what it can parse. If the user does not change the repetition, the app does not send it at all,
+  so parts the form cannot show (for example `BYSETPOS`, or a `BYMONTHDAY` other than `-1` from
+  a CalDAV mirror) survive. When the user changes it and the parsed source builds to the same
+  rule, the source goes back verbatim; otherwise the rule is rebuilt from the form. A rule with
+  such parts shows the hint `android.tasks.ruleKept`.
 
 ### Subtasks
 
@@ -251,7 +254,7 @@ Error `reason` values the app maps to messages: `tasks_task_not_found` (404), `t
 | TASKS-A8 | Given a weekly recurring task when it is ticked off then `next_due_date` is a date 7 days after the old due date, the snackbar names it, and undo removes the follow-up. | contract + ui |
 | TASKS-A9 | Given a private task of `linda` then it is not in `alex`'s list and `GET /tasks/{id}` as `alex` is 404. | contract |
 | TASKS-A10 | Given `leo` has tasks access `read` then the list shows no FAB and no checkboxes. | ui |
-| TASKS-A11 | Given the rule `FREQ=MONTHLY;BYMONTHDAY=15` then the editor shows it read-only and a save never sends `recurrence_rule`. | unit |
+| TASKS-A11 | Given a stored `FREQ=MONTHLY;BYSETPOS=3;BYDAY=TH` then an edit of another field sends no `recurrence_rule`, and an unchanged form resolves to the source verbatim; a changed frequency rebuilds it. | unit |
 | TASKS-A12 | Given the `parseRRule`/`buildRRule` cases from upstream's `test:rrule-ui` then the port gives the same results. | unit |
 | TASKS-A13 | Given a description with two checklist lines when line 2 is ticked then `/check` gets `line` 1, `checked` true and `expect` equal to the shown line, and the description updates. | contract |
 | TASKS-A14 | Given the cases of upstream's mention parser tests then the ported parser finds the same members. | unit |
@@ -260,7 +263,9 @@ Error `reason` values the app maps to messages: `tasks_task_not_found` (404), `t
 | TASKS-A17 | Given a network failure on create then a retry sends the same `Idempotency-Key` and the server holds one task. | contract |
 | TASKS-A18 | Given a household of one then the editor has no assignee or visibility field and a saved edit sends neither. | ui |
 
-## Android-only strings
+## Strings
+
+App-only strings live in `app/src/main/assets/i18n-android/en.json`; the original list was:
 
 `android.tasks.noMatch` "No tasks match these filters." · `android.tasks.gone` "This task was
 deleted or is no longer visible to you." · `android.tasks.checklistChanged` "This list changed in

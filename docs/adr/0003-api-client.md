@@ -1,6 +1,6 @@
 # 0003. API client
 
-**Status:** Accepted, 2026-11-01
+**Status:** Accepted, 2026-11-01. Retrofit dropped by [0012](0012-fewer-libraries.md); the operation list is the `Operation` enum.
 
 ## Context
 

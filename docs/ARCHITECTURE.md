@@ -26,6 +26,7 @@ Upstream reference: **v2.83.0** (pinned in [`upstream/VERSION`](../upstream/VERS
 | 9 | Unofficial proof of concept, MIT licence, English code and docs. No contact with upstream yet. | [0009](adr/0009-project-identity.md) |
 | 10 | MVP is Overview and Tasks, Tasks at tiers 1 and 2. | [0010](adr/0010-mvp-scope.md) |
 | 11 | UI strings come from upstream's locale files, not from `strings.xml`. | [0011](adr/0011-strings-from-upstream.md) |
+| 12 | OkHttp without Retrofit, JSON files instead of Room, versions that compile against SDK 36. | [0012](adr/0012-fewer-libraries.md) |
 
 ## System context
 
@@ -51,21 +52,24 @@ time or team size makes it worth it (ADR 0001).
 ```
 app/src/main/java/<appId>/
 ├── core/
-│   ├── api/        OkHttp client, cookie jar, CSRF and idempotency interceptors,
-│   │               envelope decoding, one Retrofit interface per upstream tag
-│   │               (AuthApi, VersionApi, PreferencesApi, DashboardApi, TasksApi)
-│   ├── data/       Room database (read cache), DataStore (settings), repositories
-│   ├── session/    server URL, signed-in user, permissions, household context
-│   │               (timezone, household size, members)
+│   ├── api/        YuvomiClient (OkHttp), Operation (every upstream call), CSRF store,
+│   │               typed wrappers AuthApi, HouseholdApi, TasksApi, models
+│   ├── data/       ResponseCache: last good answers as JSON files (ADR 0007)
+│   ├── session/    SessionManager, server address rules, cookie jar, Keystore
+│   │               secret box, settings (DataStore), version gate
+│   ├── time/       household time: "today" in timezone_effective
 │   ├── i18n/       loader for the upstream locale JSON, t(key, args), plurals, RTL
 │   ├── design/     theme built from upstream tokens, module tones, typography,
 │   │               shared components (member avatar, status chip, empty state)
 │   └── browser/    "Open in browser" helper (Custom Tabs)
 ├── feature/
+│   ├── shell/      root, navigation bar/rail, account sheet, web-app list, gates
 │   ├── signin/     server URL, password, TOTP
-│   ├── overview/   the dashboard tiles
-│   └── tasks/      list, filters, detail, editor, comments, checklist
-└── App.kt          navigation graph, dependency wiring
+│   ├── overview/   widget normaliser, overview builder, today sheet, tiles
+│   └── tasks/      list, grouping, filters, detail, editor, recurrence, mentions,
+│                   checklists, Markdown
+├── YuvomiApp.kt    AppContainer: manual dependency wiring
+└── MainActivity.kt
 app/src/main/assets/
 ├── i18n/<locale>.json   generated from upstream (ADR 0011)
 └── tokens.json          generated from upstream (ADR 0002)
@@ -75,22 +79,23 @@ upstream/                pin, snapshots and sync scripts (ADR 0008)
 ## Runtime layering
 
 ```
-Compose screen ──events──▶ ViewModel ──▶ Repository ──▶ Api (Retrofit/OkHttp)
-      ▲                        │              │
-      └────── StateFlow ◀──────┘              └──▶ Room (last good response)
+Compose screen ──events──▶ ViewModel ──▶ TasksApi / HouseholdApi ──▶ YuvomiClient (OkHttp)
+      ▲                        │
+      └────── StateFlow ◀──────┴──▶ ResponseCache (last good answer, JSON files)
 ```
 
 - **Screens** are stateless composables that render a `UiState` and emit events.
 - **ViewModels** own one screen each, expose a single `StateFlow<UiState>`, and survive
   configuration changes. No state is shared between screens except through repositories.
-- **Repositories** follow cache-then-network for reads: emit the cached copy at once, fetch, store,
-  emit again. Writes go straight to the network and refresh the affected cache entries on success
-  (ADR 0007).
+- **ViewModels** follow cache-then-network for reads: show the cached copy at once, fetch, store,
+  show again. Writes go straight to the network and refresh on success (ADR 0007). The logic
+  that decides what to show (`OverviewBuilder`, `TaskGrouping`, `TaskBodies`, `RRule`, ...) is
+  pure Kotlin and unit tested without Android.
 - **Session** is the one app-wide state holder: server URL, current user, permissions,
   household timezone. It is the only place that knows about sign-out.
 
-Dependency wiring is manual (a small `AppContainer`) until it hurts; Hilt is the planned next step,
-not a day-one dependency.
+Dependency wiring is manual (`AppContainer` in `YuvomiApp.kt`) until it hurts; Hilt is the planned
+next step, not a day-one dependency.
 
 ## Cross-cutting rules
 

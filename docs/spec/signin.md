@@ -93,9 +93,10 @@ header.
   | 429 | "Too many attempts. Wait a minute and try again." Button disabled for 60 s. |
   | network failure | "Could not reach the server." with retry. |
 
-- **SIGNIN-R7** The second-factor step has one field accepting a 6-digit code (numeric keyboard,
-  one-time-code autofill) and a **Use a recovery code** switch shown only when
-  `recoveryAvailable` is true, which changes the field to free text.
+- **SIGNIN-R7** The second-factor step has one field, as upstream's login page: it takes the
+  6-digit code (numeric keyboard, one-time-code autofill), and also a recovery code when
+  `recoveryAvailable` is true (then the keyboard is free text and the hint says so,
+  `login.twoFactorHintRecovery`).
 - **SIGNIN-R8** `POST /auth/2fa/verify` outcomes: 200 signs in. 401 with
   `"No pending sign-in."` returns to the password step with "The sign-in timed out. Enter your
   password again." Any other 401 says "Wrong code." When the answer has `recoveryRemaining` after a
@@ -162,7 +163,12 @@ header.
 | SIGNIN-A12 | Given the language is set to Polish then a plural string with count 5 uses the `_many` variant. | unit |
 | SIGNIN-A13 | Given a 403 `csrf_invalid` on a write then the app refreshes via `/auth/me` and retries once; the user sees no error if the retry succeeds. | unit |
 
-## Android-only strings
+## Strings
+
+Most messages reuse upstream's `login.*` keys (`login.invalidCredentials`,
+`login.tooManyAttempts`, `login.twoFactorInvalid`, `login.twoFactorExpired`,
+`login.accountCannotSignIn`, ...). The app-only strings live in
+`app/src/main/assets/i18n-android/en.json`; the original list was:
 
 `android.signin.unofficial` "Unofficial Android client" · `android.signin.serverLabel` "Server
 address" · `android.signin.notYuvomi` "This doesn't look like a Yuvomi server." ·
