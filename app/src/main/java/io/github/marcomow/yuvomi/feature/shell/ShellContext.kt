@@ -20,7 +20,16 @@ class ShellContext(
     val snackbar: SnackbarHostState,
     val openAccount: () -> Unit,
     val openWeb: (path: String) -> Unit,
+    /** Opens a native route, for links between modules (for example a meal to its recipe). */
+    val navigate: (route: String) -> Unit = {},
 ) {
+    /** Whether the member sees module [id]: not switched off for the household, and some access (ADR 0006). */
+    fun shows(id: String): Boolean {
+        val module = io.github.marcomow.yuvomi.core.design.ModuleCatalog.get(id) ?: return false
+        return id !in session.preferences.disabledModules &&
+            (module.permission == null || session.access(module.permission) != "none")
+    }
+
     /** Shows [message]; returns true when the user tapped [action]. */
     suspend fun notify(message: String, action: String? = null, long: Boolean = false): Boolean {
         snackbar.currentSnackbarData?.dismiss()

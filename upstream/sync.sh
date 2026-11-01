@@ -40,9 +40,12 @@ python3 -I "$here/scripts/extract_tokens.py" "$work/upstream" "$root/app/src/mai
 
 printf '%s\n' "$new_version" > "$here/VERSION"
 
+# Core and Tasks in operations-used.txt, every other module in operations-used.d/.
+cat "$here/operations-used.txt" "$here"/operations-used.d/*.txt > "$work/operations-used.txt"
+
 python3 -I "$here/scripts/report.py" \
   --old-spec "$work/old/openapi.json" --new-spec "$here/openapi.json" \
-  --used "$here/operations-used.txt" \
+  --used "$work/operations-used.txt" \
   --changelog "$work/upstream/CHANGELOG.md" \
   --old-version "$old_version" --new-version "$new_version" \
   --old-en "$work/old/en.json" --new-en "$root/app/src/main/assets/i18n/en.json" \

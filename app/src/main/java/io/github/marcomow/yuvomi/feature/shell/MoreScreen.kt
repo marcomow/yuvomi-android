@@ -21,29 +21,40 @@ import io.github.marcomow.yuvomi.core.design.ModuleBadge
 import io.github.marcomow.yuvomi.core.design.ModuleCatalog
 import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.t
+import io.github.marcomow.yuvomi.feature.Features
 
-/** Every module the member may open that is not native yet; each opens in the browser (ADR 0006). */
+/**
+ * "More": the native modules that are not in the bar (ADR 0015), then every module the member
+ * may open that is not native yet; those open in the browser (ADR 0006).
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreScreen() {
     val shell = LocalShell.current
-    val modules = ModuleCatalog.all.filter { m ->
-        m.id !in ModuleCatalog.native &&
-            m.id !in shell.session.preferences.disabledModules &&
-            (m.permission == null || shell.session.access(m.permission) != "none")
-    }
+    val native = Features.all.filter { it.placement == Placement.MORE && shell.shows(it.id) }
+    val modules = ModuleCatalog.all.filter { m -> m.id !in Features.nativeIds && shell.shows(m.id) }
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
-            title = { Text(t("android.nav.webApp")) },
+            title = { Text(t("nav.more")) },
             actions = { AccountButton() },
         )
-        Text(
-            t("android.more.hint"),
-            style = MaterialTheme.typography.bodyMedium,
-            color = Yuvomi.colors.textSecondary,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-        )
         LazyColumn(Modifier.fillMaxSize()) {
+            items(native, key = { "native-" + it.id }) { f ->
+                val m = ModuleCatalog.get(f.id) ?: return@items
+                ListItem(
+                    headlineContent = { Text(t(m.labelKey)) },
+                    leadingContent = { ModuleBadge(m.icon, Yuvomi.colors.module(m.tone)) },
+                    modifier = Modifier.clickable { shell.navigate(f.startRoute) },
+                )
+            }
+            item(key = "web-header") {
+                Text(
+                    t("android.more.hint"),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = Yuvomi.colors.textSecondary,
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 4.dp),
+                )
+            }
             items(modules, key = { it.id }) { m ->
                 ListItem(
                     headlineContent = { Text(t(m.labelKey)) },

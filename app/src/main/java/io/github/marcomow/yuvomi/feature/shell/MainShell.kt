@@ -7,9 +7,9 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Dashboard
-import androidx.compose.material.icons.outlined.OpenInBrowser
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -44,11 +44,13 @@ import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import io.github.marcomow.yuvomi.AppContainer
 import io.github.marcomow.yuvomi.core.browser.Browser
+import io.github.marcomow.yuvomi.core.design.ModuleCatalog
 import io.github.marcomow.yuvomi.core.i18n.Formats
 import io.github.marcomow.yuvomi.core.i18n.LocalStrings
 import io.github.marcomow.yuvomi.core.i18n.t
 import io.github.marcomow.yuvomi.core.session.SessionState
 import io.github.marcomow.yuvomi.core.time.HouseholdTime
+import io.github.marcomow.yuvomi.feature.Features
 import io.github.marcomow.yuvomi.feature.overview.OverviewScreen
 import io.github.marcomow.yuvomi.feature.tasks.TaskDetailScreen
 import io.github.marcomow.yuvomi.feature.tasks.TaskEditorScreen
@@ -73,9 +75,13 @@ object Routes {
     }
 }
 
-private data class Destination(val route: String, val base: String, val labelKey: String, val icon: ImageVector)
+private data class Destination(val route: String, val prefixes: List<String>, val labelKey: String, val icon: ImageVector)
 
-/** The signed-in app: Overview, Tasks, and "More in the web app" (ADR 0006, ADR 0010). */
+/**
+ * The signed-in app: Overview, Tasks, the native modules in [Features.all], and "More", which
+ * lists the remaining native modules and everything that opens in the web app (ADR 0006,
+ * ADR 0010, ADR 0015).
+ */
 @Composable
 fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLinkTask: Int?, onDeepLinkHandled: () -> Unit) {
     val session = state.session
@@ -95,6 +101,7 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLinkTas
             container, session, connection, time, formats, snackbar,
             openAccount = { showAccount = true },
             openWeb = { path -> Browser.open(context, connection.client.webUrl(path)) },
+            navigate = { route -> nav.navigate(route) },
         )
     }
 
@@ -112,18 +119,26 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLinkTas
         }
     }
 
-    val destinations = buildList {
-        add(Destination(Routes.OVERVIEW, "overview", "nav.dashboard", Icons.Outlined.Dashboard))
-        if (session.access("tasks") != "none") add(Destination(Routes.TASKS, "tasks", "nav.tasks", Icons.Outlined.CheckCircle))
-        add(Destination(Routes.MORE, "more", "android.nav.webApp", Icons.Outlined.OpenInBrowser))
+    fun feature(f: Feature): Destination? {
+        val module = ModuleCatalog.get(f.id) ?: return null
+        return if (shell.shows(f.id)) Destination(f.startRoute, f.routePrefixes, module.labelKey, module.icon) else null
     }
+    val overview = Destination(Routes.OVERVIEW, listOf("overview"), "nav.dashboard", Icons.Outlined.Dashboard)
+    val tasks = Destination(Routes.TASKS, listOf("tasks", "task/", "editor"), "nav.tasks", Icons.Outlined.CheckCircle)
+        .takeIf { session.access("tasks") != "none" }
+    val more = Destination(Routes.MORE, listOf("more"), "nav.more", Icons.Outlined.Apps)
+    // The bar holds Overview, Tasks, the BAR modules and More; the rail on wide screens has room for all.
+    val barDestinations = listOfNotNull(overview, tasks) +
+        Features.all.filter { it.placement == Placement.BAR }.mapNotNull(::feature) + more
+    val railDestinations = listOfNotNull(overview, tasks) + Features.all.mapNotNull(::feature) + more
 
     CompositionLocalProvider(LocalShell provides shell) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val wide = maxWidth >= 600.dp
             val current = nav.currentBackStackEntryAsState().value?.destination?.route
-            val selected = destinations.firstOrNull { current?.startsWith(it.base) == true }?.route
-                ?: if (current?.startsWith("task") == true || current?.startsWith("editor") == true) Routes.TASKS else null
+            val destinations = if (wide) railDestinations else barDestinations
+            val selected = destinations.firstOrNull { d -> d.prefixes.any { current?.startsWith(it) == true } }?.route
+                ?: Routes.MORE.takeIf { current != null && current != Routes.OVERVIEW }
             val go = { d: Destination ->
                 nav.navigate(if (d.route == Routes.TASKS) "tasks" else d.route) {
                     popUpTo(Routes.OVERVIEW) { saveState = true }
@@ -228,5 +243,6 @@ private fun ShellNavHost(nav: NavHostController, offline: Boolean) {
             )
         }
         composable(Routes.MORE) { MoreScreen() }
+        Features.all.forEach { it.register(this, nav) }
     }
 }

@@ -70,7 +70,4 @@ object ModuleCatalog {
         "cycle", "fasting", "nutrition" -> byId["health"]
         else -> byId[widgetId]
     }
-
-    /** Native in this app (ADR 0010). Everything else opens in the browser (ADR 0006). */
-    val native = setOf("dashboard", "tasks")
 }

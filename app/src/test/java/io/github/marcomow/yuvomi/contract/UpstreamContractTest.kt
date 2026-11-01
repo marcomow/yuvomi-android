@@ -47,34 +47,19 @@ import javax.crypto.spec.SecretKeySpec
  * seeded with upstream's `scripts/seed-demo.js` (docs/UPSTREAM-SYNC.md).
  * Skipped unless `YUVOMI_CONTRACT_URL` is set.
  */
-class UpstreamContractTest {
-    private val url: String? = System.getProperty("yuvomi.contractUrl")
-
+class UpstreamContractTest : ContractTestBase() {
     private class Member(val client: YuvomiClient, val me: SignInPayload) {
         val tasks = TasksApi(client)
         val household = HouseholdApi(client)
         val auth = AuthApi(client)
     }
 
-    @Before fun requireServer() = assumeTrue("YUVOMI_CONTRACT_URL not set", url != null)
-
-    private fun client(): YuvomiClient {
-        val csrf = CsrfStore()
-        val http = OkHttpClient.Builder().cookieJar(SessionCookieJar()).addInterceptor(csrf.interceptor).build()
-        return YuvomiClient(url!!, http, csrf)
-    }
-
-    private fun signIn(username: String): Member = runBlocking {
-        val c = client()
-        val outcome = AuthApi(c).login(username, PASSWORD) as LoginOutcome.SignedIn
-        Member(c, outcome.payload)
-    }
+    private fun signIn(username: String): Member = signedIn(username).let { (c, me) -> Member(c, me) }
 
     private fun Member.id(username: String): Int = runBlocking {
         TasksApi.decodeMeta(tasks.meta()).users.first { it.displayName.lowercase().startsWith(username) }.id
     }
 
-    private fun unique(prefix: String) = "$prefix ${UUID.randomUUID().toString().take(8)}"
 
     // ── docs/spec/signin.md ──
 
@@ -280,20 +265,6 @@ class UpstreamContractTest {
         assertEquals(first.id, second.id)
     }
 
-    private fun raw(c: YuvomiClient, method: String, path: String, body: String, tolerate: Boolean = false): kotlinx.serialization.json.JsonElement = runBlocking {
-        val http = c.javaClass.getDeclaredField("http").apply { isAccessible = true }.get(c) as OkHttpClient
-        val request = okhttp3.Request.Builder()
-            .url(c.baseUrl.resolve(path)!!)
-            .header("X-CSRF-Token", c.csrf.token)
-            .method(method, body.toRequestBody("application/json".toMediaType()))
-            .build()
-        http.newCall(request).execute().use { r ->
-            val text = r.body.string()
-            if (!r.isSuccessful && !tolerate) error("$method $path -> ${r.code} $text")
-            runCatching { ApiJson.parseToJsonElement(text) }.getOrDefault(JsonObject(emptyMap()))
-        }
-    }
-
     /** RFC 6238, SHA-1, 6 digits, 30 s - upstream's server/utils/totp.js. */
     private fun totp(base32: String, stepOffset: Int): String {
         val alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567"
@@ -310,10 +281,5 @@ class UpstreamContractTest {
         val bin = ((hash[o].toInt() and 0x7F) shl 24) or ((hash[o + 1].toInt() and 0xFF) shl 16) or
             ((hash[o + 2].toInt() and 0xFF) shl 8) or (hash[o + 3].toInt() and 0xFF)
         return (bin % 1_000_000).toString().padStart(6, '0')
-    }
-
-    private companion object {
-        /** Every account `scripts/seed-demo.js` creates uses this password. */
-        const val PASSWORD = "demo1234"
     }
 }

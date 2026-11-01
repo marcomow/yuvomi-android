@@ -16,3 +16,13 @@ markdown
 category
 userMultiSelect
 wmo
+calendar
+colorPicker
+kitchen
+newLabel
+noteCategories
+notes
+pantry
+recipes
+shopping
+splitExpenses

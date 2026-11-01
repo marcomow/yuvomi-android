@@ -35,7 +35,7 @@ class YuvomiClient(
     val baseUrl: HttpUrl = serverUrl.trimEnd('/').toHttpUrl()
 
     suspend fun call(
-        op: Operation,
+        op: ApiOperation,
         params: Map<String, Any> = emptyMap(),
         query: List<Pair<String, String>> = emptyList(),
         body: JsonElement? = null,
@@ -43,7 +43,7 @@ class YuvomiClient(
     ): JsonElement = callOnce(op, params, query, body, idempotencyKey, csrfRetry = true)
 
     private suspend fun callOnce(
-        op: Operation,
+        op: ApiOperation,
         params: Map<String, Any>,
         query: List<Pair<String, String>>,
         body: JsonElement?,

@@ -1,11 +1,12 @@
 package io.github.marcomow.yuvomi.core.api
 
 /**
- * Every upstream operation the app calls. Must match `upstream/operations-used.txt`
- * exactly; `OperationsListTest` enforces it, and the weekly sync checks that file
- * against upstream's OpenAPI document (ADR 0003, ADR 0008).
+ * The upstream operations of the core and of Tasks. Must match
+ * `upstream/operations-used.txt` exactly; `ContractFilesTest` enforces it, and the
+ * weekly sync checks that file against upstream's OpenAPI document (ADR 0003,
+ * ADR 0008). Other features list theirs in their own [ApiOperation] enum.
  */
-enum class Operation(val method: String, val template: String) {
+enum class Operation(override val method: String, override val template: String) : ApiOperation {
     VERSION("GET", "/api/v1/version"),
     LOGIN("POST", "/api/v1/auth/login"),
     VERIFY_2FA("POST", "/api/v1/auth/2fa/verify"),
@@ -28,16 +29,5 @@ enum class Operation(val method: String, val template: String) {
     COMMENT_DELETE("DELETE", "/api/v1/tasks/{id}/comments/{commentId}"),
     ;
 
-    val stateChanging: Boolean get() = method != "GET"
-
-    /** The auth routes sit before upstream's session guard: a 401 there means "wrong credentials". */
-    val isSignIn: Boolean get() = this == LOGIN || this == VERIFY_2FA
-
-    /** `METHOD /path`, as written in `upstream/operations-used.txt`. */
-    val signature: String get() = "$method $template"
-
-    fun path(params: Map<String, Any> = emptyMap()): String =
-        params.entries.fold(template) { acc, (key, value) ->
-            acc.replace("{$key}", java.net.URLEncoder.encode(value.toString(), "UTF-8").replace("+", "%20"))
-        }.also { require('{' !in it) { "missing path parameter in $it" } }
+    override val isSignIn: Boolean get() = this == LOGIN || this == VERIFY_2FA
 }
