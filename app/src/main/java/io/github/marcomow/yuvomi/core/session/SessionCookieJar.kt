@@ -9,15 +9,21 @@ import okhttp3.HttpUrl
 
 /**
  * Keeps upstream's session cookie (`yuvomi.sid`) and its companions across app
- * starts. [persist] receives the serialized jar whenever it changes; the
- * caller encrypts and stores it (ADR 0004).
+ * starts. [persist] receives the serialized jar and its [generation] whenever a
+ * response changes it; the caller encrypts and stores it (ADR 0004). [clear]
+ * does not persist: the caller deletes the stored copy itself and drops any
+ * write still pending from an older generation.
  */
 class SessionCookieJar(
     initial: String? = null,
-    private val persist: (String) -> Unit = {},
+    private val persist: (serialized: String, generation: Int) -> Unit = { _, _ -> },
 ) : CookieJar {
 
     private val cookies = mutableListOf<Cookie>()
+
+    /** Bumped by [clear]; a write carrying an older value is stale. */
+    @Volatile var generation = 0
+        private set
 
     init {
         initial?.let { restore(it) }
@@ -30,7 +36,7 @@ class SessionCookieJar(
             this.cookies.removeAll { it.name == cookie.name && it.domain == cookie.domain && it.path == cookie.path }
             if (cookie.expiresAt > System.currentTimeMillis()) this.cookies += cookie
         }
-        persist(serialize())
+        persist(serialize(), generation)
     }
 
     @Synchronized
@@ -43,7 +49,7 @@ class SessionCookieJar(
     @Synchronized
     fun clear() {
         cookies.clear()
-        persist(serialize())
+        generation++
     }
 
     @Synchronized

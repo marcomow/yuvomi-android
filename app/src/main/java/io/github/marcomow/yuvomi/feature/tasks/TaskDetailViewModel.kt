@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.buildJsonObject
 
 /** docs/spec/tasks.md: detail (R25), subtasks (R30 to R32), checklists (R33, R34), comments (R35 to R37). */
 class TaskDetailViewModel(private val container: AppContainer, private val taskId: Int) : ViewModel() {
@@ -106,6 +108,20 @@ class TaskDetailViewModel(private val container: AppContainer, private val taskI
         _state.update { s -> s.copy(task = s.task?.copy(subtasks = s.task.subtasks.map { if (it.id == sub.id) it.copy(status = if (done) Task.STATUS_DONE else Task.STATUS_OPEN) else it })) }
         return try {
             api.setStatus(sub.id, if (done) Task.STATUS_DONE else Task.STATUS_OPEN)
+            load()
+            null
+        } catch (e: ApiProblem) {
+            load()
+            TaskCompletion.errorKey(e)
+        }
+    }
+
+    /** TASKS-R30: rename from the row menu, `PUT /tasks/{id}` with the title only. */
+    suspend fun renameSubtask(sub: Task, title: String): String? {
+        val api = api ?: return null
+        _state.update { s -> s.copy(task = s.task?.copy(subtasks = s.task.subtasks.map { if (it.id == sub.id) it.copy(title = title) else it })) }
+        return try {
+            api.update(sub.id, buildJsonObject { put("title", title) })
             load()
             null
         } catch (e: ApiProblem) {

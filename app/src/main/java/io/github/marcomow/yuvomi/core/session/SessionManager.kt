@@ -231,9 +231,15 @@ class SessionManager(
         showNewerNotice = showNewer,
     )
 
+    /** Orders cookie writes against [clearLocal], so a late write cannot bring a cleared jar back. */
+    private val cookieStore = Mutex()
+
     private fun connect(server: String, cookies: String?): Connection {
         val csrf = CsrfStore()
-        val jar = SessionCookieJar(cookies) { serialized -> scope.launch { settings.setCookies(serialized) } }
+        lateinit var jar: SessionCookieJar
+        jar = SessionCookieJar(cookies) { serialized, generation ->
+            scope.launch { cookieStore.withLock { if (generation == jar.generation) settings.setCookies(serialized) } }
+        }
         val http = httpBuilder().cookieJar(jar).addInterceptor(csrf.interceptor).build()
         val client = YuvomiClient(server, http, csrf) { scope.launch { onSessionExpired() } }
         return Connection(server, client, jar).also { connection = it }
@@ -250,9 +256,11 @@ class SessionManager(
     }
 
     private suspend fun clearLocal(session: Session?) {
-        connection?.cookies?.clear()
+        cookieStore.withLock {
+            connection?.cookies?.clear()
+            settings.clearCookies()
+        }
         connection?.client?.csrf?.clear()
-        settings.clearCookies()
         if (session != null) cache.clear(session.server, session.user.id)
         connection?.server?.let { cache.deleteGlobal(snapshotKey(it)) }
         cache.close()

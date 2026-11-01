@@ -199,9 +199,12 @@ Error `reason` values the app maps to messages: `tasks_task_not_found` (404), `t
 
 ### Subtasks
 
-- **TASKS-R30** The detail lists `subtasks` with checkbox, title, assignee avatars and a delete
-  action; done ones are struck through; progress shows as `done/total`. Tapping a subtask opens
-  its own editor (same fields minus recurrence and points).
+- **TASKS-R30** The detail lists `subtasks` with checkbox, title and assignee avatars; done ones
+  are struck through; progress shows as `done/total`. As in the web app, the whole row is the
+  checkbox: tapping it ticks the subtask (TASKS-R32). A subtask has no detail or editor of its
+  own, because upstream's `GET /tasks/{id}` answers only for top-level tasks (`404
+  tasks_task_not_found` for a subtask). The row's menu offers **Edit**, which renames it with
+  `PUT /tasks/{id}` and the title only, and **Delete**, which asks first.
 - **TASKS-R31** "Add subtask" creates one with `POST /tasks` and `parent_task_id`. The server
   inherits the lock; a `403 task_locked` follows TASKS-R17. A subtask cannot have subtasks of its
   own (two levels), so the action is absent in a subtask's detail.

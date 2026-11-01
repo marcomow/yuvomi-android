@@ -202,7 +202,6 @@ private fun ShellNavHost(nav: NavHostController, offline: Boolean) {
                 taskId = id,
                 back = { nav.popBackStack() },
                 edit = { nav.navigate(Routes.editor(id = it)) },
-                openTask = { nav.navigate(Routes.task(it)) },
                 addSubtask = { parent -> nav.navigate(Routes.editor(parent = parent)) },
             )
         }

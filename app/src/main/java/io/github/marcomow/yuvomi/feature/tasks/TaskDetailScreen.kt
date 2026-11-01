@@ -1,7 +1,9 @@
 package io.github.marcomow.yuvomi.feature.tasks
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -24,6 +26,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -54,6 +57,7 @@ import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -79,7 +83,7 @@ import java.time.ZonedDateTime
 /** docs/spec/tasks.md, TASKS-R25 and tier 2. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, openTask: (Int) -> Unit, addSubtask: (Int) -> Unit) {
+fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, addSubtask: (Int) -> Unit) {
     val shell = LocalShell.current
     val strings = LocalStrings.current
     val vm = viewModel(key = "task-$taskId") { TaskDetailViewModel(shell.container, taskId) }
@@ -91,6 +95,7 @@ fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, openTas
     var menu by remember { mutableStateOf(false) }
     var pickDoer by remember { mutableStateOf(false) }
     var confirmSubtask by remember { mutableStateOf<Task?>(null) }
+    var renameSubtask by remember { mutableStateOf<Task?>(null) }
 
     LaunchedEffect(s.gone) {
         if (s.gone) {
@@ -235,15 +240,19 @@ fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, openTas
                     Card {
                         Column {
                             task.subtasks.forEach { sub ->
+                                // As in the web app: the row is the checkbox. Subtasks have no detail
+                                // of their own (the server answers GET /tasks/{id} only for top-level
+                                // tasks); renaming and deleting sit in the row's menu.
                                 Row(
-                                    Modifier.fillMaxWidth().clickable { openTask(sub.id) },
+                                    Modifier.fillMaxWidth().toggleable(
+                                        value = sub.isDone,
+                                        enabled = canWrite,
+                                        role = Role.Checkbox,
+                                        onValueChange = { scope.launch { report(vm.toggleSubtask(sub)) } },
+                                    ),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
-                                    Checkbox(
-                                        checked = sub.isDone,
-                                        onCheckedChange = { scope.launch { report(vm.toggleSubtask(sub)) } },
-                                        enabled = canWrite,
-                                    )
+                                    Checkbox(checked = sub.isDone, onCheckedChange = null, enabled = canWrite, modifier = Modifier.padding(12.dp))
                                     Text(
                                         sub.title,
                                         textDecoration = if (sub.isDone) TextDecoration.LineThrough else null,
@@ -251,8 +260,23 @@ fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, openTas
                                     )
                                     AvatarStack(sub.assignedUsers.map { Triple(it.displayName, it.color, it.avatarData) })
                                     if (mayEditDefinition) {
-                                        IconButton(onClick = { confirmSubtask = sub }) {
-                                            Icon(Icons.Outlined.Delete, t("common.deleteNamed", "name" to sub.title), tint = Yuvomi.colors.textSecondary)
+                                        Box {
+                                            var subMenu by remember { mutableStateOf(false) }
+                                            IconButton(onClick = { subMenu = true }) {
+                                                Icon(Icons.Outlined.MoreVert, t("common.moreActionsNamed", "name" to sub.title), tint = Yuvomi.colors.textSecondary)
+                                            }
+                                            DropdownMenu(subMenu, onDismissRequest = { subMenu = false }) {
+                                                DropdownMenuItem(
+                                                    text = { Text(t("common.edit")) },
+                                                    leadingIcon = { Icon(Icons.Outlined.Edit, null) },
+                                                    onClick = { subMenu = false; renameSubtask = sub },
+                                                )
+                                                DropdownMenuItem(
+                                                    text = { Text(t("common.delete"), color = Yuvomi.colors.danger) },
+                                                    leadingIcon = { Icon(Icons.Outlined.Delete, null, tint = Yuvomi.colors.danger) },
+                                                    onClick = { subMenu = false; confirmSubtask = sub },
+                                                )
+                                            }
                                         }
                                     }
                                 }
@@ -305,6 +329,27 @@ fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, openTas
             pickDoer = false
             tick(task, m.id to m.displayName)
         }
+    }
+    renameSubtask?.let { sub ->
+        var title by remember(sub.id) { mutableStateOf(sub.title) }
+        AlertDialog(
+            onDismissRequest = { renameSubtask = null },
+            title = { Text(t("tasks.subtaskRenamePrompt")) },
+            text = {
+                OutlinedTextField(
+                    title, { title = it }, singleLine = true,
+                    isError = title.isBlank(),
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            },
+            confirmButton = {
+                TextButton(enabled = title.isNotBlank(), onClick = {
+                    renameSubtask = null
+                    if (title.trim() != sub.title) scope.launch { report(vm.renameSubtask(sub, title.trim())) }
+                }) { Text(t("common.save")) }
+            },
+            dismissButton = { TextButton(onClick = { renameSubtask = null }) { Text(t("common.cancel")) } },
+        )
     }
     confirmSubtask?.let { sub ->
         ConfirmDialog(
