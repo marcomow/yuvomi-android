@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- SIGNIN-R2: cleartext is refused by default. The app itself only allows an
+     http:// server address for private-network hosts (ServerAddress.kt), and
+     warns. The platform switch has to be open for that check to matter, since
+     Android cannot express "private ranges only".
+     User-installed CAs are trusted on purpose: self-hosted servers often use a
+     household's own certificate authority. -->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+            <certificates src="user" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

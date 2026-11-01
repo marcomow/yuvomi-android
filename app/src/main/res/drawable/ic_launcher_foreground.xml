@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Upstream's brand mark (icon.svg): three translucent, overlapping circles.
+     Scaled from the 160-unit artwork into the adaptive-icon safe zone. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group android:scaleX="0.62" android:scaleY="0.62" android:translateX="4.3" android:translateY="-0.6">
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.82"
+            android:pathData="M37,72a27,27 0,1 0,54 0a27,27 0,1 0,-54 0z" />
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.82"
+            android:pathData="M75,78a25,25 0,1 0,50 0a25,25 0,1 0,-50 0z" />
+        <path android:fillColor="#FFFFFF" android:fillAlpha="0.82"
+            android:pathData="M56,106a24,24 0,1 0,48 0a24,24 0,1 0,-48 0z" />
+    </group>
+</vector>

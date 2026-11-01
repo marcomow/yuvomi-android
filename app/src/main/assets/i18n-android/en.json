@@ -1,0 +1,67 @@
+{
+  "android": {
+    "account": {
+      "automatic": "Automatic",
+      "language": "Language",
+      "signOut": "Sign out",
+      "versions": "App {{app}} · Server {{server}} · Tested with {{pin}}"
+    },
+    "browser": {
+      "open": "Open in browser",
+      "openWebApp": "Open web app",
+      "opensInBrowser": "Opens in your browser"
+    },
+    "error": {
+      "forbidden": "You are not allowed to do this.",
+      "generic": "Something went wrong. Please try again.",
+      "offline": "You are offline. Changes need a connection.",
+      "unsupported": "This server does not offer this anymore. The app may need an update."
+    },
+    "more": {
+      "hint": "These parts of Yuvomi are not in the app yet. They open in your browser."
+    },
+    "nav": {
+      "webApp": "Web app"
+    },
+    "overview": {
+      "filtersIgnored": "Tile filters you set in the web app are not applied here yet.",
+      "loadFailed": "The overview could not be read.",
+      "openInWebApp": "Open in the web app"
+    },
+    "signin": {
+      "certificate": "The server's certificate could not be verified.",
+      "changeServer": "Change",
+      "cleartextRefused": "Unencrypted connections are only allowed to addresses on your home network.",
+      "cleartextWarning": "This connection is not encrypted. Use it only on your home network.",
+      "invalidAddress": "This is not a valid server address.",
+      "notYuvomi": "This doesn't look like a Yuvomi server.",
+      "serverLabel": "Server address",
+      "setupRequired": "This server is not set up yet. Finish the setup in your browser.",
+      "signedOut": "You were signed out.",
+      "ssoUnsupported": "This household signs in with single sign-on, which this app does not support yet.",
+      "unofficial": "Unofficial Android client",
+      "unreachable": "Could not reach the server."
+    },
+    "tasks": {
+      "checklistChanged": "This list changed in the meantime. Try again.",
+      "createdBy": "Created by",
+      "gone": "This task was deleted or is no longer visible to you.",
+      "manageInWebApp": "Manage in the web app",
+      "noDate": "No date",
+      "noMatch": "No tasks match these filters.",
+      "noTime": "No time",
+      "notSaved": "Not saved",
+      "pointsRange": "Points must be a whole number from 0 to 10000.",
+      "ruleCustom": "Repeats (custom rule)",
+      "ruleKept": "This repetition has details the app cannot show. They are kept unless you change the repetition here.",
+      "showLater": "Show tasks that start later",
+      "startAfterDue": "The start date is after the due date.",
+      "timeNeedsDate": "A time needs a due date.",
+      "titleRequired": "Please enter a title."
+    },
+    "version": {
+      "newer": "This server is newer than the version this app was tested with. Some things may not work.",
+      "tooOld": "This server runs Yuvomi {{server}}. This app needs {{min}} or newer."
+    }
+  }
+}

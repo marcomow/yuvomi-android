@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Only what Android itself reads. UI strings come from upstream (ADR 0011). -->
+<resources>
+    <string name="app_name">Yuvomi</string>
+</resources>

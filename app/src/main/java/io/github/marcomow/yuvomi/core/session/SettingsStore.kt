@@ -1,0 +1,66 @@
+package io.github.marcomow.yuvomi.core.session
+
+import android.content.Context
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
+import androidx.datastore.preferences.preferencesDataStore
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+
+private val Context.dataStore by preferencesDataStore(name = "yuvomi")
+
+/**
+ * Per-device settings: last server and username (SIGNIN-R4), the encrypted
+ * session cookie (ADR 0004), language (SIGNIN-R17), task list grouping
+ * (TASKS-R4) and one-time notices.
+ */
+class SettingsStore(private val context: Context, private val box: SecretBox) {
+
+    private object Keys {
+        val server = stringPreferencesKey("server")
+        val username = stringPreferencesKey("username")
+        val cookies = stringPreferencesKey("cookies")
+        val language = stringPreferencesKey("language")
+        val grouping = stringPreferencesKey("taskGrouping")
+        val collapsed = stringSetPreferencesKey("taskCollapsed")
+        val notices = stringSetPreferencesKey("notices")
+    }
+
+    suspend fun server(): String? = read(Keys.server)
+    suspend fun username(): String? = read(Keys.username)
+    suspend fun setServerAndUser(server: String, username: String?) = context.dataStore.edit {
+        it[Keys.server] = server
+        if (username != null) it[Keys.username] = username
+    }
+
+    suspend fun cookies(): String? = read(Keys.cookies)?.let(box::open)
+    suspend fun setCookies(serialized: String) = context.dataStore.edit { it[Keys.cookies] = box.seal(serialized) }
+    suspend fun clearCookies() = context.dataStore.edit { it.remove(Keys.cookies) }
+
+    /** `null` means "Automatic" (device locale). */
+    val language: Flow<String?> = context.dataStore.data.map { it[Keys.language] }
+    suspend fun setLanguage(code: String?) = context.dataStore.edit {
+        if (code == null) it.remove(Keys.language) else it[Keys.language] = code
+    }
+
+    suspend fun grouping(): String = read(Keys.grouping) ?: "category"
+    suspend fun setGrouping(mode: String) = context.dataStore.edit { it[Keys.grouping] = mode }
+    suspend fun collapsed(): Set<String> = context.dataStore.data.first()[Keys.collapsed] ?: emptySet()
+    suspend fun setCollapsed(value: Set<String>) = context.dataStore.edit { it[Keys.collapsed] = value }
+
+    /** One-time notices: returns true the first time [id] is asked about. */
+    suspend fun firstTime(id: String): Boolean {
+        var first = false
+        context.dataStore.edit {
+            val seen = it[Keys.notices] ?: emptySet()
+            first = id !in seen
+            if (first) it[Keys.notices] = seen + id
+        }
+        return first
+    }
+
+    private suspend fun read(key: Preferences.Key<String>): String? = context.dataStore.data.first()[key]
+}

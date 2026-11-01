@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Upstream's brand mark (icon.svg) at full size, for the sign-in screen. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    android:width="160dp"
+    android:height="160dp"
+    android:viewportWidth="160"
+    android:viewportHeight="160">
+    <path android:pathData="M36,0h88a36,36 0,0 1,36 36v88a36,36 0,0 1,-36 36h-88a36,36 0,0 1,-36 -36v-88a36,36 0,0 1,36 -36z">
+        <aapt:attr name="android:fillColor">
+            <gradient android:type="linear" android:startX="0" android:startY="0" android:endX="160" android:endY="160"
+                android:startColor="#8B5CF6" android:endColor="#6C3AED" />
+        </aapt:attr>
+    </path>
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.82" android:pathData="M37,72a27,27 0,1 0,54 0a27,27 0,1 0,-54 0z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.82" android:pathData="M75,78a25,25 0,1 0,50 0a25,25 0,1 0,-50 0z" />
+    <path android:fillColor="#FFFFFF" android:fillAlpha="0.82" android:pathData="M56,106a24,24 0,1 0,48 0a24,24 0,1 0,-48 0z" />
+</vector>
