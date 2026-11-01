@@ -87,8 +87,9 @@ docker exec yuvomi node scripts/seed-demo.js --locale en
 ```
 
 The seed is upstream's own: five users, all with the password `demo1234` (`alex` and `linda`
-admins, `emma` and `leo` children with upstream's child start permissions, `maria` in the `other`
-family role), plus tasks with categories, priorities, statuses, dates, several assignees, tags and
+admins, `emma` and `leo` children with upstream's child start permissions, and `maria`, the
+household's housekeeper, who cannot sign in because upstream refuses sign-in for housekeeping
+workers), plus tasks with categories, priorities, statuses, dates, several assignees, tags and
 points. The tests sign in as those users through the app's real API client, so they cover the
 cookie and CSRF handling as well as the response shapes.
 

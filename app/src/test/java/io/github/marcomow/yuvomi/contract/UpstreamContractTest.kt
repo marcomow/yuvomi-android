@@ -95,19 +95,25 @@ class UpstreamContractTest {
     }
 
     /**
-     * Enrols `maria` in TOTP and signs in with the next 30-second step (upstream
-     * refuses a step at or before the last one used). The account stays enrolled:
-     * CI starts a fresh container per run, and no other test signs in as maria.
+     * Enrols a fresh member in TOTP and signs in with the next 30-second step
+     * (upstream refuses a step at or before the last one used). The member is
+     * created by `alex` for this test alone, so no other test meets a second
+     * factor. The seeded `maria` cannot be used: she is the housekeeper, and
+     * upstream refuses sign-in for housekeeping workers (`canSignIn`).
      */
     @Test fun `SIGNIN-A6 a second factor completes sign-in in the same cookie jar`() = runBlocking {
-        val maria = signIn("maria")
-        // /auth/2fa/setup and /enable are not app operations; the fixture calls them raw.
-        val secret = raw(maria.client, "POST", "/api/v1/auth/2fa/setup", "{}")
+        val alex = signIn("alex")
+        val username = "twofa_" + UUID.randomUUID().toString().take(8)
+        // /auth/users and /auth/2fa/* are not app operations; the fixture calls them raw.
+        raw(alex.client, "POST", "/api/v1/auth/users",
+            """{"username":"$username","display_name":"Two Factor","password":"$PASSWORD","family_role":"parent"}""")
+        val member = signIn(username)
+        val secret = raw(member.client, "POST", "/api/v1/auth/2fa/setup", "{}")
             .jsonObject["data"]!!.jsonObject["secret"]!!.jsonPrimitive.content
-        raw(maria.client, "POST", "/api/v1/auth/2fa/enable", """{"code":"${totp(secret, 0)}"}""")
+        raw(member.client, "POST", "/api/v1/auth/2fa/enable", """{"code":"${totp(secret, 0)}"}""")
         val c = client()
-        assertTrue(AuthApi(c).login("maria", PASSWORD) is LoginOutcome.TwoFactorRequired)
-        assertEquals("maria", AuthApi(c).verifyTwoFactor(totp(secret, 1)).user.username)
+        assertTrue(AuthApi(c).login(username, PASSWORD) is LoginOutcome.TwoFactorRequired)
+        assertEquals(username, AuthApi(c).verifyTwoFactor(totp(secret, 1)).user.username)
     }
 
     @Test fun `SIGNIN-A11 a child has no budget`() {
