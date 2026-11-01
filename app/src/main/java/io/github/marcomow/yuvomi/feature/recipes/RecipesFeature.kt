@@ -19,7 +19,12 @@ object RecipesFeature : Feature {
     }
 }
 
-/** Recipes's routes. Other modules link here through these helpers only. */
+/**
+ * Recipes's routes. Other modules link here through these helpers only; this module registers
+ * a destination for each of them in [RecipesFeature.register].
+ */
 object RecipesRoutes {
     const val START = "recipes"
+
+    fun recipe(id: Int) = "recipes/$id"
 }

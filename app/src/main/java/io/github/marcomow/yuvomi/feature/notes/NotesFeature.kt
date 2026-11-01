@@ -19,7 +19,12 @@ object NotesFeature : Feature {
     }
 }
 
-/** Notes's routes. Other modules link here through these helpers only. */
+/**
+ * Notes's routes. Other modules link here through these helpers only; this module registers
+ * a destination for each of them in [NotesFeature.register].
+ */
 object NotesRoutes {
     const val START = "notes"
+
+    fun note(id: Int) = "notes/$id"
 }

@@ -27,6 +27,17 @@ enum class Operation(override val method: String, override val template: String)
     COMMENT_CREATE("POST", "/api/v1/tasks/{id}/comments"),
     COMMENT_UPDATE("PATCH", "/api/v1/tasks/{id}/comments/{commentId}"),
     COMMENT_DELETE("DELETE", "/api/v1/tasks/{id}/comments/{commentId}"),
+
+    // Kitchen: read and create calls that more than one kitchen module makes (KitchenApi).
+    SHOPPING_LISTS("GET", "/api/v1/shopping"),
+    SHOPPING_CATEGORIES("GET", "/api/v1/shopping/categories"),
+    SHOPPING_UNDO_TRANSFER("POST", "/api/v1/shopping/items/undo-transfer"),
+    PANTRY_LIST("GET", "/api/v1/pantry"),
+    RECIPES_LIST("GET", "/api/v1/recipes"),
+    RECIPE_CREATE("POST", "/api/v1/recipes"),
+    MEALS_LIST("GET", "/api/v1/meals"),
+    MEAL_CREATE("POST", "/api/v1/meals"),
+    KITCHEN_SUMMARY("GET", "/api/v1/kitchen/summary"),
     ;
 
     override val isSignIn: Boolean get() = this == LOGIN || this == VERIFY_2FA

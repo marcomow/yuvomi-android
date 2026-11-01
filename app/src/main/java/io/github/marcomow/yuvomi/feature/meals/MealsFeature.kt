@@ -19,7 +19,13 @@ object MealsFeature : Feature {
     }
 }
 
-/** Meals's routes. Other modules link here through these helpers only. */
+/**
+ * Meals's routes. Other modules link here through these helpers only; this module registers
+ * a destination for each of them in [MealsFeature.register].
+ */
 object MealsRoutes {
     const val START = "meals"
+
+    /** The week containing [date] (ISO yyyy-mm-dd), or this week when null. */
+    fun week(date: String? = null) = "meals" + (date?.let { "?week=$it" } ?: "")
 }

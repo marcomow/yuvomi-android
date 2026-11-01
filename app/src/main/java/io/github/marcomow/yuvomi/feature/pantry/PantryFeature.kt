@@ -19,7 +19,10 @@ object PantryFeature : Feature {
     }
 }
 
-/** Pantry's routes. Other modules link here through these helpers only. */
+/**
+ * Pantry's routes. Other modules link here through these helpers only; this module registers
+ * a destination for each of them in [PantryFeature.register].
+ */
 object PantryRoutes {
     const val START = "pantry"
 }

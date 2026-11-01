@@ -28,3 +28,15 @@ GET /api/v1/tasks/{id}/comments
 POST /api/v1/tasks/{id}/comments
 PATCH /api/v1/tasks/{id}/comments/{commentId}
 DELETE /api/v1/tasks/{id}/comments/{commentId}
+
+# Kitchen: calls more than one kitchen module makes (KitchenApi; docs/spec/shopping.md,
+# meals.md, recipes.md, pantry.md). Module-only calls live in operations-used.d/.
+GET /api/v1/shopping
+GET /api/v1/shopping/categories
+POST /api/v1/shopping/items/undo-transfer
+GET /api/v1/pantry
+GET /api/v1/recipes
+POST /api/v1/recipes
+GET /api/v1/meals
+POST /api/v1/meals
+GET /api/v1/kitchen/summary

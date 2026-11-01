@@ -19,7 +19,13 @@ object ShoppingFeature : Feature {
     }
 }
 
-/** Shopping's routes. Other modules link here through these helpers only. */
+/**
+ * Shopping's routes. Other modules link here through these helpers only; this module registers
+ * a destination for each of them in [ShoppingFeature.register].
+ */
 object ShoppingRoutes {
     const val START = "shopping"
+
+    /** A list, or the last one opened when [id] is null. */
+    fun list(id: Int? = null) = "shopping" + (id?.let { "?list=$it" } ?: "")
 }
