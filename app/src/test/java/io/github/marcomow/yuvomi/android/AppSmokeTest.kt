@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.android
 
+import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
@@ -65,9 +66,11 @@ class AppSmokeTest {
                     "shoppingOpenCount":3,"users":[{"id":1,"display_name":"Alex Johnson"},{"id":2,"display_name":"Emma"}],
                     "memberTodayTasks":[{"user_id":2,"open_count":1}],"birthdays":[{"name":"Leo","days_until":2,"next_age":7}],"birthdayTotal":1}""")
                 "GET /api/v1/tasks" -> json("""{"data":[$task]}""")
+                // Late on purpose: the editor's fields fill in only after the options and the task arrive.
                 "GET /api/v1/tasks/meta/options" -> json("""{"users":[{"id":1,"display_name":"Alex Johnson"},{"id":2,"display_name":"Emma"}],
                     "categories":[{"key":"household","label_key":"tasks.categoryHousehold","sort_order":0},{"key":"misc","label_key":"tasks.categoryMisc","sort_order":7}],
                     "tags":[{"tag":"Garden","count":1}],"default_points":0}""")
+                    .newBuilder().headersDelay(750, TimeUnit.MILLISECONDS).build()
                 "GET /api/v1/tasks/7" -> json("""{"data":$task}""")
                 // Late on purpose: the detail must not depend on comments arriving with the task.
                 "GET /api/v1/tasks/7/comments" -> json("""{"data":[{"id":1,"task_id":7,"user_id":2,"comment":"@Alex Johnson done soon","created_at":"2026-11-01 08:00:00","author_name":"Emma"}]}""")
@@ -118,6 +121,10 @@ class AppSmokeTest {
         // Editor.
         compose.onNodeWithContentDescription(strings.t("tasks.editButton")).performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithText(strings.t("tasks.editTask")).fetchSemanticsNodes().isNotEmpty() }
-        compose.onNodeWithText("Take out the bins").assertExists()
+        // The form fills in once the options and the task have loaded; until the screen change
+        // finishes, the detail's title is on screen too, so look for the editable field only.
+        compose.waitUntil(10_000) {
+            compose.onAllNodes(hasSetTextAction() and hasText("Take out the bins")).fetchSemanticsNodes().isNotEmpty()
+        }
     }
 }
