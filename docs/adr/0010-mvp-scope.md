@@ -1,6 +1,7 @@
 # 0010. MVP scope
 
-**Status:** Accepted, 2026-11-01
+**Status:** Accepted, 2026-11-01. Widened by [0015](0015-more-native-modules.md): Shopping, Meals,
+Recipes, Notes and Pantry are native too.
 
 ## Context
 

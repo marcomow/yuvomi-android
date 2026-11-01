@@ -46,6 +46,9 @@ import io.github.marcomow.yuvomi.core.design.ModuleCatalog
 import io.github.marcomow.yuvomi.core.design.Tokens
 import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.t
+import io.github.marcomow.yuvomi.feature.Features
+import io.github.marcomow.yuvomi.feature.meals.MealsRoutes
+import io.github.marcomow.yuvomi.feature.shopping.ShoppingRoutes
 import io.github.marcomow.yuvomi.core.time.HouseholdTime
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
 import java.time.LocalDate
@@ -80,11 +83,11 @@ fun TodayGlance(
                     is GlanceRow.Meal -> SimpleLine(
                         Icons.Outlined.Restaurant, "meals",
                         t("meals.type" + row.meal.mealType.replaceFirstChar { it.uppercase() }), row.meal.title,
-                    ) { shell.openWeb("/meals") }
+                    ) { shell.navigate(MealsRoutes.week()) }
                     is GlanceRow.Shopping -> SimpleLine(
                         Icons.Outlined.ShoppingCart, "shopping",
                         t("dashboard.todayShopping"), t("dashboard.todayShoppingCount", "count" to row.count),
-                    ) { shell.openWeb("/shopping") }
+                    ) { shell.navigate(ShoppingRoutes.list()) }
                 }
             }
             if (rows.size > GLANCE_ROWS) {
@@ -144,19 +147,21 @@ fun TileView(
                     }
                 }
                 is Tile.Shopping -> {
-                    TileHeader(t("nav.shopping"), "shopping", t("dashboard.todayShoppingCount", "count" to tile.openCount), web = "/shopping")
+                    TileHeader(t("nav.shopping"), "shopping", t("dashboard.todayShoppingCount", "count" to tile.openCount)) {
+                        shell.navigate(ShoppingRoutes.list())
+                    }
                     if (tile.lists.isEmpty() && tile.openCount == 0) EmptyLine(t("dashboard.shoppingListNothingOpen"))
                     tile.lists.forEach { list ->
                         ListLine(list.name, if (list.openCount > 0) t("dashboard.todayShoppingCount", "count" to list.openCount) else t("dashboard.shoppingListNothingOpen")) {
-                            shell.openWeb("/shopping")
+                            shell.navigate(ShoppingRoutes.list(list.id))
                         }
                     }
                 }
                 is Tile.Meals -> {
-                    TileHeader(t("dashboard.todayMeals"), "meals", null, web = "/meals")
+                    TileHeader(t("dashboard.todayMeals"), "meals", null) { shell.navigate(MealsRoutes.week()) }
                     if (tile.meals.isEmpty()) EmptyLine(t("dashboard.todayNothingPlanned"))
                     tile.meals.forEach { meal ->
-                        ListLine(t("meals.type" + meal.mealType.replaceFirstChar { it.uppercase() }), meal.title) { shell.openWeb("/meals") }
+                        ListLine(t("meals.type" + meal.mealType.replaceFirstChar { it.uppercase() }), meal.title) { shell.navigate(MealsRoutes.week()) }
                     }
                 }
                 is Tile.Birthdays -> {
@@ -192,8 +197,11 @@ fun TileView(
                 }
                 is Tile.Generic -> {
                     val module = ModuleCatalog.forWidget(tile.id)
-                    TileHeader(t(module?.labelKey ?: "nav.dashboard"), module?.tone ?: "dashboard", null, web = module?.route ?: "/")
-                    ListLine(t("android.overview.openInWebApp"), null) { shell.openWeb(module?.route ?: "/") }
+                    // A module with native screens opens them (ADR 0015); the rest open the web app.
+                    val native = Features.all.firstOrNull { it.id == module?.id }
+                    val open = { if (native != null) shell.navigate(native.startRoute) else shell.openWeb(module?.route ?: "/") }
+                    TileHeader(t(module?.labelKey ?: "nav.dashboard"), module?.tone ?: "dashboard", null, onClick = open)
+                    ListLine(t(if (native != null) "android.overview.open" else "android.overview.openInWebApp"), null, open)
                 }
             }
         }

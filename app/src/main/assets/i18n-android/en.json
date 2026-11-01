@@ -26,7 +26,8 @@
     "overview": {
       "filtersIgnored": "Tile filters you set in the web app are not applied here yet.",
       "loadFailed": "The overview could not be read.",
-      "openInWebApp": "Open in the web app"
+      "openInWebApp": "Open in the web app",
+      "open": "Open"
     },
     "signin": {
       "certificate": "The server's certificate could not be verified.",

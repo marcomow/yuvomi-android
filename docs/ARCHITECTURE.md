@@ -52,8 +52,9 @@ time or team size makes it worth it (ADR 0001).
 ```
 app/src/main/java/<appId>/
 ├── core/
-│   ├── api/        YuvomiClient (OkHttp), Operation (every upstream call), CSRF store,
-│   │               typed wrappers AuthApi, HouseholdApi, TasksApi, models
+│   ├── api/        YuvomiClient (OkHttp), ApiOperation and Operation (core, Tasks and
+│   │               shared kitchen calls), CSRF store, typed wrappers AuthApi,
+│   │               HouseholdApi, TasksApi, KitchenApi, models
 │   ├── data/       ResponseCache: last good answers as JSON files (ADR 0007)
 │   ├── session/    SessionManager, server address rules, cookie jar, Keystore
 │   │               secret box, settings (DataStore), version gate
@@ -63,15 +64,20 @@ app/src/main/java/<appId>/
 │   │               shared components (member avatar, status chip, empty state)
 │   └── browser/    "Open in browser" helper (Custom Tabs)
 ├── feature/
-│   ├── shell/      root, navigation bar/rail, account sheet, web-app list, gates
+│   ├── Features.kt the native modules beyond Overview and Tasks, and every operation (ADR 0015)
+│   ├── shell/      root, navigation bar/rail, Feature interface, account sheet, "More", gates
 │   ├── signin/     server URL, password, TOTP
 │   ├── overview/   widget normaliser, overview builder, today sheet, tiles
-│   └── tasks/      list, grouping, filters, detail, editor, recurrence, mentions,
-│                   checklists, Markdown
+│   ├── tasks/      list, grouping, filters, detail, editor, recurrence, mentions,
+│   │               checklists, Markdown
+│   └── shopping/, meals/, recipes/, notes/, pantry/
+│                   one package each: screens, view models, models, API wrapper,
+│                   <Module>Operation, <Module>Routes (ADR 0015)
 ├── YuvomiApp.kt    AppContainer: manual dependency wiring
 └── MainActivity.kt
 app/src/main/assets/
 ├── i18n/<locale>.json   generated from upstream (ADR 0011)
+├── i18n-android/        the app's own strings; <module>/<locale>.json per native module
 └── tokens.json          generated from upstream (ADR 0002)
 upstream/                pin, snapshots and sync scripts (ADR 0008)
 ```
