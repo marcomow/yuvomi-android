@@ -1,3 +1,14 @@
 # The upstream operations of docs/spec/notes.md, as `METHOD /api/v1/path` with
 # OpenAPI path templates. Must match the module's operation enum exactly
 # (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/notes
+POST /api/v1/notes
+PUT /api/v1/notes/{id}
+DELETE /api/v1/notes/{id}
+PATCH /api/v1/notes/{id}/pin
+PATCH /api/v1/notes/{id}/check
+GET /api/v1/notes/categories
+POST /api/v1/notes/categories
+PATCH /api/v1/notes/categories/reorder
+PUT /api/v1/notes/categories/{id}
+DELETE /api/v1/notes/categories/{id}
