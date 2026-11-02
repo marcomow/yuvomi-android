@@ -1,0 +1,8 @@
+{
+  "android": {
+    "meals": {
+      "gone": "This meal was deleted in the meantime.",
+      "weekToShopping": "Add the week's ingredients to the shopping list"
+    }
+  }
+}

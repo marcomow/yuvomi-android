@@ -1,3 +1,13 @@
 # The upstream operations of docs/spec/meals.md, as `METHOD /api/v1/path` with
 # OpenAPI path templates. Must match the module's operation enum exactly
 # (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/meals/suggestions
+POST /api/v1/meals/apply-plan
+PUT /api/v1/meals/{id}
+DELETE /api/v1/meals/{id}
+POST /api/v1/meals/{id}/ingredients
+PATCH /api/v1/meals/ingredients/{ingId}
+DELETE /api/v1/meals/ingredients/{ingId}
+POST /api/v1/meals/{id}/to-shopping-list
+POST /api/v1/meals/week-to-shopping-list
+GET /api/v1/family/members
