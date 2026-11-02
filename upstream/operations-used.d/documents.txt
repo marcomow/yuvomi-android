@@ -1,0 +1,19 @@
+# docs/spec/documents.md (DocumentsOperation)
+GET /api/v1/documents
+POST /api/v1/documents
+PUT /api/v1/documents/{id}
+DELETE /api/v1/documents/{id}
+PATCH /api/v1/documents/{id}/archive
+GET /api/v1/documents/{id}/preview
+GET /api/v1/documents/{id}/download
+GET /api/v1/documents/{id}/thumbnail
+GET /api/v1/documents/meta/options
+GET /api/v1/documents/folders
+POST /api/v1/documents/folders
+PUT /api/v1/documents/folders/{id}
+DELETE /api/v1/documents/folders/{id}
+GET /api/v1/documents/folders/{id}/delete-impact
+GET /api/v1/documents/dms/search
+POST /api/v1/documents/dms/link
+POST /api/v1/documents/dms/push
+GET /api/v1/auth/users

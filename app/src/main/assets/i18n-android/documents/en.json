@@ -1,5 +1,13 @@
 {
   "android": {
-    "documents": {}
+    "documents": {
+      "clearDate": "Remove date",
+      "handoffUnavailable": "This app cannot hand files to other apps yet. Use Download instead.",
+      "loadError": "The documents could not be loaded.",
+      "noApp": "No app on this device can open this file. Use Download instead.",
+      "openWith": "Open with…",
+      "reminderRange": "Enter a whole number of days from 0 to 365, or leave it empty.",
+      "saved": "Saved to your device."
+    }
   }
 }
