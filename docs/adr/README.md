@@ -27,3 +27,4 @@ Template: **Status**, **Context**, **Decision**, **Consequences**, **Alternative
 | 0018 | [In-app updates from the GitHub releases](0018-in-app-updates.md) | Accepted (amends 0013) |
 | 0019 | [Upstream's shared error sentences, generated](0019-shared-error-sentences.md) | Accepted (refines rule 4) |
 | 0020 | [Home-screen widgets with Glance](0020-home-screen-widgets.md) | Accepted |
+| 0021 | [Reminders as phone notifications](0021-reminders-on-the-phone.md) | Accepted |

@@ -745,7 +745,8 @@
     "checkAllSubtasks": "علامت زدن همه",
     "subtasksAllDone": "«{{title}}» و همه زیرکارها انجام شد.",
     "seriesDoneNamed": "«{{title}}» انجام شد - دفعهٔ بعد: {{date}}",
-    "kanbanRestore": "بازیابی"
+    "kanbanRestore": "بازیابی",
+    "errorTagGone": "این برچسب دیگر وجود ندارد."
   },
   "meals": {
     "ingredientCount_one": "{{count}} مادهٔ لازم",
@@ -1091,7 +1092,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "بازگرداندن به حالت اصلی",
-      "resetToast": "تغییرات بازنشانی شد."
+      "resetToast": "تغییرات بازنشانی شد.",
+      "resetPendingToast": "بازنشانی شد. متن اصلی با همگام‌سازی بعدی برمی‌گردد."
     },
     "iconLabel": "نماد",
     "iconSearchPlaceholder": "جستجوی نماد",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "سند بعدی: {{name}}",
     "emptyFolderTitle": "«{{name}}» خالی است",
     "viewerImageFallbackHint": "نمایش این تصویر ممکن نشد. برای باز کردن، آن را دانلود کنید.",
-    "moreDetailsHint": "توضیحات و وضعیت"
+    "moreDetailsHint": "توضیحات و وضعیت",
+    "subjectLabel": "مربوط به",
+    "subjectHint": "تغییری در اینکه چه کسی سند را می‌بیند ایجاد نمی‌کند.",
+    "subjectNoAccess": "{{name}} نمی‌تواند این سند را باز کند و یادآوری برای آن دریافت نمی‌کند.",
+    "personFilterLabel": "شخص",
+    "personFilterAll": "همه افراد"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "فایل فقط سطر عنوان دارد و هیچ دوره‌ای ندارد.",
     "errorCycleImportTooManyRows": "هر درون‌ریزی حداکثر {{limit}} دوره می‌تواند داشته باشد. فایل را تقسیم کنید.",
     "errorVitalImpossible": "این مقدار ممکن نیست. لطفاً ورودی را بررسی کنید.",
-    "errorVitalBpOrder": "مقدار سیستولیک باید بیشتر از دیاستولیک باشد."
+    "errorVitalBpOrder": "مقدار سیستولیک باید بیشتر از دیاستولیک باشد.",
+    "errorVitalUnit": "این واحد با این اندازه‌گیری سازگار نیست."
   },
   "housekeeping": {
     "title": "خدمتکار خانه",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "افراد را فقط برای فهرست‌هایی می‌توان تعیین کرد که به کارها می‌روند.",
     "syncAssigneeNotMember": "اینجا فقط اعضای خانوار را می‌توان انتخاب کرد.",
     "syncAssigneeUnknown": "این فرد دیگر وجود ندارد. صفحه را دوباره بارگیری کنید.",
-    "permDetails": "ویجت‌ها و مجوزهای بیشتر"
+    "permDetails": "ویجت‌ها و مجوزهای بیشتر",
+    "connectionFailedDetail": "اتصال ناموفق بود: {{error}}",
+    "documentStorageChangeFailed": "تغییر اعمال نشد: {{error}}",
+    "apiTokenCopyFailed": "کپی انجام نشد. توکن را انتخاب کنید و دستی کپی کنید.",
+    "weatherLocateDenied": "دسترسی به موقعیت مکانی مجاز نیست. آن را در تنظیمات مرورگر مجاز کنید یا مکان را دستی وارد کنید.",
+    "weatherLocateFailed": "موقعیت مکانی شما مشخص نشد. مکان را دستی وارد کنید.",
+    "outlookAutoSyncOverrides": "Outlook نمی‌تواند سری‌هایی را که استثناهای تکی پیوندخورده دارند همگام کند. تقویم مقصد آن‌ها را غیرفعال کنید تا اینجا قابل ویرایش بمانند. نیازی به حذف استثناها نیست.",
+    "memberRemoveOwnAccount": "نمی‌توانید حساب خودتان را حذف کنید.",
+    "memberRemoveLastAdmin": "حداقل یک مدیر باید باقی بماند.",
+    "memberRemoveLastSsoAdmin": "این آخرین مدیر متصل به SSO است. ابتدا مدیر دیگری را متصل کنید.",
+    "backupWebdavUrlInvalid": "نشانی باید با http:// یا https:// شروع شود.",
+    "icsSubscriptionGone": "این اشتراک دیگر وجود ندارد."
   },
   "subscriptions": {
     "tabLabel": "اشتراک‌ها",

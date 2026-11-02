@@ -1,6 +1,6 @@
 # Spec: Contacts
 
-Status: implemented · Upstream checked: 2.83.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/contacts/` (`ContactsRules`, `VCard` and
 `BirthField` are the pure ports; `ContactsViewModel` the list, `ContactDetailViewModel` the read

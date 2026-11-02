@@ -87,6 +87,8 @@ class CompleteTask : ActionCallback {
         val ok = runCatching { c.session.connection!!.tasks.setStatus(id, "done") }.isSuccess
         if (!ok) context.startActivity(Widgets.open(context, Routes.task(id)))
         Widgets.refresh(context, TasksWidget())
+        // A completed task's reminder no longer fires (REM-R2).
+        if (ok) runCatching { io.github.marcomow.yuvomi.feature.reminders.ReminderScheduler.refresh(context) }
     }
 }
 

@@ -745,7 +745,8 @@
     "checkAllSubtasks": "Markahan lahat",
     "subtasksAllDone": "Tapos na ang \"{{title}}\" at lahat ng subtask.",
     "seriesDoneNamed": "Tapos na ang \"{{title}}\" - susunod: {{date}}",
-    "kanbanRestore": "I-restore"
+    "kanbanRestore": "I-restore",
+    "errorTagGone": "Wala na ang tag na ito."
   },
   "meals": {
     "ingredientCount_one": "{{count}} sangkap",
@@ -1091,7 +1092,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Ibalik sa orihinal",
-      "resetToast": "Na-reset ang mga pagbabago."
+      "resetToast": "Na-reset ang mga pagbabago.",
+      "resetPendingToast": "Naibalik. Babalik ang orihinal na teksto sa susunod na pag-sync."
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "Maghanap ng icon",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Susunod na dokumento: {{name}}",
     "emptyFolderTitle": "Walang laman ang \"{{name}}\"",
     "viewerImageFallbackHint": "Hindi maipakita ang larawang ito. I-download ito para mabuksan.",
-    "moreDetailsHint": "Paglalarawan at katayuan"
+    "moreDetailsHint": "Paglalarawan at katayuan",
+    "subjectLabel": "Tungkol kay",
+    "subjectHint": "Hindi nito binabago kung sino ang nakakakita ng dokumento.",
+    "subjectNoAccess": "Hindi mabubuksan ni {{name}} ang dokumentong ito at hindi siya makakatanggap ng paalala.",
+    "personFilterLabel": "Tao",
+    "personFilterAll": "Lahat ng tao"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "Header row lang ang laman ng file at walang regla.",
     "errorCycleImportTooManyRows": "Hanggang {{limit}} regla lang ang kaya ng isang import. Hatiin ang file.",
     "errorVitalImpossible": "Hindi posible ang halagang ito. Pakisuri ang inilagay mo.",
-    "errorVitalBpOrder": "Dapat mas mataas ang systolic kaysa sa diastolic."
+    "errorVitalBpOrder": "Dapat mas mataas ang systolic kaysa sa diastolic.",
+    "errorVitalUnit": "Hindi tugma ang yunit na ito sa sukat na ito."
   },
   "housekeeping": {
     "title": "Gawaing-bahay",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "Maitatakda lang ang mga tao para sa mga listahang napupunta sa Mga Gawain.",
     "syncAssigneeNotMember": "Mga miyembro lang ng sambahayan ang mapipili rito.",
     "syncAssigneeUnknown": "Wala na ang taong ito. I-reload ang pahina.",
-    "permDetails": "Mga widget at iba pang pahintulot"
+    "permDetails": "Mga widget at iba pang pahintulot",
+    "connectionFailedDetail": "Nabigo ang koneksyon: {{error}}",
+    "documentStorageChangeFailed": "Hindi nailapat ang pagbabago: {{error}}",
+    "apiTokenCopyFailed": "Hindi nakopya. Piliin ang token at kopyahin ito nang mano-mano.",
+    "weatherLocateDenied": "Hindi pinapayagan ang access sa iyong lokasyon. Payagan ito sa mga setting ng browser o ilagay ang lugar nang mano-mano.",
+    "weatherLocateFailed": "Hindi matukoy ang iyong lokasyon. Ilagay ang lugar nang mano-mano.",
+    "outlookAutoSyncOverrides": "Hindi ma-sync ng Outlook ang mga serye na may naka-link na mga iisang eksepsyon. I-off ang target na kalendaryo ng mga ito para manatiling nae-edit dito. Hindi mo kailangang magbura ng mga eksepsyon.",
+    "memberRemoveOwnAccount": "Hindi mo maaaring alisin ang sarili mong account.",
+    "memberRemoveLastAdmin": "Kailangang may matirang kahit isang administrator.",
+    "memberRemoveLastSsoAdmin": "Ito ang huling administrator na naka-link sa SSO. Mag-link muna ng isa pang administrator.",
+    "backupWebdavUrlInvalid": "Dapat magsimula ang address sa http:// o https://.",
+    "icsSubscriptionGone": "Wala na ang subscription na ito."
   },
   "subscriptions": {
     "tabLabel": "Mga Subscription",

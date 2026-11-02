@@ -67,12 +67,16 @@ object HealthVitals {
     private fun linear(f: Double) = Conv({ it * f }, { it / f })
     private val fahrenheit = Conv({ (it - 32) * 5 / 9 }, { it * 9 / 5 + 32 })
     private val length = mapOf("cm" to linear(1.0), "mm" to linear(0.1), "m" to linear(100.0), "in" to linear(2.54))
+    // Two spellings of one unit share ONE object, so `limitReading` knows nothing is converted
+    // (utils/vital-units.js, 2.84.0). 1 stone = 14 lb.
+    private val pound = linear(0.45359237)
+    private val celsius = linear(1.0)
     private val conversions: Map<String, Map<String, Conv>> = mapOf(
-        "weight" to mapOf("kg" to linear(1.0), "g" to linear(0.001), "lb" to linear(0.45359237), "lbs" to linear(0.45359237)),
+        "weight" to mapOf("kg" to linear(1.0), "g" to linear(0.001), "lb" to pound, "lbs" to pound, "stone" to linear(0.45359237 * 14)),
         "height" to length,
         "head_circumference" to length,
         "glucose" to mapOf("mg/dl" to linear(1.0), "mmol/l" to linear(18.0182)),
-        "temp" to mapOf("°c" to linear(1.0), "c" to linear(1.0), "°f" to fahrenheit, "f" to fahrenheit),
+        "temp" to mapOf("°c" to celsius, "c" to celsius, "°f" to fahrenheit, "f" to fahrenheit),
     )
 
     private fun conv(type: String, unit: String?): Conv? = unit?.let { conversions[type]?.get(it.trim().lowercase()) }
@@ -81,7 +85,8 @@ object HealthVitals {
         val a = conv(type, from) ?: return value
         val b = conv(type, to) ?: return value
         if (a === b) return value
-        return (b.fromBase(a.toBase(value)) * 1e6).roundToInt() / 1e6
+        // Long, not Int: 9,000 kg in micro-units would clamp at Int.MAX_VALUE.
+        return Math.round(b.fromBase(a.toBase(value)) * 1e6) / 1e6
     }
 
     /** The most frequent of the dialog's units, the first on a tie or when none occurs. */
@@ -236,6 +241,21 @@ object HealthVitals {
         "temp" to mapOf("°C" to 35.0..41.0, "°F" to 95.0..105.8),
     )
 
+    /**
+     * `vitalLimitReading` (utils/vital-units.js, 2.84.0): the value in the listed unit the limits
+     * stand against. "LB" and "lbs" are `lb` without converting; "g" and "stone" have no limits of
+     * their own and are converted to the type's first unit. An unknown unit comes back unchanged
+     * and finds no limit.
+     */
+    fun limitReading(type: String, unit: String?, value: Double?): Pair<String?, Double?> {
+        val listed = metric(type)?.units ?: return unit to value
+        if (unit == null) return unit to value
+        listed.firstOrNull { it.trim().lowercase() == unit.trim().lowercase() }?.let { return it to value }
+        val c = conv(type, unit) ?: return unit to value
+        val twin = listed.firstOrNull { conv(type, it) === c }
+        return if (twin != null) twin to value else listed.first() to value?.let { convert(type, it, unit, listed.first()) }
+    }
+
     /** Per channel: `impossible`, `bpOrder`, `low`, `high`, or nothing. */
     fun plausibility(type: String, unit: String?, values: List<Double?>): Map<Int, String> {
         val out = mutableMapOf<Int, String>()
@@ -248,7 +268,7 @@ object HealthVitals {
             }
         }
         if (type == "bp") {
-            if ((unit ?: "mmHg") == "mmHg") {
+            if (limitReading("bp", unit ?: "mmHg", null).first == "mmHg") {
                 check(0, values[0], 40.0..300.0, 70.0..220.0)
                 check(1, values[1], 20.0..200.0, 40.0..130.0)
             }
@@ -258,8 +278,10 @@ object HealthVitals {
             check(2, values.getOrNull(2), 20.0..300.0, 40.0..180.0)
             return out
         }
-        val h = if (type == "spo2") 1.0..100.0 else hard[type]?.get(unit)
-        check(0, values[0], h, soft[type]?.get(unit))
+        // As on the server, the converted reading counts (#2375): a legacy row in grams stops at the same limits.
+        val (limitUnit, value) = limitReading(type, unit, values[0])
+        val h = if (type == "spo2") 1.0..100.0 else hard[type]?.get(limitUnit)
+        check(0, value, h, soft[type]?.get(limitUnit))
         return out
     }
 

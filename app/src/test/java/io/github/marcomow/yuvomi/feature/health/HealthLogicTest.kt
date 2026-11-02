@@ -107,6 +107,26 @@ class HealthLogicTest {
         assertEquals(7.5, sleep["value_num"]!!.jsonPrimitive.content.toDouble(), 0.0)
     }
 
+    /** HEALTH-A27 (HEALTH-R52, 2.84.0): limits on the converted reading, stone converts, an unchanged legacy edit is not judged. */
+    @Test fun `HEALTH-A27 legacy units meet the same limits and an unchanged edit takes a note`() {
+        assertEquals("kg" to 700.001, HealthVitals.limitReading("weight", "g", 700001.0))
+        assertEquals("lb" to 150.0, HealthVitals.limitReading("weight", "LBS", 150.0))
+        assertEquals("°C" to 37.0, HealthVitals.limitReading("temp", "c", 37.0))
+        assertEquals("furlong" to 3.0, HealthVitals.limitReading("weight", "furlong", 3.0))
+        assertEquals("impossible", HealthVitals.plausibility("weight", "g", listOf(700001.0, null, null))[0])
+        assertTrue(HealthVitals.plausibility("weight", "g", listOf(72000.0, null, null)).isEmpty())
+        assertEquals("impossible", HealthVitals.plausibility("weight", "KG", listOf(701.0, null, null))[0])
+        assertEquals(63.502932, HealthVitals.convert("weight", 10.0, "stone", "kg"), 1e-6)
+        // A legacy row out of bounds still takes a note when the measurement stays as it is ...
+        val legacy = vital(4, "weight", "2026-11-04T08:00", 9_000_000.0, unit = "g")
+        val f = HealthForms.vitalForm(legacy, "weight", today, "08:00", "family")
+        val note = HealthForms.vitalBody(f.copy(note = "scale was off"), legacy, 1, 1)
+        assertTrue(note.toString(), note is HealthForms.Built.Ok)
+        assertFalse("unit" in (note as HealthForms.Built.Ok).body)
+        // ... but not once the value changes.
+        assertEquals("health.errorVitalImpossible", (HealthForms.vitalBody(f.copy(value = "8000000"), legacy, 1, 1) as HealthForms.Built.Invalid).key)
+    }
+
     // ── Medications ──
 
     private val schedule = MedSchedule(id = 11, medicationId = 5, timeOfDay = "08:00", daysMask = null, doseQty = 1.0)

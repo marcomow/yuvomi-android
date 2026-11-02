@@ -745,7 +745,8 @@
     "checkAllSubtasks": "Tout cocher",
     "subtasksAllDone": "« {{title}} » et toutes ses sous-tâches terminés.",
     "seriesDoneNamed": "« {{title}} » terminé - prochaine fois : {{date}}",
-    "kanbanRestore": "Restaurer"
+    "kanbanRestore": "Restaurer",
+    "errorTagGone": "Cette étiquette n'existe plus."
   },
   "meals": {
     "ingredientCount_one": "{{count}} ingrédient",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Réinitialiser",
-      "resetToast": "Modifications annulées."
+      "resetToast": "Modifications annulées.",
+      "resetPendingToast": "Réinitialisé. Le texte d'origine reviendra à la prochaine synchronisation."
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "Rechercher une icône",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Document suivant : {{name}}",
     "emptyFolderTitle": "« {{name}} » est vide",
     "viewerImageFallbackHint": "Cette image n'a pas pu être affichée. Téléchargez-la pour l'ouvrir.",
-    "moreDetailsHint": "Description et statut"
+    "moreDetailsHint": "Description et statut",
+    "subjectLabel": "Concerne",
+    "subjectHint": "Ne change pas qui peut voir le document.",
+    "subjectNoAccess": "{{name}} ne peut pas ouvrir ce document et ne recevra pas de rappel.",
+    "personFilterLabel": "Personne",
+    "personFilterAll": "Toutes les personnes"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "Le fichier ne contient qu’une ligne d’en-tête et aucune période de règles.",
     "errorCycleImportTooManyRows": "Un import peut contenir au plus {{limit}} périodes de règles. Divise le fichier.",
     "errorVitalImpossible": "Cette valeur n'est pas possible. Vérifiez votre saisie.",
-    "errorVitalBpOrder": "La valeur systolique doit être supérieure à la diastolique."
+    "errorVitalBpOrder": "La valeur systolique doit être supérieure à la diastolique.",
+    "errorVitalUnit": "Cette unité ne convient pas à cette mesure."
   },
   "housekeeping": {
     "title": "Ménage",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "Les personnes ne se définissent que pour les listes qui vont dans les Tâches.",
     "syncAssigneeNotMember": "Seuls les membres du foyer peuvent être choisis ici.",
     "syncAssigneeUnknown": "Cette personne n’existe plus. Rechargez la page.",
-    "permDetails": "Widgets et autres droits"
+    "permDetails": "Widgets et autres droits",
+    "connectionFailedDetail": "Échec de la connexion : {{error}}",
+    "documentStorageChangeFailed": "La modification n'a pas été appliquée : {{error}}",
+    "apiTokenCopyFailed": "La copie a échoué. Sélectionnez le jeton et copiez-le à la main.",
+    "weatherLocateDenied": "L'accès à votre position n'est pas autorisé. Autorisez-le dans les réglages du navigateur ou saisissez le lieu à la main.",
+    "weatherLocateFailed": "Votre position n'a pas pu être déterminée. Saisissez le lieu à la main.",
+    "outlookAutoSyncOverrides": "Outlook ne peut pas synchroniser les séries comportant des exceptions individuelles liées. Désactivez leur calendrier cible pour qu'elles restent modifiables ici. Vous n'avez aucune exception à supprimer.",
+    "memberRemoveOwnAccount": "Vous ne pouvez pas supprimer votre propre compte.",
+    "memberRemoveLastAdmin": "Il doit rester au moins un administrateur.",
+    "memberRemoveLastSsoAdmin": "C'est le dernier administrateur lié au SSO. Liez d'abord un autre administrateur.",
+    "backupWebdavUrlInvalid": "L'adresse doit commencer par http:// ou https://.",
+    "icsSubscriptionGone": "Cet abonnement n'existe plus."
   },
   "subscriptions": {
     "tabLabel": "Abonnements",

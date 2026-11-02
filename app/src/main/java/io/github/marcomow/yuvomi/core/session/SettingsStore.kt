@@ -32,6 +32,7 @@ class SettingsStore(private val context: Context, private val box: SecretBox) {
         val autoUpdates = booleanPreferencesKey("autoUpdates")
         val lastUpdateCheck = longPreferencesKey("lastUpdateCheck")
         val knownUpdate = stringPreferencesKey("knownUpdate")
+        val phoneReminders = booleanPreferencesKey("phoneReminders")
         val dismissedUpdate = stringPreferencesKey("dismissedUpdate")
     }
 
@@ -62,6 +63,11 @@ class SettingsStore(private val context: Context, private val box: SecretBox) {
     /** The newest update the last check found (JSON of `Releases.Update`), so the banner survives a restart. */
     suspend fun knownUpdate(): String? = read(Keys.knownUpdate)
     suspend fun setKnownUpdate(json: String?) = context.dataStore.edit { if (json == null) it.remove(Keys.knownUpdate) else it[Keys.knownUpdate] = json }
+
+    /** Reminders as phone notifications (REM-R6), on by default. */
+    val phoneReminders: Flow<Boolean> = context.dataStore.data.map { it[Keys.phoneReminders] ?: true }
+    suspend fun phoneRemindersNow(): Boolean = phoneReminders.first()
+    suspend fun setPhoneReminders(on: Boolean) = context.dataStore.edit { it[Keys.phoneReminders] = on }
 
     /** The version whose banner the member closed; the next version shows it again. */
     val dismissedUpdate: Flow<String?> = context.dataStore.data.map { it[Keys.dismissedUpdate] }

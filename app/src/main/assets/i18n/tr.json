@@ -745,7 +745,8 @@
     "checkAllSubtasks": "Tümünü işaretle",
     "subtasksAllDone": "\"{{title}}\" ve tüm alt görevler tamamlandı.",
     "seriesDoneNamed": "\"{{title}}\" tamamlandı - sıradaki: {{date}}",
-    "kanbanRestore": "Geri yükle"
+    "kanbanRestore": "Geri yükle",
+    "errorTagGone": "Bu etiket artık yok."
   },
   "meals": {
     "ingredientCount_one": "{{count}} malzeme",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Orijinale sıfırla",
-      "resetToast": "Değişiklikler sıfırlandı."
+      "resetToast": "Değişiklikler sıfırlandı.",
+      "resetPendingToast": "Sıfırlandı. Özgün metin bir sonraki eşitlemede geri gelir."
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "Simge ara",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Sonraki belge: {{name}}",
     "emptyFolderTitle": "\"{{name}}\" boş",
     "viewerImageFallbackHint": "Bu görsel görüntülenemedi. Açmak için indirin.",
-    "moreDetailsHint": "Açıklama ve durum"
+    "moreDetailsHint": "Açıklama ve durum",
+    "subjectLabel": "İlgili kişi",
+    "subjectHint": "Belgeyi kimin görebileceğini değiştirmez.",
+    "subjectNoAccess": "{{name}} bu belgeyi açamaz ve bunun için hatırlatma almaz.",
+    "personFilterLabel": "Kişi",
+    "personFilterAll": "Tüm kişiler"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "Dosyada yalnızca başlık satırı var ve hiç adet dönemi yok.",
     "errorCycleImportTooManyRows": "Bir içe aktarma en fazla {{limit}} adet dönemi içerebilir. Dosyayı böl.",
     "errorVitalImpossible": "Bu değer mümkün değil. Lütfen girdiğini kontrol et.",
-    "errorVitalBpOrder": "Sistolik değer diyastolikten büyük olmalı."
+    "errorVitalBpOrder": "Sistolik değer diyastolikten büyük olmalı.",
+    "errorVitalUnit": "Bu birim bu ölçüme uymuyor."
   },
   "housekeeping": {
     "title": "Ev işleri",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "Kişiler yalnızca Görevler’e giden listeler için ayarlanabilir.",
     "syncAssigneeNotMember": "Burada yalnızca hane üyeleri seçilebilir.",
     "syncAssigneeUnknown": "Bu kişi artık yok. Sayfayı yeniden yükleyin.",
-    "permDetails": "Widget'lar ve diğer izinler"
+    "permDetails": "Widget'lar ve diğer izinler",
+    "connectionFailedDetail": "Bağlantı başarısız: {{error}}",
+    "documentStorageChangeFailed": "Değişiklik uygulanmadı: {{error}}",
+    "apiTokenCopyFailed": "Kopyalanamadı. Belirteci seçip elle kopyalayın.",
+    "weatherLocateDenied": "Konumunuza erişime izin verilmiyor. Tarayıcı ayarlarından izin verin veya yeri elle girin.",
+    "weatherLocateFailed": "Konumunuz belirlenemedi. Yeri elle girin.",
+    "outlookAutoSyncOverrides": "Outlook, bağlı tekil istisnalar içeren serileri eşitleyemez. Burada düzenlenebilir kalmaları için hedef takvimlerini kapatın. Hiçbir istisnayı silmeniz gerekmez.",
+    "memberRemoveOwnAccount": "Kendi hesabınızı kaldıramazsınız.",
+    "memberRemoveLastAdmin": "En az bir yönetici kalmalıdır.",
+    "memberRemoveLastSsoAdmin": "Bu, SSO ile bağlantılı son yönetici. Önce başka bir yöneticiyi bağlayın.",
+    "backupWebdavUrlInvalid": "Adres http:// veya https:// ile başlamalıdır.",
+    "icsSubscriptionGone": "Bu abonelik artık yok."
   },
   "subscriptions": {
     "tabLabel": "Abonelikler",

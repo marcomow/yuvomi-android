@@ -31,6 +31,12 @@ interface DocumentsHost {
 
     fun today(): LocalDate
 
+    /**
+     * DOCS-R35: the server reads `subject_user_id` (2.84.0 on). An older one would drop the
+     * choice without a word, so the dialog does not offer it there.
+     */
+    val knowsSubjects: Boolean get() = true
+
     /** Shows [message]; true when the member tapped [action]. */
     suspend fun notify(message: String, action: String? = null): Boolean
 }
@@ -269,8 +275,11 @@ class DocumentsViewModel(
 
     fun toggleExpiring() = _state.update { it.copy(filter = it.filter.copy(expiringSoon = !it.filter.expiringSoon)) }
 
+    /** DOCS-R36: the person filter; null shows everyone's documents. */
+    fun setPerson(id: Int?) = _state.update { it.copy(filter = it.filter.copy(personId = id)) }
+
     fun resetFilters() = _state.update {
-        it.copy(filter = it.filter.copy(category = "", folderId = DocumentRules.FOLDER_ALL, expiringSoon = false))
+        it.copy(filter = it.filter.copy(category = "", folderId = DocumentRules.FOLDER_ALL, expiringSoon = false, personId = null))
     }
 
     /** `selectFolder`: choosing a folder with children opens its branch. */
@@ -533,6 +542,23 @@ class DocumentsViewModel(
         val seen = s.members.map { it.id }.toMutableSet()
         val granted = selected.mapNotNull { id -> s.directory.firstOrNull { it.id == id } }.filter { seen.add(it.id) }
         return s.members + granted
+    }
+
+    /** DOCS-R35: the "About" choices, `withChosenPeople(state.members, [documentSubject(doc)])`. */
+    val offersSubject: Boolean get() = host.knowsSubjects
+
+    fun subjectPeople(doc: Document?): List<DocumentPerson> {
+        val members = state.value.members
+        val chosen = doc?.let { DocumentRules.subject(it, members) } ?: return members
+        return if (members.any { it.id == chosen.id }) members else members + chosen
+    }
+
+    /** DOCS-R35: `syncSubjectAccess`, the name for `documents.subjectNoAccess`, or null when the person may open it. */
+    fun subjectNoAccessName(doc: Document?, form: DocumentForm): String? {
+        val person = form.subjectUserId ?: return null
+        val creator = doc?.createdBy ?: host.userId
+        if (DocumentRules.subjectMayOpen(person, creator, form.visibility, form.allowedMemberIds)) return null
+        return subjectPeople(doc).firstOrNull { it.id == person }?.displayName.orEmpty()
     }
 
     fun personName(id: Int): String? = state.value.let { s -> (s.directory + s.members).firstOrNull { it.id == id }?.displayName }

@@ -54,6 +54,10 @@ internal class ShellDocumentsHost(private val shell: ShellContext, override val 
 
     override fun today(): LocalDate = shell.time.today()
 
+    /** An unreadable version counts as new, like the version gate (SIGNIN-R14). */
+    override val knowsSubjects: Boolean
+        get() = (io.github.marcomow.yuvomi.core.session.VersionGate.compare(shell.session.serverVersion, DocumentRules.SUBJECT_SINCE) ?: 0) >= 0
+
     override suspend fun notify(message: String, action: String?): Boolean = shell.notify(message, action)
 }
 

@@ -745,7 +745,8 @@
     "checkAllSubtasks": "Huk av alle",
     "subtasksAllDone": "«{{title}}» og alle deloppgaver utført.",
     "seriesDoneNamed": "«{{title}}» utført - neste gang: {{date}}",
-    "kanbanRestore": "Gjenopprett"
+    "kanbanRestore": "Gjenopprett",
+    "errorTagGone": "Denne etiketten finnes ikke lenger."
   },
   "meals": {
     "ingredientCount_one": "{{count}} ingrediens",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Tilbakestill til original",
-      "resetToast": "Endringer tilbakestilt."
+      "resetToast": "Endringer tilbakestilt.",
+      "resetPendingToast": "Tilbakestilt. Originalteksten kommer tilbake ved neste synkronisering."
     },
     "iconLabel": "Ikon",
     "iconSearchPlaceholder": "Søkeikon",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Neste dokument: {{name}}",
     "emptyFolderTitle": "«{{name}}» er tom",
     "viewerImageFallbackHint": "Dette bildet kunne ikke vises. Last det ned for å åpne det.",
-    "moreDetailsHint": "Beskrivelse og status"
+    "moreDetailsHint": "Beskrivelse og status",
+    "subjectLabel": "Gjelder",
+    "subjectHint": "Endrer ikke hvem som kan se dokumentet.",
+    "subjectNoAccess": "{{name}} kan ikke åpne dette dokumentet og får ingen påminnelse om det.",
+    "personFilterLabel": "Person",
+    "personFilterAll": "Alle personer"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "Filen har bare en overskriftsrad og ingen mens.",
     "errorCycleImportTooManyRows": "En import kan inneholde høyst {{limit}} menser. Del opp filen.",
     "errorVitalImpossible": "Denne verdien er ikke mulig. Sjekk det du skrev inn.",
-    "errorVitalBpOrder": "Den systoliske verdien må være høyere enn den diastoliske."
+    "errorVitalBpOrder": "Den systoliske verdien må være høyere enn den diastoliske.",
+    "errorVitalUnit": "Denne enheten passer ikke til denne målingen."
   },
   "housekeeping": {
     "title": "Husarbeid",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "Personer kan bare settes for lister som går til Oppgaver.",
     "syncAssigneeNotMember": "Bare medlemmer av husstanden kan velges her.",
     "syncAssigneeUnknown": "Denne personen finnes ikke lenger. Last inn siden på nytt.",
-    "permDetails": "Widgeter og flere rettigheter"
+    "permDetails": "Widgeter og flere rettigheter",
+    "connectionFailedDetail": "Tilkoblingen mislyktes: {{error}}",
+    "documentStorageChangeFailed": "Endringen ble ikke tatt i bruk: {{error}}",
+    "apiTokenCopyFailed": "Kopiering mislyktes. Merk tokenet og kopier det for hånd.",
+    "weatherLocateDenied": "Tilgang til posisjonen er ikke tillatt. Tillat det i nettleserinnstillingene eller skriv inn stedet for hånd.",
+    "weatherLocateFailed": "Posisjonen kunne ikke fastslås. Skriv inn stedet for hånd.",
+    "outlookAutoSyncOverrides": "Outlook kan ikke synkronisere serier med tilknyttede enkeltunntak. Slå av målkalenderen deres slik at de fortsatt kan redigeres her. Du trenger ikke slette noen unntak.",
+    "memberRemoveOwnAccount": "Du kan ikke fjerne din egen konto.",
+    "memberRemoveLastAdmin": "Minst én administrator må bli igjen.",
+    "memberRemoveLastSsoAdmin": "Dette er den siste administratoren knyttet til SSO. Knytt til en annen administrator først.",
+    "backupWebdavUrlInvalid": "Adressen må begynne med http:// eller https://.",
+    "icsSubscriptionGone": "Dette abonnementet finnes ikke lenger."
   },
   "subscriptions": {
     "tabLabel": "Abonnementer",

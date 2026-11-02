@@ -745,7 +745,8 @@
     "checkAllSubtasks": "Marcar todas",
     "subtasksAllDone": "«{{title}}» e todas as subtarefas concluídos.",
     "seriesDoneNamed": "«{{title}}» concluído - próxima vez: {{date}}",
-    "kanbanRestore": "Restaurar"
+    "kanbanRestore": "Restaurar",
+    "errorTagGone": "Esta etiqueta já não existe."
   },
   "meals": {
     "ingredientCount_one": "{{count}} ingrediente",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Restaurar original",
-      "resetToast": "Alterações restauradas."
+      "resetToast": "Alterações restauradas.",
+      "resetPendingToast": "Redefinido. O texto original volta na próxima sincronização."
     },
     "iconLabel": "Ícone",
     "iconSearchPlaceholder": "Pesquisar ícone",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Documento seguinte: {{name}}",
     "emptyFolderTitle": "\"{{name}}\" está vazia",
     "viewerImageFallbackHint": "Não foi possível mostrar esta imagem. Transfira-a para a abrir.",
-    "moreDetailsHint": "Descrição e estado"
+    "moreDetailsHint": "Descrição e estado",
+    "subjectLabel": "Refere-se a",
+    "subjectHint": "Não altera quem pode ver o documento.",
+    "subjectNoAccess": "{{name}} não pode abrir este documento e não receberá um lembrete.",
+    "personFilterLabel": "Pessoa",
+    "personFilterAll": "Todas as pessoas"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "O ficheiro tem só a linha de cabeçalho e nenhum período.",
     "errorCycleImportTooManyRows": "Uma importação pode ter no máximo {{limit}} períodos. Divide o ficheiro.",
     "errorVitalImpossible": "Este valor não é possível. Verifique o que introduziu.",
-    "errorVitalBpOrder": "O valor sistólico tem de ser superior ao diastólico."
+    "errorVitalBpOrder": "O valor sistólico tem de ser superior ao diastólico.",
+    "errorVitalUnit": "Esta unidade não corresponde a esta medição."
   },
   "housekeeping": {
     "title": "Faxina",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "As pessoas só podem ser definidas para listas que vão para Tarefas.",
     "syncAssigneeNotMember": "Aqui só podem ser escolhidos membros do agregado.",
     "syncAssigneeUnknown": "Esta pessoa já não existe. Recarregue a página.",
-    "permDetails": "Widgets e mais permissões"
+    "permDetails": "Widgets e mais permissões",
+    "connectionFailedDetail": "Falha na ligação: {{error}}",
+    "documentStorageChangeFailed": "A alteração não foi aplicada: {{error}}",
+    "apiTokenCopyFailed": "Não foi possível copiar. Selecione o token e copie-o manualmente.",
+    "weatherLocateDenied": "O acesso à sua localização não é permitido. Permita-o nas definições do navegador ou introduza o local manualmente.",
+    "weatherLocateFailed": "Não foi possível determinar a sua localização. Introduza o local manualmente.",
+    "outlookAutoSyncOverrides": "O Outlook não consegue sincronizar séries com exceções individuais associadas. Desative o calendário de destino delas para que continuem editáveis aqui. Não precisa de eliminar nenhuma exceção.",
+    "memberRemoveOwnAccount": "Não pode remover a sua própria conta.",
+    "memberRemoveLastAdmin": "Tem de ficar pelo menos um administrador.",
+    "memberRemoveLastSsoAdmin": "Este é o último administrador associado ao SSO. Associe primeiro outro administrador.",
+    "backupWebdavUrlInvalid": "O endereço tem de começar por http:// ou https://.",
+    "icsSubscriptionGone": "Esta subscrição já não existe."
   },
   "subscriptions": {
     "tabLabel": "Assinaturas",

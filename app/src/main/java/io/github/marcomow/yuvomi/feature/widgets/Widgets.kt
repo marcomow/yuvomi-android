@@ -2,13 +2,11 @@ package io.github.marcomow.yuvomi.feature.widgets
 
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.glance.appwidget.GlanceAppWidget
 import androidx.glance.appwidget.GlanceAppWidgetManager
 import androidx.glance.appwidget.state.updateAppWidgetState
 import io.github.marcomow.yuvomi.AppContainer
-import io.github.marcomow.yuvomi.MainActivity
 import io.github.marcomow.yuvomi.YuvomiApp
 import io.github.marcomow.yuvomi.core.api.ApiJson
 import io.github.marcomow.yuvomi.core.api.TasksApi
@@ -41,30 +39,13 @@ object Widgets {
     /** Bumped to make a running widget read again ([refresh]). */
     val VERSION = longPreferencesKey("version")
 
-    /** Extra of the intent a widget opens the app with: a route of the shell's navigation. */
-    const val EXTRA_ROUTE = "io.github.marcomow.yuvomi.route"
-
     private const val TASKS = "tasks"
     private const val SHOPPING = "shopping"
 
     fun container(context: Context): AppContainer = (context.applicationContext as YuvomiApp).container
 
-    /** An intent that opens the app at [route] (or its start when null). Unique per route, so each row's tap stays its own. */
-    fun open(context: Context, route: String?): Intent = Intent(context, MainActivity::class.java).apply {
-        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
-        if (route != null) {
-            putExtra(EXTRA_ROUTE, route)
-            data = Uri.parse("yuvomi-widget://open/" + Uri.encode(route))
-        }
-    }
-
-    private val ALLOWED = listOf(Regex("tasks"), Regex("task/[0-9]+"), Regex("shopping"), Regex("shopping\\?list=[0-9]+"))
-
-    /**
-     * [route] if it is one a widget opens. The activity is exported (it is the launcher), so any
-     * app could hand it an extra; only these routes are followed.
-     */
-    fun allowedRoute(route: String): String? = route.takeIf { r -> ALLOWED.any { it.matches(r) } }
+    /** Opening the app at a route ([AppLinks]). */
+    fun open(context: Context, route: String?): Intent = io.github.marcomow.yuvomi.feature.shell.AppLinks.open(context, route)
 
     private class Ready(val container: AppContainer, val session: Session, val connection: Connection, val strings: Strings)
 

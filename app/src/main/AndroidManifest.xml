@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!-- Reminders on the phone: show them, wake for them, set them again after a reboot. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.INTERNET" />
     <!-- In-app updates (ADR 0018): hand a downloaded release to the package installer. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
@@ -30,6 +33,15 @@
                 <data android:scheme="yuvomi-android" android:host="tasks" />
             </intent-filter>
         </activity>
+        <!-- Reminders on the phone (docs/spec/reminders.md). -->
+        <receiver android:name=".feature.reminders.ReminderAlarmReceiver" android:exported="false" />
+        <receiver android:name=".feature.reminders.ReminderDismissReceiver" android:exported="false" />
+        <receiver android:name=".feature.reminders.ReminderBootReceiver" android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
         <!-- Home-screen widgets (docs/spec/widgets.md). -->
         <receiver android:name=".feature.widgets.TasksWidgetReceiver" android:exported="false" android:label="@string/widget_tasks_description">
             <intent-filter>

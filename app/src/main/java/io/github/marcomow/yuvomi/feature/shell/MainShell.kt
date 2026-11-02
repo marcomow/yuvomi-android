@@ -112,6 +112,17 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLink: S
     // shows as the banner above every screen (UpdateBanner).
     LaunchedEffect(Unit) { container.updater.checkIfDue() }
 
+    // Reminders on the phone (REM-R7): Android 13 and newer ask once whether the app may notify.
+    val askNotify = androidx.activity.compose.rememberLauncherForActivityResult(
+        androidx.activity.result.contract.ActivityResultContracts.RequestPermission(),
+    ) { granted -> if (granted) scope.launch { io.github.marcomow.yuvomi.feature.reminders.ReminderScheduler.refresh(context) } }
+    LaunchedEffect(Unit) {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) return@LaunchedEffect
+        if (io.github.marcomow.yuvomi.feature.reminders.ReminderScheduler.canNotify(context)) return@LaunchedEffect
+        if (!container.settings.phoneRemindersNow() || !container.settings.firstTime("notify-permission")) return@LaunchedEffect
+        askNotify.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+    }
+
     // Foreground after more than 5 minutes: re-read the member and household (OVERVIEW-R14).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         val now = System.currentTimeMillis()

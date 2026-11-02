@@ -16,8 +16,11 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Event
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.ShoppingCart
+import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
@@ -36,6 +39,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import io.github.marcomow.yuvomi.core.api.model.DashCountdown
 import io.github.marcomow.yuvomi.core.api.model.DashEvent
 import io.github.marcomow.yuvomi.core.api.model.Task
 import io.github.marcomow.yuvomi.core.design.AvatarStack
@@ -50,6 +54,7 @@ import io.github.marcomow.yuvomi.core.time.HouseholdTime
 import io.github.marcomow.yuvomi.feature.Features
 import io.github.marcomow.yuvomi.feature.birthdays.BirthdaysRoutes
 import io.github.marcomow.yuvomi.feature.calendar.CalendarRoutes
+import io.github.marcomow.yuvomi.feature.documents.DocumentsRoutes
 import io.github.marcomow.yuvomi.feature.meals.MealsRoutes
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
 import io.github.marcomow.yuvomi.feature.shopping.ShoppingRoutes
@@ -197,6 +202,12 @@ fun TileView(
                         )
                     }
                 }
+                is Tile.Countdown -> {
+                    // OVERVIEW-R17: the tile belongs to no module, so it speaks in the overview's tone.
+                    TileHeader(t("dashboard.countdownTitle"), "dashboard", tile.total.toString())
+                    tile.items.forEach { item -> CountdownLine(item, today, openTask) }
+                    if (tile.more > 0) EmptyLine(t("dashboard.countdownMore", "count" to tile.more))
+                }
                 is Tile.Generic -> {
                     val module = ModuleCatalog.forWidget(tile.id)
                     // A module with native screens opens them (ADR 0015); the rest open the web app.
@@ -332,6 +343,54 @@ private fun EventLine(event: DashEvent, time: String?, running: Boolean, open: (
                 Text(it, style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary, maxLines = 1)
             }
         }
+    }
+}
+
+/**
+ * One row of "Key dates" (`renderCountdowns`): the source's mark, title, the relative date and
+ * the document's person, the count toned by how near it is. A row opens its own object: the
+ * task, the event, or the document in the viewer (#1705).
+ */
+@Composable
+private fun CountdownLine(item: DashCountdown, today: LocalDate, openTask: (Int) -> Unit) {
+    val shell = LocalShell.current
+    val module = KeyDates.module(item.source)
+    val accent = Tokens.parseColor(item.color) ?: Yuvomi.colors.module(module)
+    val (key, count) = KeyDates.phrase(item.daysUntil)
+    val label = if (count == null) t(key) else t(key, "count" to count)
+    val whenText = HouseholdTime.date(item.date)?.let { shell.formats.relativeDate(it, today) }.orEmpty()
+    val meta = KeyDates.meta(item, whenText, label)
+    val tone = when (KeyDates.rank(item.daysUntil)) {
+        KeyDates.Rank.OVERDUE -> Yuvomi.colors.danger
+        KeyDates.Rank.NOW -> Yuvomi.colors.warning
+        KeyDates.Rank.SOON -> MaterialTheme.colorScheme.onSurface
+        KeyDates.Rank.LATER -> Yuvomi.colors.textSecondary
+    }
+    val icon = when (item.source) {
+        "task" -> Icons.Outlined.TaskAlt
+        "document" -> Icons.Outlined.Description
+        else -> Icons.Outlined.Event
+    }
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .clickable {
+                when (item.source) {
+                    "task" -> openTask(item.id)
+                    "document" -> shell.navigate(DocumentsRoutes.document(item.id))
+                    else -> shell.navigate(CalendarRoutes.event(item.id))
+                }
+            }
+            .padding(horizontal = 16.dp, vertical = 10.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+    ) {
+        Icon(icon, null, tint = accent, modifier = Modifier.size(18.dp))
+        Column(Modifier.weight(1f)) {
+            Text(item.title, maxLines = 1, overflow = TextOverflow.Ellipsis)
+            if (meta.isNotEmpty()) Text(meta, style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary, maxLines = 1)
+        }
+        Text(label, style = MaterialTheme.typography.labelLarge, color = tone)
     }
 }
 

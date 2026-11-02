@@ -1,6 +1,6 @@
 # Spec: Health
 
-Status: implemented · Upstream checked: 2.83.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0012, 0015
+Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0012, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/health/`. Pure ports: `HealthVitals`,
 `HealthMeds`, `HealthCycle`, `HealthLogic` (activity, labs, prevention, nutrition, fasting, error
@@ -170,6 +170,14 @@ requirement says so ("Differs:").
   visibility; the plausibility line (`vitalPlausibility`): the impossible and a systolic not
   above the diastolic stop the save, the unusual only warns. Create sends `collectVitalBody`,
   edit `vitalPatchBody` (cleared channels and note as null, the unit only when changed).
+- **HEALTH-R52** Units (2.84.0, #2375, `utils/vital-units.js`): the dialog still offers only the
+  listed units, but the hard and soft limits are read on the converted value
+  (`vitalLimitReading`): another spelling of a listed unit ("LB", "lbs") counts as it, a unit
+  without limits of its own ("g", "stone") is converted to the kind's first unit. Weights in
+  stone also convert in cards and chart. Editing judges the hard limits only when the patch
+  changes the measurement (`vitalMeasureChanged`: a value or the sent unit), so a legacy row
+  outside them still takes a note, as on the server. The server refuses any other unit with
+  `health_vital_unit_invalid` (upstream's sentence, FriendlyErrorTable).
 - **HEALTH-R15** Delete from the editor, with undo (`deleteVitalWithUndo`).
 - **HEALTH-R16** An empty area shows `health.vitals.emptyTitle` with the add action for writers.
 
@@ -270,6 +278,7 @@ requirement says so ("Differs:").
 |---|---|---|---|
 | HEALTH-A1 | Given weights in kg and lb then the week series converts to kg, buckets seven rolling days and gives the delta; month and year stepping walk rolling and calendar windows. | unit | passing (`HealthLogicTest`) |
 | HEALTH-A2 | Given readings then hard limits, soft ranges and the blood pressure order match `vitalPlausibility`; durations, mood and the brief read as the web app. | unit | passing (`HealthLogicTest`) |
+| HEALTH-A27 | Given a legacy row in g or stone then the limits apply to the converted value, an unchanged edit is not judged, and stone converts to kg. | unit | passing (`HealthLogicTest`) |
 | HEALTH-A3 | Given the vitals form then create sends `user_id` only for someone else and the patch clears emptied fields and keeps the unit out. | unit | passing (`HealthLogicTest`) |
 | HEALTH-A4 | Given schedules then due doses follow the mask, and inactive medications drop out. | unit | passing (`HealthLogicTest`) |
 | HEALTH-A5 | Given logs then adherence counts planned doses only and the streak needs every dose of a day. | unit | passing (`HealthLogicTest`) |

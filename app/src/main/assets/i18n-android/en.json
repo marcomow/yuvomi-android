@@ -89,6 +89,13 @@
       "bannerOpen": "Show app updates",
       "bannerDismiss": "Hide until the next version",
       "openSettings": "Open"
+    },
+    "reminders": {
+      "phone": "Reminders on this phone",
+      "phoneHint": "Your reminders for tasks, events and everything else arrive as notifications on this phone, also when the app is closed. The phone looks them up about every 6 hours.",
+      "blocked": "Android does not let Yuvomi show notifications.",
+      "allow": "Allow",
+      "unsupported": "Your Yuvomi server does not offer this yet. It needs version 2.84.0 or newer."
     }
   }
 }

@@ -32,6 +32,8 @@ data class DocumentForm(
     val expiresAt: String? = null,
     val reminderDays: String = "",
     val allowedMemberIds: Set<Int> = emptySet(),
+    /** "About" (DOCS-R35): one household member or no one. */
+    val subjectUserId: Int? = null,
 ) {
     companion object {
         /** A new upload: the open folder is preselected (`presetFolderId`), never "all" or "no folder". */
@@ -47,6 +49,7 @@ data class DocumentForm(
             expiresAt = doc.expiresAt?.take(10),
             reminderDays = doc.expiryReminderDays?.toString().orEmpty(),
             allowedMemberIds = doc.allowedMemberIds.toSet(),
+            subjectUserId = doc.subjectUserId,
         )
     }
 }
@@ -78,6 +81,8 @@ object DocumentBodies {
         if (form.expiresAt == null) put("expires_at", JsonNull) else put("expires_at", form.expiresAt)
         val days = form.reminderDays.trim().toIntOrNull()
         if (form.expiresAt != null && days != null) put("expiry_reminder_days", days) else put("expiry_reminder_days", JsonNull)
+        // DOCS-R35: always sent, null for no one (`getSelectedUserIds(form, SUBJECT_INPUT)[0] ?? null`).
+        if (form.subjectUserId == null) put("subject_user_id", JsonNull) else put("subject_user_id", form.subjectUserId)
         put(
             "allowed_member_ids",
             JsonArray(if (form.visibility == DocumentRules.VISIBILITY_RESTRICTED) form.allowedMemberIds.sorted().map { JsonPrimitive(it) } else emptyList()),
@@ -186,7 +191,7 @@ sealed interface EmptyKind {
         fun of(filter: DocumentRules.Filter, folders: List<DocumentFolder>, otherStatusHits: Int): EmptyKind {
             if (filter.normalizedQuery.isNotEmpty()) return Search(otherStatusHits, filter.hasFacet)
             val folder = filter.selectedFolder
-            if (folder != null && filter.category.isEmpty() && !filter.expiringSoon) return EmptyFolder(folders.firstOrNull { it.id == folder }?.name)
+            if (folder != null && filter.category.isEmpty() && !filter.expiringSoon && filter.personId == null) return EmptyFolder(folders.firstOrNull { it.id == folder }?.name)
             if (filter.hasFacet) return NoMatch
             if (filter.status == DocumentRules.STATUS_ARCHIVED) return EmptyArchive
             return Nothing

@@ -25,6 +25,20 @@ class Formats(private val strings: Strings, private val zone: ZoneId) {
 
     fun weekdayDate(d: LocalDate): String = skeleton("EEEEMMMMd").format(d.asDate())
 
+    /**
+     * `relativeDateLabel` (utils/day-label.js): today, tomorrow, the short weekday up to six days
+     * ahead, else the date (with the year outside the current one).
+     */
+    fun relativeDate(d: LocalDate, today: LocalDate): String {
+        val ahead = ChronoUnit.DAYS.between(today, d)
+        return when {
+            ahead == 0L -> strings.t("common.today")
+            ahead == 1L -> strings.t("common.tomorrow")
+            ahead in 2..6 -> skeleton("EEE").format(d.asDate())
+            else -> date(d, today)
+        }
+    }
+
     fun time(t: LocalTime): String =
         skeleton("jmm").format(Date.from(t.atDate(LocalDate.of(2000, 1, 1)).atZone(zone).toInstant()))
 

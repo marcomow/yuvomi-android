@@ -745,7 +745,8 @@
     "checkAllSubtasks": "Alle abhaken",
     "subtasksAllDone": "„{{title}}“ und alle Teilaufgaben erledigt.",
     "seriesDoneNamed": "„{{title}}“ erledigt - nächstes Mal am {{date}}",
-    "kanbanRestore": "Wiederherstellen"
+    "kanbanRestore": "Wiederherstellen",
+    "errorTagGone": "Dieses Stichwort gibt es nicht mehr."
   },
   "meals": {
     "ingredientCount_one": "{{count}} Zutat",
@@ -1091,7 +1092,8 @@
     "timeSuffix": "Uhr",
     "ics": {
       "reset": "Auf Original zurücksetzen",
-      "resetToast": "Änderungen zurückgesetzt."
+      "resetToast": "Änderungen zurückgesetzt.",
+      "resetPendingToast": "Zurückgesetzt. Der Originaltext kommt erst mit dem nächsten Abgleich zurück."
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "Icon suchen",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Nächstes Dokument: {{name}}",
     "emptyFolderTitle": "„{{name}}“ ist leer",
     "viewerImageFallbackHint": "Dieses Bild konnte nicht angezeigt werden. Lade es herunter, um es zu öffnen.",
-    "moreDetailsHint": "Beschreibung und Status"
+    "moreDetailsHint": "Beschreibung und Status",
+    "subjectLabel": "Betrifft",
+    "subjectHint": "Ändert nicht, wer das Dokument sieht.",
+    "subjectNoAccess": "{{name}} kann dieses Dokument nicht öffnen und bekommt keine Erinnerung dazu.",
+    "personFilterLabel": "Person",
+    "personFilterAll": "Alle Personen"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "Die Datei enthält nur eine Kopfzeile und keine Perioden.",
     "errorCycleImportTooManyRows": "Ein Import darf höchstens {{limit}} Perioden enthalten. Teile die Datei auf.",
     "errorVitalImpossible": "Dieser Wert ist nicht möglich. Bitte prüfe die Eingabe.",
-    "errorVitalBpOrder": "Der systolische Wert muss größer sein als der diastolische."
+    "errorVitalBpOrder": "Der systolische Wert muss größer sein als der diastolische.",
+    "errorVitalUnit": "Diese Einheit passt nicht zu dieser Messung."
   },
   "housekeeping": {
     "title": "Haushaltshilfe",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "Personen gibt es nur für Listen, die in Aufgaben landen.",
     "syncAssigneeNotMember": "Nur Haushaltsmitglieder können hier gewählt werden.",
     "syncAssigneeUnknown": "Diese Person gibt es nicht mehr. Lade die Seite neu.",
-    "permDetails": "Widgets und weitere Rechte"
+    "permDetails": "Widgets und weitere Rechte",
+    "connectionFailedDetail": "Verbindung fehlgeschlagen: {{error}}",
+    "documentStorageChangeFailed": "Die Änderung wurde nicht übernommen: {{error}}",
+    "apiTokenCopyFailed": "Kopieren hat nicht geklappt. Markiere das Token und kopiere es von Hand.",
+    "weatherLocateDenied": "Der Zugriff auf den Standort ist nicht erlaubt. Gib ihn in den Browser-Einstellungen frei oder trage den Ort von Hand ein.",
+    "weatherLocateFailed": "Der Standort ließ sich nicht ermitteln. Trage den Ort von Hand ein.",
+    "outlookAutoSyncOverrides": "Outlook kann Serien mit verknüpften Einzelausnahmen nicht synchronisieren. Deaktiviere ihren Zielkalender, damit sie lokal bearbeitbar bleiben. Du musst keine Einzelausnahmen löschen.",
+    "memberRemoveOwnAccount": "Dein eigenes Konto kannst du nicht entfernen.",
+    "memberRemoveLastAdmin": "Mindestens ein Administrator muss bleiben.",
+    "memberRemoveLastSsoAdmin": "Das ist der letzte Administrator mit SSO-Verknüpfung. Verknüpfe zuerst einen weiteren Administrator.",
+    "backupWebdavUrlInvalid": "Die Adresse muss mit http:// oder https:// beginnen.",
+    "icsSubscriptionGone": "Dieses Abonnement gibt es nicht mehr."
   },
   "subscriptions": {
     "tabLabel": "Abonnements",

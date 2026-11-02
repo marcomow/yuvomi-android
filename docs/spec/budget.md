@@ -1,6 +1,6 @@
 # Spec: Budget
 
-Status: implemented · Upstream checked: 2.83.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/budget/`. Pure ports: `Money`
 (`utils/money.js`, `utils/amount-field.js`), `RegionPresets` (`settings/region-presets.js`),

@@ -2,6 +2,7 @@ package io.github.marcomow.yuvomi.feature.overview
 
 import io.github.marcomow.yuvomi.core.api.ApiJson
 import io.github.marcomow.yuvomi.core.api.model.DashBirthday
+import io.github.marcomow.yuvomi.core.api.model.DashCountdown
 import io.github.marcomow.yuvomi.core.api.model.DashEvent
 import io.github.marcomow.yuvomi.core.api.model.DashMeal
 import io.github.marcomow.yuvomi.core.api.model.Member
@@ -62,6 +63,14 @@ sealed interface Tile {
 
     data class Family(val members: List<Pair<Member, Int>>) : Tile {
         override val id = "family"
+    }
+
+    /**
+     * "Key dates" (OVERVIEW-R17): marked events and tasks and, since 2.84.0, documents within
+     * their expiry lead time, nearest first as the server sorts them; [more] is "+N more".
+     */
+    data class Countdown(val items: List<DashCountdown>, val total: Int, val more: Int) : Tile {
+        override val id = "countdown"
     }
 
     /** Any other tile: module name and "open in the web app" (ADR 0006). */
@@ -134,7 +143,12 @@ object OverviewBuilder {
 
         // ── Tiles (OVERVIEW-R7..R10, R12) ──
         val visible = widgets.filter { it.visible && canSee(it.id) }
-        val tiles = visible.map { w -> tileFor(w.id, dashboard, time, today) ?: Tile.Generic(w.id) }
+        // OVERVIEW-R17: a row follows its own module's switch and rights (`visibleCountdowns`).
+        fun sourceOn(module: String) = module !in prefs.disabledModules && permissions.module(module) != "none"
+        val tiles = visible.mapNotNull { w ->
+            if (w.id == "countdown") return@mapNotNull countdownTile(dashboard, ::sourceOn)
+            tileFor(w.id, dashboard, time, today) ?: Tile.Generic(w.id)
+        }
 
         return OverviewModel(
             greetingKey = greetingKey(now.hour),
@@ -178,6 +192,18 @@ object OverviewBuilder {
             Tile.Family(users.map { it to (open[it.id] ?: 0) })
         }
         else -> null
+    }
+
+    /**
+     * OVERVIEW-R17: without a visible row the tile is not there at all (`countdownAvailable`),
+     * not an empty tile; a broken `countdowns` piece is the generic tile (OVERVIEW-R12).
+     */
+    private fun countdownTile(d: JsonObject, sourceOn: (String) -> Boolean): Tile? {
+        val items = d.list("countdowns", DashCountdown.serializer()) ?: return Tile.Generic("countdown")
+        val shown = items.filter { sourceOn(KeyDates.module(it.source)) }
+        if (shown.isEmpty()) return null
+        val total = d.int("countdownTotal") ?: shown.size
+        return Tile.Countdown(shown.take(KeyDates.ROWS), total, KeyDates.more(total, shown.size))
     }
 
     private fun <T> JsonObject.list(key: String, item: KSerializer<T>): List<T>? =

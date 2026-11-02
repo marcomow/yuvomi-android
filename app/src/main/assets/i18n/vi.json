@@ -23,7 +23,7 @@
     "filters": "Bộ lọc",
     "filtersOpen": "Mở bộ lọc",
     "filtersActive": "{{count}} bộ lọc đang bật",
-    "filtersActive_one": "1 bộ lọc đang bật",
+    "filtersActive_one": "{{count}} bộ lọc đang bật",
     "filtersResetDefault": "Đặt lại bộ lọc",
     "close": "Đóng",
     "add": "Thêm",
@@ -251,7 +251,7 @@
     "weekStripTitle": "Tuần này",
     "weekStripEmpty": "Không có sự kiện trong bảy ngày tới",
     "weekDayEvents": "{{count}} sự kiện",
-    "weekDayEvents_one": "1 sự kiện",
+    "weekDayEvents_one": "{{count}} sự kiện",
     "noPinnedNotes": "Không có ghi chú được ghim",
     "todayMeals": "Bữa ăn hôm nay",
     "todayTitle": "Tổng quan hôm nay",
@@ -296,7 +296,7 @@
     "clock": "Đồng hồ",
     "wallWho": "Hôm nay tới lượt ai",
     "wallWhoCount": "{{count}} mục hôm nay",
-    "wallWhoCount_one": "1 mục hôm nay",
+    "wallWhoCount_one": "{{count}} mục hôm nay",
     "wallWhoNone": "Hôm nay chưa giao cho ai",
     "wallWhoDoneMore": "+{{count}} đã xong",
     "wallWhoDoneMore_one": "+{{count}} đã xong",
@@ -741,11 +741,12 @@
     "checkedOpenNamed": "\"{{title}}\" đang mở lại.",
     "errorReorderNotAllowed": "Bạn có thể xem thứ tự của gia đình nhưng không thể đổi.",
     "doneSubtasksOpen": "Đã hoàn thành \"{{title}}\" - còn {{count}} việc con chưa xong.",
-    "doneSubtasksOpen_one": "Đã hoàn thành \"{{title}}\" - còn một việc con chưa xong.",
+    "doneSubtasksOpen_one": "Đã hoàn thành \"{{title}}\" - còn {{count}} việc con chưa xong.",
     "checkAllSubtasks": "Đánh dấu tất cả",
     "subtasksAllDone": "Đã hoàn thành \"{{title}}\" và mọi việc con.",
     "seriesDoneNamed": "Đã hoàn thành \"{{title}}\" - lần tới: {{date}}",
-    "kanbanRestore": "Khôi phục"
+    "kanbanRestore": "Khôi phục",
+    "errorTagGone": "Thẻ này không còn tồn tại."
   },
   "meals": {
     "ingredientCount_one": "{{count}} nguyên liệu",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Đặt lại về ban đầu",
-      "resetToast": "Các thay đổi đã được đặt lại."
+      "resetToast": "Các thay đổi đã được đặt lại.",
+      "resetPendingToast": "Đã đặt lại. Nội dung gốc sẽ trở lại ở lần đồng bộ tiếp theo."
     },
     "iconLabel": "Biểu tượng",
     "iconSearchPlaceholder": "Tìm kiếm biểu tượng",
@@ -1252,7 +1254,7 @@
     "filtersLayers": "Lớp",
     "filtersPeople": "Mọi người",
     "filtersActive": "{{count}} bộ lọc đang bật",
-    "filtersActive_one": "1 bộ lọc đang bật",
+    "filtersActive_one": "{{count}} bộ lọc đang bật",
     "filtersDisplay": "Hiển thị",
     "agendaDayEmpty": "Không có kế hoạch",
     "openInMap": "Mở trong Bản đồ",
@@ -1492,7 +1494,7 @@
     "decrease": "Giảm số lượng",
     "toShoppingAll": "Tất cả vào danh sách mua sắm",
     "bulkPillLabel": "{{count}} mục sắp hết",
-    "bulkPillLabel_one": "1 mục sắp hết",
+    "bulkPillLabel_one": "{{count}} mục sắp hết",
     "toShoppingDone": "Đã thêm {{count}} mục vào {{list}}.",
     "toShoppingDone_one": "Đã thêm {{count}} mục vào {{list}}.",
     "toShoppingNone": "Mọi thứ đã có trong danh sách mua sắm.",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Tài liệu tiếp theo: {{name}}",
     "emptyFolderTitle": "\"{{name}}\" đang trống",
     "viewerImageFallbackHint": "Không thể hiển thị hình ảnh này. Hãy tải xuống để mở.",
-    "moreDetailsHint": "Mô tả và trạng thái"
+    "moreDetailsHint": "Mô tả và trạng thái",
+    "subjectLabel": "Liên quan đến",
+    "subjectHint": "Không thay đổi người có thể xem tài liệu.",
+    "subjectNoAccess": "{{name}} không thể mở tài liệu này và sẽ không nhận được lời nhắc.",
+    "personFilterLabel": "Người",
+    "personFilterAll": "Tất cả mọi người"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "Tệp chỉ có dòng tiêu đề và không có kỳ kinh nào.",
     "errorCycleImportTooManyRows": "Mỗi lần nhập chỉ được tối đa {{limit}} kỳ kinh. Hãy chia nhỏ tệp.",
     "errorVitalImpossible": "Giá trị này không thể có. Vui lòng kiểm tra lại.",
-    "errorVitalBpOrder": "Huyết áp tâm thu phải cao hơn tâm trương."
+    "errorVitalBpOrder": "Huyết áp tâm thu phải cao hơn tâm trương.",
+    "errorVitalUnit": "Đơn vị này không phù hợp với phép đo này."
   },
   "housekeeping": {
     "title": "Dọn dẹp",
@@ -4443,7 +4451,7 @@
     "shiftTypeRequiredError": "Hãy chọn một loại ca.",
     "quickStartShiftTypes": "Thêm các loại ca phổ biến:",
     "quickStartCreated": "Đã tạo {{count}} loại ca.",
-    "quickStartCreated_one": "Đã tạo một loại ca.",
+    "quickStartCreated_one": "Đã tạo {{count}} loại ca.",
     "quickStartNothingNew": "Đã thiết lập sẵn - không có gì mới để tạo.",
     "customFields": "Trường tùy chỉnh",
     "createCustomField": "Thêm trường",
@@ -4452,7 +4460,7 @@
     "emptyCustomFieldsDescription": "Định nghĩa một trường một lần - ví dụ Phòng hoặc Người hướng dẫn - rồi gắn vào những loại ca cần đến nó.",
     "deleteCustomFieldTitle": "Xóa trường \"{{name}}\"?",
     "deleteCustomFieldDetail": "Trường này hiện đang gắn với {{count}} loại ca. Mọi giá trị đã ghi cho nó cũng sẽ bị xóa theo. Không thể hoàn tác.",
-    "deleteCustomFieldDetail_one": "Trường này hiện đang gắn với một loại ca. Mọi giá trị đã ghi cho nó cũng sẽ bị xóa theo. Không thể hoàn tác.",
+    "deleteCustomFieldDetail_one": "Trường này hiện đang gắn với {{count}} loại ca. Mọi giá trị đã ghi cho nó cũng sẽ bị xóa theo. Không thể hoàn tác.",
     "attachedFields": "Trường tùy chỉnh",
     "showInOverlay": "Hiện trên lịch",
     "noFieldsAttached": "Không có trường tùy chỉnh nào được gắn.",
@@ -4574,7 +4582,7 @@
     "typeInUse": "Loại ca này vẫn đang được dùng bởi một chu kỳ, ngoại lệ hoặc ca phụ. Hãy xóa các mục sử dụng đó trước.",
     "deletePatternTitle": "Xóa chu kỳ \"{{name}}\"?",
     "deletePatternDetail": "{{count}} ngày trong chu kỳ sẽ bị xóa cùng. Không thể hoàn tác.",
-    "deletePatternDetail_one": "Ngày chu kỳ duy nhất sẽ bị xóa cùng. Không thể hoàn tác.",
+    "deletePatternDetail_one": "{{count}} ngày trong chu kỳ sẽ bị xóa cùng. Không thể hoàn tác.",
     "extraShifts": "Ca phụ",
     "addExtraShift": "Thêm ca phụ",
     "editExtraShift": "Sửa ca phụ",
@@ -5979,7 +5987,7 @@
     "healthVisibilityApply": "Đổi cả các mục hiện có",
     "healthVisibilityApplyHint": "Đã lưu. Có đổi cả các mục hiện có trong {{area}} không?",
     "healthVisibilityApplied": "Đã đổi {{count}} mục.",
-    "healthVisibilityApplied_one": "Đã đổi một mục.",
+    "healthVisibilityApplied_one": "Đã đổi {{count}} mục.",
     "mealTypeNamesLabel": "Tên riêng của bạn",
     "mealTypeNamesHint": "Gia đình bạn gọi bốn bữa ăn là gì. Để trống để dùng tên mặc định. Tên hiển thị giống nhau trong mọi ngôn ngữ.",
     "mealTypeNamesSaved": "Đã lưu tên.",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "Chỉ đặt được người cho danh sách đi vào Công việc.",
     "syncAssigneeNotMember": "Ở đây chỉ chọn được thành viên trong gia đình.",
     "syncAssigneeUnknown": "Người này không còn tồn tại. Hãy tải lại trang.",
-    "permDetails": "Tiện ích và quyền khác"
+    "permDetails": "Tiện ích và quyền khác",
+    "connectionFailedDetail": "Kết nối thất bại: {{error}}",
+    "documentStorageChangeFailed": "Thay đổi chưa được áp dụng: {{error}}",
+    "apiTokenCopyFailed": "Không sao chép được. Hãy chọn token và sao chép thủ công.",
+    "weatherLocateDenied": "Quyền truy cập vị trí chưa được cho phép. Hãy cho phép trong cài đặt trình duyệt hoặc nhập địa điểm thủ công.",
+    "weatherLocateFailed": "Không xác định được vị trí của bạn. Hãy nhập địa điểm thủ công.",
+    "outlookAutoSyncOverrides": "Outlook không thể đồng bộ chuỗi có các ngoại lệ đơn lẻ được liên kết. Hãy tắt lịch đích của chúng để vẫn chỉnh sửa được ở đây. Bạn không cần xóa ngoại lệ nào.",
+    "memberRemoveOwnAccount": "Bạn không thể xóa tài khoản của chính mình.",
+    "memberRemoveLastAdmin": "Phải còn lại ít nhất một quản trị viên.",
+    "memberRemoveLastSsoAdmin": "Đây là quản trị viên cuối cùng được liên kết với SSO. Hãy liên kết một quản trị viên khác trước.",
+    "backupWebdavUrlInvalid": "Địa chỉ phải bắt đầu bằng http:// hoặc https://.",
+    "icsSubscriptionGone": "Đăng ký này không còn tồn tại."
   },
   "subscriptions": {
     "tabLabel": "Gói đăng ký",

@@ -206,6 +206,20 @@ class CalendarLogicTest {
         assertFalse(EventReminders.unchanged(listOf(EventReminders.Row("15")), listOf(after)))
     }
 
+    /** CAL-A35 (CAL-R29, 2.84.0): an external series opened at an occurrence keeps an unchanged reminder. */
+    @Test fun `an unchanged reminder of an untouched external series keeps its stored instant`() {
+        // Series start 2026-10-05 10:00 Berlin (08:00 UTC), opened at 2026-11-02 10:00 (09:00 UTC).
+        val untouched = EventReminders.Untouched("2026-10-05T10:00", listOf(EventReminders.naiveUtc("2026-10-05 07:00:00Z")!!))
+        assertEquals("2026-10-05T07:00:00", untouched.storedAts.single())
+        // 60 minutes before the series start hits the stored instant and stays; a new 15-minute row counts from the occurrence.
+        assertEquals(listOf("2026-10-05T07:00:00", "2026-11-02T08:45:00"),
+            EventReminders.times(listOf(EventReminders.Row("60"), EventReminders.Row("15")), "2026-11-02T10:00", dates, untouched))
+        // Without it, the row slides onto the occurrence, as before.
+        assertEquals(listOf("2026-11-02T08:00:00"), EventReminders.times(listOf(EventReminders.Row("60")), "2026-11-02T10:00", dates))
+        assertEquals("2026-10-05T08:00:00", EventReminders.naiveUtc("2026-10-05T10:00:00+02:00"))
+        assertNull(EventReminders.naiveUtc(""))
+    }
+
     /** CAL-A10: the form body, checks and duration memory. */
     @Test fun `the form builds the web body`() {
         val form = EventForm.create(d("2026-11-02"), LocalTime.of(9, 0), 90, 1, CalendarPrefs(defaultAssignMe = true, defaultReminders = listOf(15, 15, 60)), 4)

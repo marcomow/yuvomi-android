@@ -9,7 +9,7 @@ The reasoning behind every choice here is in the decision records under [`adr/`]
 brainstorm that led to them is kept in [`ARCHITECTURE-BRAINSTORM.md`](ARCHITECTURE-BRAINSTORM.md)
 for history; where the two disagree, this file and the ADRs win.
 
-Upstream reference: **v2.83.0** (pinned in [`upstream/VERSION`](../upstream/VERSION)).
+Upstream reference: **v2.84.0** (pinned in [`upstream/VERSION`](../upstream/VERSION)).
 
 ## Decisions at a glance
 

@@ -1,6 +1,6 @@
 # Spec: Overview
 
-Status: ready for implementation · Upstream checked: 2.83.0 · Decisions: ADR 0002, 0006, 0007,
+Status: ready for implementation · Upstream checked: 2.84.0 · Decisions: ADR 0002, 0006, 0007,
 0010
 
 ## Purpose
@@ -120,18 +120,36 @@ tile's saved `options`; translating those is a follow-up (OVERVIEW-R15).
   | `meals` | `module-meals` | `todayMeals[]` (`meal_type`, `title`) | today's meals by type | browser `/meals` |
   | `birthdays` | `module-birthdays` | `birthdays[]` (`name`, `kind` = `birthday` or `name_day`, `days_until`, `next_age`, `next_date`), `birthdayTotal` | up to 5, "today", "tomorrow" or "in N days", the coming age when known | browser `/birthdays` |
   | `family` | `module-dashboard` | `users[]` (`id`, `display_name`, `avatar_color`, `avatar_data`), `memberTodayTasks[]` (`user_id`, `open_count`) | each member with avatar and open tasks due by today | member row: Tasks list filtered to that member |
-  | `countdown` | `module-dashboard` | `countdowns[]` (`title`, `days`/`target_date`), `countdownTotal` | up to 5 countdowns | browser `/` |
+  | `countdown` | `module-dashboard` | `countdowns[]` (`source`, `id`, `title`, `date`, `days_until`, `color`, `person_name`), `countdownTotal` | "Key dates", OVERVIEW-R17 | row: its task, event or document |
 
   Every other tile id renders the **generic tile**: module icon and name in the module tone, one
   line `android.overview.openInWebApp`, tap opens the module's web route in the browser
-  (ADR 0006). The `countdown` tile uses the generic tile in the MVP; contract test OVERVIEW-A6
-  prints the item fields so a native tile can follow.
+  (ADR 0006). The `countdown` tile is native since 2.84.0 (OVERVIEW-R17); contract test
+  OVERVIEW-A6 prints the item fields.
 - **OVERVIEW-R11** Ticking a task off in the today sheet or the tasks tile follows
   [tasks.md](tasks.md) TASKS-R20 to R23 (who did it, points, recurring follow-up, undo), then
   refreshes the overview.
 - **OVERVIEW-R12** A tile whose fields are missing, `null`, or the wrong type renders the generic
   tile instead and logs once per session; it never takes the screen down. A top-level answer that
   is not JSON is a load error for the whole screen.
+
+- **OVERVIEW-R17** "Key dates" (`dashboard.countdownTitle`, `renderCountdowns`): the rows of
+  `countdowns[]` as the server sorts them (nearest first, expired ones within the grace period on
+  top): marked events and tasks and, since 2.84.0, active documents within their expiry lead time
+  (DOCS-R38, `documentCountdowns` in services/countdowns.js). A row's module (`event` calendar,
+  `task` tasks, `document` documents, `COUNTDOWN_MODULE`) must not be switched off
+  (`disabled_modules`) or `none`; the server already leaves out what the member may not see and
+  archived documents. Up to 5 rows: the source's glyph in the event's colour or the module tone,
+  the title, one meta line with the relative date (`relativeDateLabel`, left out when the count
+  already says it) and the document's `person_name`, joined with " · ", and the count
+  (`countdownPhrase`: `common.today`, `common.tomorrow`, `dashboard.daysLeft` up to 30 days, then
+  `dashboard.countdownWeeks` to 60, `dashboard.countdownMonths` to 364, `dashboard.countdownYears`;
+  `dashboard.countdownOverdue` after the date), toned by `countdownRank` (danger, warning, text,
+  secondary). The header counts `countdownTotal`; `dashboard.countdownMore` names what is not
+  shown, against that total. A task row opens the task, an event the event
+  (`CalendarRoutes.event`), a document the viewer (`DocumentsRoutes.document`). Without a row
+  left the tile is not there at all (`countdownAvailable`); a missing or malformed `countdowns`
+  is the generic tile (OVERVIEW-R12).
 
 ### Loading, refresh, offline
 
@@ -160,6 +178,8 @@ tile's saved `options`; translating those is a follow-up (OVERVIEW-R15).
 | OVERVIEW-A8 | Given a cached overview and no network when the app starts then the cached tiles and the offline banner show within one frame of the first draw. | ui |
 | OVERVIEW-A9 | Given 7 rows for the today sheet then 5 show and `+2 more` expands to 7. | ui |
 | OVERVIEW-A11 | Given the `tasks` tile saved as visible then the today sheet has no task rows and the tasks tile shows them; given it hidden then the sheet has them. | unit |
+| OVERVIEW-A12 | Given `countdowns` with an event, a task and a document about Emma then "Key dates" shows them with the count phrases and "… · Emma", and "+N more" against `countdownTotal`; with Documents switched off the document row is gone; with no row left the tile is gone. | unit + ui |
+| OVERVIEW-A13 | Given a document row in "Key dates" when it is tapped then the documents viewer route `documents?open=<id>` opens. | ui |
 | OVERVIEW-A10 | Given the calendar tile when an appointment is tapped then the browser opens `<server>/calendar?open=<id>`. | ui |
 
 ## Strings

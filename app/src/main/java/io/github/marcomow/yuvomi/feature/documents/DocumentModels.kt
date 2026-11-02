@@ -35,6 +35,10 @@ data class Document(
     @SerialName("expires_at") val expiresAt: String? = null,
     @SerialName("expiry_reminder_days") val expiryReminderDays: Int? = null,
     @SerialName("allowed_member_ids") val allowedMemberIds: List<Int> = emptyList(),
+    /** Who the document is about (2.84.0, #1705); says nothing about who may see it (DOCS-R35). */
+    @SerialName("subject_user_id") val subjectUserId: Int? = null,
+    @SerialName("subject_name") val subjectName: String? = null,
+    @SerialName("subject_color") val subjectColor: String? = null,
 ) {
     val archived: Boolean get() = status == DocumentRules.STATUS_ARCHIVED
 }

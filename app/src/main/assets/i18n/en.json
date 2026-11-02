@@ -745,7 +745,8 @@
     "checkAllSubtasks": "Check off all",
     "subtasksAllDone": "“{{title}}” and all subtasks done.",
     "seriesDoneNamed": "“{{title}}” done - next due {{date}}",
-    "kanbanRestore": "Restore"
+    "kanbanRestore": "Restore",
+    "errorTagGone": "This tag no longer exists."
   },
   "meals": {
     "ingredientCount_one": "{{count}} ingredient",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Reset to original",
-      "resetToast": "Changes reset."
+      "resetToast": "Changes reset.",
+      "resetPendingToast": "Reset. The original text returns with the next sync."
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "Search icon",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Next document: {{name}}",
     "emptyFolderTitle": "\"{{name}}\" is empty",
     "viewerImageFallbackHint": "This image could not be displayed. Download it to open it.",
-    "moreDetailsHint": "Description and status"
+    "moreDetailsHint": "Description and status",
+    "subjectLabel": "About",
+    "subjectHint": "Doesn't change who can see the document.",
+    "subjectNoAccess": "{{name}} can't open this document and won't get a reminder for it.",
+    "personFilterLabel": "Person",
+    "personFilterAll": "All people"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "The file only has a header row and no periods.",
     "errorCycleImportTooManyRows": "An import can hold at most {{limit}} periods. Split the file.",
     "errorVitalImpossible": "This value is not possible. Please check what you entered.",
-    "errorVitalBpOrder": "The systolic value must be higher than the diastolic one."
+    "errorVitalBpOrder": "The systolic value must be higher than the diastolic one.",
+    "errorVitalUnit": "This unit does not fit this measurement."
   },
   "housekeeping": {
     "title": "Housekeeping",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "People can only be set for lists that go to Tasks.",
     "syncAssigneeNotMember": "Only household members can be chosen here.",
     "syncAssigneeUnknown": "This person no longer exists. Reload the page.",
-    "permDetails": "Widgets and more permissions"
+    "permDetails": "Widgets and more permissions",
+    "connectionFailedDetail": "Connection failed: {{error}}",
+    "documentStorageChangeFailed": "The change was not applied: {{error}}",
+    "apiTokenCopyFailed": "Copying did not work. Select the token and copy it by hand.",
+    "weatherLocateDenied": "Access to your location is not allowed. Allow it in your browser settings or enter the place by hand.",
+    "weatherLocateFailed": "Your location could not be detected. Enter the place by hand.",
+    "outlookAutoSyncOverrides": "Outlook cannot sync series with linked single exceptions. Turn off their target calendar so they stay editable here. You do not need to delete any exceptions.",
+    "memberRemoveOwnAccount": "You cannot remove your own account.",
+    "memberRemoveLastAdmin": "At least one administrator must remain.",
+    "memberRemoveLastSsoAdmin": "This is the last administrator linked to SSO. Link another administrator first.",
+    "backupWebdavUrlInvalid": "The address must start with http:// or https://.",
+    "icsSubscriptionGone": "This subscription no longer exists."
   },
   "subscriptions": {
     "tabLabel": "Subscriptions",

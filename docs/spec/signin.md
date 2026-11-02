@@ -1,6 +1,6 @@
 # Spec: Sign-in and session
 
-Status: ready for implementation · Upstream checked: 2.83.0 · Decisions: ADR 0004, 0006, 0007,
+Status: ready for implementation · Upstream checked: 2.84.0 · Decisions: ADR 0004, 0006, 0007,
 0008, 0011
 
 ## Purpose

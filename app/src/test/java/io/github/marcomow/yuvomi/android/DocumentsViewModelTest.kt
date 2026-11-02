@@ -160,6 +160,49 @@ class DocumentsViewModelTest {
         assertEquals(DocumentsViewModel.SaveResult.Problem(Message("common.required")), blank)
     }
 
+    /** DOCS-A18: "About" is saved with the form, and the dialog names a person who cannot open the document. */
+    @Test fun `the subject is saved and a person without access is named`() {
+        val vm = loaded()
+        assertTrue(vm.offersSubject)
+        // Leo is the stored person but no longer a member: still a choice (`withChosenPeople`).
+        val doc = vm.state.value.documents.single().copy(subjectUserId = 4, subjectName = "Leo")
+        assertEquals(listOf(1, 4), vm.subjectPeople(doc).map { it.id })
+        val form = DocumentForm.of(doc)
+        assertEquals(4, form.subjectUserId)
+        assertEquals(null, vm.subjectNoAccessName(doc, form))
+        assertEquals("Leo", vm.subjectNoAccessName(doc, form.copy(visibility = "private")))
+        assertEquals(null, vm.subjectNoAccessName(doc, form.copy(visibility = "restricted", allowedMemberIds = setOf(4))))
+        assertEquals(null, vm.subjectNoAccessName(doc, form.copy(visibility = "private", subjectUserId = 1)))
+        // A new upload: the member filing it may always open it.
+        assertEquals(null, vm.subjectNoAccessName(null, DocumentForm(visibility = "private", subjectUserId = 1)))
+        val ok = runBlocking { vm.save(doc, form.copy(subjectUserId = 1), emptyList(), emptyList()) }
+        assertEquals(DocumentsViewModel.SaveResult.Saved, ok)
+        val put = writes.single { it.startsWith("PUT /api/v1/documents/1") }
+        assertTrue(put, put.contains("\"subject_user_id\":1"))
+        runBlocking { vm.save(doc, form.copy(subjectUserId = null), emptyList(), emptyList()) }
+        assertTrue(writes.toString(), writes.last { it.startsWith("PUT /api/v1/documents/1") }.contains("\"subject_user_id\":null"))
+    }
+
+    /** DOCS-A18: an older server (no `subject_user_id`) is not asked "About". */
+    @Test fun `an older server is not offered the subject`() {
+        val old = object : DocumentsHost by host {
+            override val knowsSubjects = false
+        }
+        val vm = DocumentsViewModel(container, old)
+        assertTrue(!vm.offersSubject)
+    }
+
+    /** DOCS-A19: the person filter is a facet the reset clears. */
+    @Test fun `the person filter is set and reset`() {
+        val vm = loaded()
+        vm.setPerson(2)
+        assertEquals(2, vm.state.value.filter.personId)
+        assertTrue(vm.state.value.visible.isEmpty())
+        vm.resetFilters()
+        assertEquals(null, vm.state.value.filter.personId)
+        assertEquals(1, vm.state.value.visible.size)
+    }
+
     /** DOCS-A14: the folder delete asks with the server's preview and sends the confirmed counts. */
     @Test fun `folder delete keeps documents with the previewed counts`() {
         val vm = loaded()

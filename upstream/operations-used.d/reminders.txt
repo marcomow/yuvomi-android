@@ -1,0 +1,5 @@
+# The upstream operations of docs/spec/reminders.md (reminders on the phone), as
+# `METHOD /api/v1/path` with OpenAPI path templates. Must match RemindersOperation
+# exactly (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/reminders/upcoming
+PATCH /api/v1/reminders/{id}/dismiss

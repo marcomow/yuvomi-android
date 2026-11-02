@@ -135,6 +135,35 @@ class DocumentsContractTest : ContractTestBase() {
         expectHttp(404) { alex.docs.download(created.id) }
     }
 
+    /** DOCS-A18, A20, OVERVIEW-A12 (2.84.0): who a document is about, and its row in "Key dates". */
+    @Test fun `DOCS-A18 a document names its person and expires into key dates`() = runBlocking {
+        val alex = member("alex")
+        val emma = member("emma")
+        val created = alex.upload(unique("Passport"))
+        try {
+            // Within its 7-day lead time: the server lists it among the countdowns, with the person.
+            val soon = java.time.LocalDate.now(java.time.ZoneOffset.UTC).plusDays(3).toString()
+            val form = DocumentForm.of(created).copy(subjectUserId = emma.id, expiresAt = soon, reminderDays = "7")
+            val updated = alex.docs.update(created.id, DocumentBodies.payload(form))
+            assertEquals(emma.id, updated.subjectUserId)
+            assertTrue(updated.subjectName.orEmpty().isNotEmpty())
+            val listed = DocumentsApi.decodeDocuments(alex.docs.list("active")).first { it.id == created.id }
+            assertEquals(emma.id, listed.subjectUserId)
+            val dash = io.github.marcomow.yuvomi.core.api.HouseholdApi(signedIn("alex").first).dashboard()
+            val rows = io.github.marcomow.yuvomi.core.api.ApiJson.decodeFromJsonElement(
+                kotlinx.serialization.builtins.ListSerializer(io.github.marcomow.yuvomi.core.api.model.DashCountdown.serializer()), dash["countdowns"]!!,
+            )
+            val row = rows.firstOrNull { it.source == "document" && it.id == created.id }
+            // The tile holds only the nearest few; when it is there, it names the person.
+            if (row != null) assertEquals(updated.subjectName, row.personName)
+            // No longer about anyone: null clears it; a stranger is refused.
+            assertNull(alex.docs.update(created.id, DocumentBodies.payload(form.copy(subjectUserId = null))).subjectUserId)
+            expectHttp(400) { alex.docs.update(created.id, DocumentBodies.payload(form.copy(subjectUserId = 999_999))) }
+        } finally {
+            alex.cleanup(documents = listOf(created.id))
+        }
+    }
+
     /** DOCS-A9: the server's own checks on an upload. */
     @Test fun `DOCS-A9 uploads that do not fit are refused with a reason`() = runBlocking {
         val alex = member("alex")

@@ -109,9 +109,13 @@ YUVOMI_CONTRACT_URL=http://localhost:3000 ./gradlew testDebugUnitTest --tests 'i
 | From the minimum up to the pin | Normal. |
 | Newer than the pin | Normal, plus a one-time quiet notice per server version: "This server is newer than the version this app was tested with." |
 
-The **minimum supported version** starts at the pin (2.83.0) and only moves forward when the app
+The **minimum supported version** started at the first pin (2.83.0) and only moves forward when the app
 starts relying on something a newer upstream added. It is `upstreamMin` in `app/build.gradle.kts`;
 the pin is read from `upstream/VERSION`. Both reach the app as `BuildConfig` fields.
+
+Something a newer upstream added that an older server would silently drop is offered only from
+that version on, instead of moving the minimum: the "About" person of a document (2.84.0,
+`DocumentRules.SUBJECT_SINCE`, DOCS-R35) is not asked on a 2.83.0 server.
 
 Independently of the version, a `404` or `405` on an operation from `operations-used.txt` marks
 that feature as unavailable for this session instead of retrying, as upstream's `MODULES.md`

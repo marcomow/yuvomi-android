@@ -121,7 +121,12 @@ object HealthForms {
                 unit = f.unit.ifBlank { null }
             }
         }
-        val issues = HealthVitals.plausibility(f.type, unit, listOf(v1, v2, v3))
+        val unitEditable = metric?.format == null && (metric?.units?.size ?: 0) > 1
+        val unitChanged = editing != null && unitEditable && (unit ?: "") != (editing.unit ?: "")
+        // `vitalMeasureChanged` (2.84.0, #2375): when editing, the hard limits count only if the
+        // measurement changes, as on the server; a legacy row outside them still takes a note.
+        val judged = editing == null || unitChanged || v1 != editing.value1 || v2 != editing.value2 || v3 != editing.value3
+        val issues = if (judged) HealthVitals.plausibility(f.type, unit, listOf(v1, v2, v3)) else emptyMap()
         if ("bpOrder" in issues.values) return Built.Invalid("health.errorVitalBpOrder")
         if ("impossible" in issues.values) return Built.Invalid("health.errorVitalImpossible")
         val note = f.note.trim().ifEmpty { null }
@@ -135,8 +140,7 @@ object HealthForms {
                 putOrNull("value_num2", v2)
                 putOrNull("value_num3", v3)
                 putOrNull("note", note)
-                val editable = metric?.format == null && (metric?.units?.size ?: 0) > 1
-                if (editable && (unit ?: "") != (editing.unit ?: "")) putOrNull("unit", unit)
+                if (unitChanged) putOrNull("unit", unit)
             } else {
                 if (v2 != null) put("value_num2", v2)
                 if (v3 != null) put("value_num3", v3)

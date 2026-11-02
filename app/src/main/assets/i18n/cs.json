@@ -806,7 +806,8 @@
     "doneSubtasksOpen_few": "„{{title}}“ hotovo - stále jsou otevřené {{count}} dílčí úkoly.",
     "doneSubtasksOpen_many": "„{{title}}“ hotovo - stále otevřených dílčích úkolů: {{count}}.",
     "seriesDoneNamed": "„{{title}}“ hotovo - příště: {{date}}",
-    "kanbanRestore": "Obnovit"
+    "kanbanRestore": "Obnovit",
+    "errorTagGone": "Tento štítek už neexistuje."
   },
   "meals": {
     "randomizeSuccess_few": "Naplánována {{count}} jídla.",
@@ -1151,7 +1152,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Obnovit původní",
-      "resetToast": "Změny byly vráceny."
+      "resetToast": "Změny byly vráceny.",
+      "resetPendingToast": "Vráceno. Původní text se vrátí až při příští synchronizaci."
     },
     "iconLabel": "Ikona",
     "iconSearchPlaceholder": "Hledat ikonu",
@@ -2987,7 +2989,12 @@
     "viewerNextNamed": "Další dokument: {{name}}",
     "emptyFolderTitle": "„{{name}}“ je prázdná",
     "viewerImageFallbackHint": "Tento obrázek se nepodařilo zobrazit. Stáhněte si jej a otevřete.",
-    "moreDetailsHint": "Popis a stav"
+    "moreDetailsHint": "Popis a stav",
+    "subjectLabel": "Týká se",
+    "subjectHint": "Nemění, kdo dokument vidí.",
+    "subjectNoAccess": "{{name}} tento dokument nemůže otevřít a nedostane k němu připomenutí.",
+    "personFilterLabel": "Osoba",
+    "personFilterAll": "Všechny osoby"
   },
   "health": {
     "fasting": {
@@ -3961,7 +3968,8 @@
     "errorCycleImportNoRows": "Soubor obsahuje jen řádek záhlaví a žádné menstruace.",
     "errorCycleImportTooManyRows": "Jeden import smí obsahovat nejvýše {{limit}} menstruací. Rozděl soubor.",
     "errorVitalImpossible": "Tato hodnota není možná. Zkontrolujte prosím zadání.",
-    "errorVitalBpOrder": "Systolická hodnota musí být vyšší než diastolická."
+    "errorVitalBpOrder": "Systolická hodnota musí být vyšší než diastolická.",
+    "errorVitalUnit": "Tato jednotka k tomuto měření nepatří."
   },
   "housekeeping": {
     "title": "Domácí práce",
@@ -6308,7 +6316,18 @@
     "reminderListAssigneesTasksOnly": "Osoby lze nastavit jen u seznamů, které jdou do Úkolů.",
     "syncAssigneeNotMember": "Zde lze vybrat pouze členy domácnosti.",
     "syncAssigneeUnknown": "Tato osoba již neexistuje. Načtěte stránku znovu.",
-    "permDetails": "Widgety a další oprávnění"
+    "permDetails": "Widgety a další oprávnění",
+    "connectionFailedDetail": "Připojení se nezdařilo: {{error}}",
+    "documentStorageChangeFailed": "Změna nebyla použita: {{error}}",
+    "apiTokenCopyFailed": "Kopírování se nezdařilo. Označte token a zkopírujte ho ručně.",
+    "weatherLocateDenied": "Přístup k poloze není povolen. Povolte ho v nastavení prohlížeče nebo zadejte místo ručně.",
+    "weatherLocateFailed": "Polohu se nepodařilo zjistit. Zadejte místo ručně.",
+    "outlookAutoSyncOverrides": "Outlook neumí synchronizovat série s propojenými jednotlivými výjimkami. Vypněte jejich cílový kalendář, aby zůstaly upravitelné zde. Výjimky mazat nemusíte.",
+    "memberRemoveOwnAccount": "Vlastní účet nemůžete odebrat.",
+    "memberRemoveLastAdmin": "Musí zůstat alespoň jeden správce.",
+    "memberRemoveLastSsoAdmin": "Toto je poslední správce propojený se SSO. Nejprve propojte dalšího správce.",
+    "backupWebdavUrlInvalid": "Adresa musí začínat http:// nebo https://.",
+    "icsSubscriptionGone": "Toto předplatné už neexistuje."
   },
   "subscriptions": {
     "tabLabel": "Předplatná",

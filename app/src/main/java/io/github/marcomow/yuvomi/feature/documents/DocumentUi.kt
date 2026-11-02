@@ -54,6 +54,7 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import io.github.marcomow.yuvomi.core.design.MemberAvatar
 import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.LocalStrings
 import io.github.marcomow.yuvomi.core.i18n.t
@@ -116,7 +117,7 @@ fun DocumentThumb(doc: Document, thumbs: DocumentThumbs?, modifier: Modifier = M
 /** `expiryChipHtml`: short form on rows, danger tone when expired, warning when soon. */
 @Composable
 fun ExpiryBadge(doc: Document, today: LocalDate, short: Boolean) {
-    val chip = DocumentRules.expiryChip(DocumentRules.dateStatus(doc.expiresAt, today)) ?: return
+    val chip = DocumentRules.expiryChip(DocumentRules.expiryStatus(doc, today)) ?: return
     val tone = if (chip.expired) Yuvomi.colors.danger else Yuvomi.colors.warning
     Badge(Icons.Outlined.EventBusy, t(if (short) chip.shortKey else chip.key, "count" to chip.count), tone)
 }
@@ -147,11 +148,13 @@ private fun MetaItem(icon: ImageVector?, text: String) {
  */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun DocumentMetaLine(doc: Document, selectedFolder: String, today: LocalDate, withStats: Boolean = true) {
+fun DocumentMetaLine(doc: Document, selectedFolder: String, today: LocalDate, withStats: Boolean = true, members: List<DocumentPerson> = emptyList()) {
     val shell = LocalShell.current
     val label = categoryLabel(doc.category)
     FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
         ExpiryBadge(doc, today, short = true)
+        // DOCS-R37: the person follows the expiry ("Passport, John" tells rows apart).
+        SubjectMark(doc, members)
         if (withStats) {
             val day = HouseholdTime.date(doc.updatedAt)?.let { shell.formats.date(it, today) }
             MetaItem(null, listOfNotNull(day, DocumentRules.fileSize(doc.fileSize)).joinToString(" · "))
@@ -168,6 +171,16 @@ fun DocumentMetaLine(doc: Document, selectedFolder: String, today: LocalDate, wi
             val unavailable = key == "documents.storageDmsUnavailable"
             Badge(if (key == "documents.storageLocalFolder") Icons.Outlined.Storage else Icons.Outlined.Cloud, t(key), if (unavailable) Yuvomi.colors.danger else Yuvomi.colors.textSecondary)
         }
+    }
+}
+
+/** `subjectMetaHtml` (DOCS-R37): the person's disc and name; says nothing about who sees the document. */
+@Composable
+fun SubjectMark(doc: Document, members: List<DocumentPerson>) {
+    val person = DocumentRules.subject(doc, members) ?: return
+    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+        MemberAvatar(person.displayName, person.avatarColor, person.avatarData, size = 16.dp)
+        Text(person.displayName, style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary, maxLines = 1)
     }
 }
 

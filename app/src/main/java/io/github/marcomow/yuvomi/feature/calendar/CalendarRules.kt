@@ -386,18 +386,49 @@ object EventReminders {
         return out
     }
 
-    /** `reminderTimesFromRows()`: what `PUT /reminders` gets; a row after the start keeps its instant. */
-    fun times(rows: List<Row>, anchorStart: String, dates: CalendarDates): List<String> {
+    /**
+     * The start the lead times were read against, and the stored instants, when that is not the
+     * start the save computes from: an external series opened at an occurrence (2.84.0).
+     */
+    data class Untouched(val anchorStart: String, val storedAts: List<String>)
+
+    /** `naiveUtc()` (utils/reminder-offset.js): an instant as `YYYY-MM-DDTHH:MM:SS` in UTC. */
+    fun naiveUtc(value: String?): String? {
+        val text = value?.trim()?.replace(' ', 'T').orEmpty()
+        if (text.isEmpty()) return null
+        val instant = runCatching { java.time.OffsetDateTime.parse(text).toInstant() }.getOrNull()
+            ?: runCatching { java.time.Instant.parse(text) }.getOrNull()
+            ?: runCatching { java.time.LocalDateTime.parse(text).toInstant(java.time.ZoneOffset.UTC) }.getOrNull()
+            ?: return null
+        return utcKey(instant.toEpochMilli())
+    }
+
+    private fun utcKey(millis: Long): String =
+        java.time.Instant.ofEpochMilli(millis).atZone(java.time.ZoneOffset.UTC).toLocalDateTime().toString().let {
+            if (it.length == 16) "$it:00" else it.take(19)
+        }
+
+    /**
+     * `reminderTimesFromRows()`: what `PUT /reminders` gets; a row after the start keeps its
+     * instant. With [untouched], a row whose lead time still lands on a stored instant from the
+     * start it was read against keeps that instant instead of sliding onto the opened occurrence
+     * (CAL-R29, upstream 2.84.0).
+     */
+    fun times(rows: List<Row>, anchorStart: String, dates: CalendarDates, untouched: Untouched? = null): List<String> {
         val anchor = anchorMillis(anchorStart, dates)
+        val readAnchor = untouched?.let { anchorMillis(it.anchorStart, dates) }
         val out = mutableListOf<String>()
         for (row in rows) {
             val at = if (row.keepsStoredInstant) {
                 row.storedAt!!.replace(' ', 'T').removeSuffix("Z").take(19)
             } else {
                 val offset = offsets(listOf(row)).firstOrNull() ?: continue
-                val a = anchor ?: continue
-                java.time.Instant.ofEpochMilli(a - offset * 60000L).atZone(java.time.ZoneOffset.UTC).toLocalDateTime().toString().let {
-                    if (it.length == 16) "$it:00" else it.take(19)
+                val kept = readAnchor?.let { utcKey(it - offset * 60000L) }
+                if (kept != null && kept in untouched.storedAts) {
+                    kept
+                } else {
+                    val a = anchor ?: continue
+                    utcKey(a - offset * 60000L)
                 }
             }
             if (at in out) continue

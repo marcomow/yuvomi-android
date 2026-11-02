@@ -137,7 +137,7 @@ internal fun DocumentViewer(
                         MetaText(categoryIcon(doc.category), label)
                         if (!doc.folderName.isNullOrEmpty() && !DocumentRules.folderRepeatsCategory(doc.folderName, label)) MetaText(Icons.Outlined.Folder, doc.folderName)
                         MetaText(null, DocumentRules.fileSize(doc.fileSize))
-                        DocumentRules.dateStatus(doc.expiresAt, s.today)?.let { status ->
+                        DocumentRules.expiryStatus(doc, s.today)?.let { status ->
                             val text = t(DocumentRules.expiryViewerKey(status), "date" to shell.formats.date(status.endDate, s.today))
                             when (status.state) {
                                 DocumentRules.DateState.VALID -> MetaText(Icons.Outlined.EventBusy, text)
@@ -145,6 +145,7 @@ internal fun DocumentViewer(
                                 DocumentRules.DateState.EXPIRING -> Badge(Icons.Outlined.EventBusy, text, Yuvomi.colors.warning)
                             }
                         }
+                        SubjectMark(doc, s.members)
                         DocumentRules.storageBadgeKey(doc)?.let { MetaText(null, t(it)) }
                     }
                     if (!manage) ReadDetails(doc, vm)

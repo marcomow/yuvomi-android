@@ -34,6 +34,7 @@ object SettingsRegistry {
     )
 
     const val APP_UPDATES = "app-updates"
+    const val PHONE_REMINDERS = "phone-reminders"
     const val MINE = "mine"
     const val HOUSEHOLD = "household"
 
@@ -84,6 +85,8 @@ object SettingsRegistry {
         Section("personal-device", "personal-device", MINE, "settings.pageDevice", "settings.pageDeviceDescription", false),
         Section("device-display", "personal-device", MINE, "settings.sectionDeviceDisplay", "settings.wallModeHint", false),
         Section("personal-notifications", "personal-notifications", MINE, "settings.pageNotifications", "settings.pageNotificationsDescription", false),
+        // App-only (REM-R6): reminders as notifications on this phone.
+        Section(PHONE_REMINDERS, "personal-notifications", MINE, "android.reminders.phone", "android.reminders.phoneHint", false),
         Section("personal-weather", "personal-weather", MINE, "settings.pageWeather", "settings.pageWeatherDescription", false),
         Section(APP_UPDATES, APP_UPDATES, MINE, "android.update.title", "android.update.description", false),
         Section("admin-family", "admin-family", HOUSEHOLD, "settings.pageFamilyRoles", "settings.pageFamilyRolesDescription", true),

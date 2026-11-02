@@ -4,7 +4,9 @@ import io.github.marcomow.yuvomi.core.api.ApiJson
 import io.github.marcomow.yuvomi.core.api.model.Permissions
 import io.github.marcomow.yuvomi.core.api.model.Preferences
 import io.github.marcomow.yuvomi.core.time.HouseholdTime
+import io.github.marcomow.yuvomi.core.api.model.DashCountdown
 import io.github.marcomow.yuvomi.feature.overview.GlanceRow
+import io.github.marcomow.yuvomi.feature.overview.KeyDates
 import io.github.marcomow.yuvomi.feature.overview.OverviewBuilder
 import io.github.marcomow.yuvomi.feature.overview.Tile
 import kotlinx.serialization.json.JsonObject
@@ -96,5 +98,70 @@ class OverviewBuilderTest {
     @Test fun `a module switched off for the household is treated like none`() {
         val model = build(Preferences(disabledModules = listOf("shopping")))
         assertTrue(model.glance!!.none { it is GlanceRow.Shopping })
+    }
+
+    // ── Key dates (OVERVIEW-R17, OVERVIEW-A12) ──
+
+    private val keyDates = JsonObject(
+        dashboard + mapOf(
+            "countdowns" to ApiJson.parseToJsonElement(
+                """[
+                  {"source":"task","id":5,"title":"Renew licence","date":"2026-10-30","days_until":-2,"icon":null,"color":null,"recurring":false},
+                  {"source":"document","id":8,"title":"Passport","date":"2026-11-01","days_until":0,"icon":"file-text","color":null,"recurring":false,"person_name":"Emma"},
+                  {"source":"event","id":9,"title":"Contract ends","date":"2027-03-01","days_until":120,"icon":"calendar","color":"#2563EB","recurring":false}
+                ]""",
+            ),
+            "countdownTotal" to ApiJson.parseToJsonElement("8"),
+        ),
+    )
+
+    @Test fun `OVERVIEW-A12 key dates list events, tasks and documents with the person`() {
+        val tile = build(dash = keyDates).tiles.first { it.id == "countdown" } as Tile.Countdown
+        assertEquals(listOf("task", "document", "event"), tile.items.map { it.source })
+        assertEquals("Emma", tile.items[1].personName)
+        assertEquals(8, tile.total)
+        assertEquals(5, tile.more)
+    }
+
+    @Test fun `OVERVIEW-A12 a row follows its module's switch and rights, and no row means no tile`() {
+        val noDocs = build(Preferences(disabledModules = listOf("documents")), dash = keyDates).tiles.first { it.id == "countdown" } as Tile.Countdown
+        assertEquals(listOf("task", "event"), noDocs.items.map { it.source })
+        val onlyDocs = build(permissions = Permissions(modules = mapOf("tasks" to "none", "calendar" to "none")), dash = keyDates)
+            .tiles.first { it.id == "countdown" } as Tile.Countdown
+        assertEquals(listOf(8), onlyDocs.items.map { it.id })
+        val none = build(Preferences(disabledModules = listOf("documents", "tasks", "calendar")), dash = keyDates)
+        assertTrue(none.tiles.none { it.id == "countdown" })
+        val empty = JsonObject(dashboard + ("countdowns" to ApiJson.parseToJsonElement("[]")))
+        assertTrue(build(dash = empty).tiles.none { it.id == "countdown" })
+        // Malformed: the generic tile (OVERVIEW-R12).
+        val broken = JsonObject(dashboard + ("countdowns" to ApiJson.parseToJsonElement("\"oops\"")))
+        assertTrue(build(dash = broken).tiles.first { it.id == "countdown" } is Tile.Generic)
+    }
+
+    @Test fun `key dates phrases, ranks and the meta line follow countdown js`() {
+        assertEquals("dashboard.countdownOverdue" to 3, KeyDates.phrase(-3))
+        assertEquals("common.today" to null, KeyDates.phrase(0))
+        assertEquals("common.tomorrow" to null, KeyDates.phrase(1))
+        assertEquals("dashboard.daysLeft" to 30, KeyDates.phrase(30))
+        assertEquals("dashboard.countdownWeeks" to 4, KeyDates.phrase(31))
+        assertEquals("dashboard.countdownWeeks" to 9, KeyDates.phrase(60))
+        assertEquals("dashboard.countdownMonths" to 2, KeyDates.phrase(61))
+        assertEquals("dashboard.countdownMonths" to 12, KeyDates.phrase(364))
+        assertEquals("dashboard.countdownYears" to 1, KeyDates.phrase(365))
+        assertEquals("dashboard.countdownYears" to 3, KeyDates.phrase(1100))
+        assertEquals(KeyDates.Rank.OVERDUE, KeyDates.rank(-1))
+        assertEquals(KeyDates.Rank.NOW, KeyDates.rank(1))
+        assertEquals(KeyDates.Rank.SOON, KeyDates.rank(30))
+        assertEquals(KeyDates.Rank.LATER, KeyDates.rank(31))
+        assertEquals("documents", KeyDates.module("document"))
+        assertEquals("tasks", KeyDates.module("task"))
+        assertEquals("calendar", KeyDates.module("event"))
+        val passport = DashCountdown(source = "document", id = 1, title = "Passport", personName = "Emma")
+        // "Today" is not said twice; the person joins the date.
+        assertEquals("Emma", KeyDates.meta(passport, "Today", "Today"))
+        assertEquals("Fri · Emma", KeyDates.meta(passport, "Fri", "4 days"))
+        assertEquals("Fri", KeyDates.meta(passport.copy(personName = null), "Fri", "4 days"))
+        assertEquals(0, KeyDates.more(null, 3))
+        assertEquals(2, KeyDates.more(7, 7))
     }
 }

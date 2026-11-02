@@ -25,6 +25,7 @@ import androidx.compose.material.icons.automirrored.outlined.DriveFileMove
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.ArrowDropDown
+import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.CreateNewFolder
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.outlined.Folder
 import androidx.compose.material.icons.outlined.FolderOpen
 import androidx.compose.material.icons.outlined.Link
 import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.RadioButtonUnchecked
 import androidx.compose.material.icons.outlined.Search
 import androidx.compose.material.icons.outlined.Unarchive
@@ -84,6 +86,7 @@ import io.github.marcomow.yuvomi.core.design.Card
 import io.github.marcomow.yuvomi.core.design.EmptyState
 import io.github.marcomow.yuvomi.core.design.ErrorBox
 import io.github.marcomow.yuvomi.core.design.LoadingBox
+import io.github.marcomow.yuvomi.core.design.MemberAvatar
 import io.github.marcomow.yuvomi.core.design.OfflineBanner
 import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.LocalStrings
@@ -354,6 +357,7 @@ private fun FacetChips(s: DocumentsViewModel.UiState, vm: DocumentsViewModel, op
             leadingIcon = { Icon(Icons.Outlined.Folder, null, Modifier.size(18.dp)) },
             trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, null, Modifier.size(18.dp)) },
         )
+        PersonChip(s, vm)
         if (DocumentRules.showsExpiringChip(s.shown, folders, s.filter, s.today)) {
             FilterChip(
                 selected = s.filter.expiringSoon,
@@ -377,6 +381,46 @@ private fun FacetChips(s: DocumentsViewModel.UiState, vm: DocumentsViewModel, op
                     leadingIcon = { Icon(categoryIcon(category), null, Modifier.size(18.dp)) },
                 )
             }
+        }
+    }
+}
+
+/**
+ * DOCS-R36, `renderPersonChip`: one chip with a menu instead of a chip per person, shown once a
+ * loaded document names a person (or one is chosen).
+ */
+@Composable
+private fun PersonChip(s: DocumentsViewModel.UiState, vm: DocumentsViewModel) {
+    val people = DocumentRules.personFilterPeople(s.shown, s.members, s.filter.personId)
+    if (people.isEmpty() && s.filter.personId == null) return
+    val chosen = people.firstOrNull { it.id == s.filter.personId }
+    var open by remember { mutableStateOf(false) }
+    val label = t("documents.personFilterLabel")
+    Box {
+        FilterChip(
+            selected = chosen != null,
+            onClick = { open = true },
+            label = { Text(chosen?.displayName ?: label, maxLines = 1) },
+            leadingIcon = {
+                if (chosen != null) {
+                    MemberAvatar(chosen.displayName, chosen.avatarColor, chosen.avatarData, size = 20.dp)
+                } else {
+                    Icon(Icons.Outlined.Person, null, Modifier.size(18.dp))
+                }
+            },
+            trailingIcon = { Icon(Icons.Outlined.ArrowDropDown, null, Modifier.size(18.dp)) },
+            modifier = Modifier.semantics { contentDescription = chosen?.let { "$label: ${it.displayName}" } ?: label },
+        )
+        DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+            val item = @Composable { id: Int?, text: String ->
+                DropdownMenuItem(
+                    text = { Text(text) },
+                    onClick = { open = false; vm.setPerson(id) },
+                    leadingIcon = { if (id == s.filter.personId || (id == null && chosen == null)) Icon(Icons.Outlined.Check, null) else Spacer(Modifier.size(24.dp)) },
+                )
+            }
+            item(null, t("documents.personFilterAll"))
+            people.forEach { item(it.id, it.displayName) }
         }
     }
 }
@@ -483,7 +527,7 @@ private fun DocumentRow(
         }
         Column(Modifier.weight(1f).padding(horizontal = 12.dp)) {
             Text(doc.name, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
-            DocumentMetaLine(doc, s.filter.folderId, s.today)
+            DocumentMetaLine(doc, s.filter.folderId, s.today, members = s.members)
         }
         if (!s.selectMode) {
             IconButton(onClick = { actions.download(doc) }) { Icon(Icons.Outlined.Download, t("documents.downloadNamed", "name" to doc.name)) }
@@ -522,7 +566,7 @@ private fun DocumentCard(
                 doc.description?.takeIf { it.isNotBlank() }?.let {
                     Text(it, style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary, maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
-                DocumentMetaLine(doc, s.filter.folderId, s.today, withStats = false)
+                DocumentMetaLine(doc, s.filter.folderId, s.today, withStats = false, members = s.members)
             }
             Row(Modifier.fillMaxWidth().padding(start = 12.dp), verticalAlignment = Alignment.CenterVertically) {
                 Text(

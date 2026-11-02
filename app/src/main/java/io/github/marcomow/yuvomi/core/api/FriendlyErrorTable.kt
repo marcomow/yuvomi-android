@@ -72,6 +72,7 @@ internal object FriendlyErrorTable {
         "health_vital_not_found" to "health.errorVitalGone",
         "health_vital_out_of_range" to "health.errorVitalImpossible",
         "health_vital_bp_order" to "health.errorVitalBpOrder",
+        "health_vital_unit_invalid" to "health.errorVitalUnit",
         "health_medication_not_found" to "health.errorMedicationGone",
         "health_schedule_not_found" to "health.errorScheduleGone",
         "health_dose_not_found" to "health.errorDoseGone",
@@ -206,6 +207,12 @@ internal object FriendlyErrorTable {
         "calendar_assignee_not_member" to "settings.syncAssigneeNotMember",
         "calendar_assignee_unknown" to "settings.syncAssigneeUnknown",
         "reminder_list_assignee_not_tasks" to "settings.reminderListAssigneesTasksOnly",
+        "calendar_subscription_not_found" to "settings.icsSubscriptionGone",
+        "outlook_auto_sync_overrides" to "settings.outlookAutoSyncOverrides",
+        "own_account" to "settings.memberRemoveOwnAccount",
+        "last_admin" to "settings.memberRemoveLastAdmin",
+        "last_sso_admin" to "settings.memberRemoveLastSsoAdmin",
+        "tasks_tag_not_found" to "tasks.errorTagGone",
         "immich_url_invalid" to "settings.immichErrorUrlInvalid",
         "immich_album_id_invalid" to "settings.immichErrorAlbumIdInvalid",
         "immich_api_key_invalid" to "settings.immichErrorApiKeyInvalid",
@@ -322,6 +329,8 @@ internal object FriendlyErrorTable {
         "calendar_calendar_not_found",
         "calendar_event_not_found",
         "calendar_selected_calendar_not_found",
+        "calendar_subscription_not_found",
+        "tasks_tag_not_found",
     )
 
     const val PARAM_MAX: Long = 1000000000L

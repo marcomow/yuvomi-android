@@ -150,6 +150,7 @@ class EventEditorViewModel(
                 var savedId: Int? = ev?.id
                 var remindersAtomic = false
                 var reminderBase = form.start
+                var untouched: EventReminders.Untouched? = null
                 if (ev == null) {
                     savedId = store.api.create(JsonObject(body), idempotencyKey).id
                 } else {
@@ -193,12 +194,17 @@ class EventEditorViewModel(
                         if (form.allDay == s.original.allDay && form.start == s.original.start && form.end == s.original.end) {
                             body.remove("start_datetime")
                             body.remove("end_datetime")
+                            // CAL-R29 (2.84.0): the series start stays, so an unchanged reminder must not
+                            // slide onto the opened occurrence.
+                            ev.reminderAnchorStart?.let { anchor ->
+                                untouched = EventReminders.Untouched(anchor, target.reminders.mapNotNull { r -> EventReminders.naiveUtc(r.remindAt) })
+                            }
                         }
                         savedId = store.api.update(ev.id, JsonObject(body)).id
                     }
                 }
                 if (savedId != null && !remindersAtomic) {
-                    val times = EventReminders.times(rows, reminderBase, dates)
+                    val times = EventReminders.times(rows, reminderBase, dates, untouched)
                     if (times.isNotEmpty()) store.api.setReminders(savedId, times)
                     else runCatching { store.api.clearReminders(savedId) }
                 }

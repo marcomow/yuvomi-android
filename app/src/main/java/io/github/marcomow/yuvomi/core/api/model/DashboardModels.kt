@@ -55,3 +55,21 @@ data class MemberOpenTasks(
     @SerialName("user_id") val userId: Int,
     @SerialName("open_count") val openCount: Int = 0,
 )
+
+/**
+ * One row of `countdowns[]` (`DashboardCountdown`, services/countdowns.js): a marked event or
+ * task, or since 2.84.0 a document within its expiry lead time (OVERVIEW-R17).
+ */
+@Serializable
+data class DashCountdown(
+    val source: String = "event",
+    val id: Int,
+    val title: String = "",
+    val date: String = "",
+    @SerialName("days_until") val daysUntil: Int = 0,
+    val icon: String? = null,
+    val color: String? = null,
+    val recurring: FlexBool = false,
+    /** Only on `document`: who the document is about. */
+    @SerialName("person_name") val personName: String? = null,
+)

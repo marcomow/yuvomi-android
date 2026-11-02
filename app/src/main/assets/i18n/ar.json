@@ -919,7 +919,8 @@
     "doneSubtasksOpen_few": "تم إنجاز «{{title}}» - لا تزال {{count}} مهام فرعية مفتوحة.",
     "doneSubtasksOpen_many": "تم إنجاز «{{title}}» - لا تزال {{count}} مهمة فرعية مفتوحة.",
     "seriesDoneNamed": "تم إنجاز «{{title}}» - المرة القادمة: {{date}}",
-    "kanbanRestore": "استعادة"
+    "kanbanRestore": "استعادة",
+    "errorTagGone": "هذا الوسم لم يعد موجودًا."
   },
   "meals": {
     "randomizeSuccess_few": "تم تخطيط {{count}} وجبات.",
@@ -1282,7 +1283,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "إعادة التعيين للأصل",
-      "resetToast": "تم إعادة تعيين التغييرات."
+      "resetToast": "تم إعادة تعيين التغييرات.",
+      "resetPendingToast": "أُعيد الضبط. يعود النص الأصلي مع المزامنة التالية."
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "البحث عن أيقونة",
@@ -3216,7 +3218,12 @@
     "viewerNextNamed": "المستند التالي: {{name}}",
     "emptyFolderTitle": "\"{{name}}\" فارغ",
     "viewerImageFallbackHint": "تعذّر عرض هذه الصورة. نزّلها لفتحها.",
-    "moreDetailsHint": "الوصف والحالة"
+    "moreDetailsHint": "الوصف والحالة",
+    "subjectLabel": "يخص",
+    "subjectHint": "لا يغيّر من يمكنه رؤية المستند.",
+    "subjectNoAccess": "لا يمكن لـ {{name}} فتح هذا المستند ولن يتلقى تذكيرًا بشأنه.",
+    "personFilterLabel": "الشخص",
+    "personFilterAll": "كل الأشخاص"
   },
   "health": {
     "fasting": {
@@ -4204,7 +4211,8 @@
     "errorCycleImportNoRows": "يحتوي الملف على سطر العناوين فقط ولا يحتوي على دورات.",
     "errorCycleImportTooManyRows": "يمكن أن يحتوي الاستيراد على {{limit}} دورة كحد أقصى. قسّم الملف.",
     "errorVitalImpossible": "هذه القيمة غير ممكنة. يرجى التحقق من الإدخال.",
-    "errorVitalBpOrder": "يجب أن تكون القيمة الانقباضية أعلى من الانبساطية."
+    "errorVitalBpOrder": "يجب أن تكون القيمة الانقباضية أعلى من الانبساطية.",
+    "errorVitalUnit": "هذه الوحدة لا تناسب هذا القياس."
   },
   "housekeeping": {
     "title": "التدبير المنزلي",
@@ -6617,7 +6625,18 @@
     "reminderListAssigneesTasksOnly": "يمكن تحديد الأشخاص فقط للقوائم التي تذهب إلى المهام.",
     "syncAssigneeNotMember": "يمكن اختيار أفراد المنزل فقط هنا.",
     "syncAssigneeUnknown": "هذا الشخص لم يعد موجودًا. أعد تحميل الصفحة.",
-    "permDetails": "الأدوات والصلاحيات الإضافية"
+    "permDetails": "الأدوات والصلاحيات الإضافية",
+    "connectionFailedDetail": "فشل الاتصال: {{error}}",
+    "documentStorageChangeFailed": "لم يتم تطبيق التغيير: {{error}}",
+    "apiTokenCopyFailed": "تعذر النسخ. حدد الرمز وانسخه يدويًا.",
+    "weatherLocateDenied": "الوصول إلى موقعك غير مسموح. اسمح به في إعدادات المتصفح أو أدخل المكان يدويًا.",
+    "weatherLocateFailed": "تعذر تحديد موقعك. أدخل المكان يدويًا.",
+    "outlookAutoSyncOverrides": "لا يمكن لـ Outlook مزامنة السلاسل التي ترتبط بها استثناءات فردية. أوقف تقويمها الهدف لتبقى قابلة للتعديل هنا. لا حاجة إلى حذف أي استثناءات.",
+    "memberRemoveOwnAccount": "لا يمكنك إزالة حسابك الخاص.",
+    "memberRemoveLastAdmin": "يجب أن يبقى مسؤول واحد على الأقل.",
+    "memberRemoveLastSsoAdmin": "هذا آخر مسؤول مرتبط بـ SSO. اربط مسؤولًا آخر أولًا.",
+    "backupWebdavUrlInvalid": "يجب أن يبدأ العنوان بـ http:// أو https://.",
+    "icsSubscriptionGone": "هذا الاشتراك لم يعد موجودًا."
   },
   "subscriptions": {
     "tabLabel": "الاشتراكات",

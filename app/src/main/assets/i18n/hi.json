@@ -745,7 +745,8 @@
     "checkAllSubtasks": "सभी पर निशान लगाएं",
     "subtasksAllDone": "\"{{title}}\" और सभी उपकार्य पूर्ण।",
     "seriesDoneNamed": "\"{{title}}\" पूर्ण - अगली बार: {{date}}",
-    "kanbanRestore": "पुनर्स्थापित करें"
+    "kanbanRestore": "पुनर्स्थापित करें",
+    "errorTagGone": "यह टैग अब मौजूद नहीं है।"
   },
   "meals": {
     "ingredientCount_one": "{{count}} सामग्री",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "मूल पर वापस जाएं",
-      "resetToast": "परिवर्तन रीसेट हो गए।"
+      "resetToast": "परिवर्तन रीसेट हो गए।",
+      "resetPendingToast": "रीसेट हो गया। अगली सिंक के साथ मूल पाठ वापस आएगा।"
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "आइकन खोजें",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "अगला दस्तावेज़: {{name}}",
     "emptyFolderTitle": "\"{{name}}\" खाली है",
     "viewerImageFallbackHint": "यह छवि प्रदर्शित नहीं की जा सकी। इसे खोलने के लिए डाउनलोड करें।",
-    "moreDetailsHint": "विवरण और स्थिति"
+    "moreDetailsHint": "विवरण और स्थिति",
+    "subjectLabel": "किसके बारे में",
+    "subjectHint": "इससे यह नहीं बदलता कि दस्तावेज़ कौन देख सकता है।",
+    "subjectNoAccess": "{{name}} यह दस्तावेज़ नहीं खोल सकते और उन्हें इसका अनुस्मारक नहीं मिलेगा।",
+    "personFilterLabel": "व्यक्ति",
+    "personFilterAll": "सभी लोग"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "फ़ाइल में केवल हेडर पंक्ति है और कोई माहवारी नहीं।",
     "errorCycleImportTooManyRows": "एक आयात में अधिकतम {{limit}} माहवारी हो सकती हैं। फ़ाइल को बाँटें।",
     "errorVitalImpossible": "यह मान संभव नहीं है। कृपया अपनी प्रविष्टि जाँचें।",
-    "errorVitalBpOrder": "सिस्टोलिक मान डायस्टोलिक से अधिक होना चाहिए।"
+    "errorVitalBpOrder": "सिस्टोलिक मान डायस्टोलिक से अधिक होना चाहिए।",
+    "errorVitalUnit": "यह इकाई इस माप के लिए उपयुक्त नहीं है।"
   },
   "housekeeping": {
     "title": "गृहकार्य",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "लोग केवल उन सूचियों के लिए तय किए जा सकते हैं जो कार्यों में जाती हैं।",
     "syncAssigneeNotMember": "यहाँ केवल परिवार के सदस्य चुने जा सकते हैं।",
     "syncAssigneeUnknown": "यह व्यक्ति अब मौजूद नहीं है। पेज फिर से लोड करें।",
-    "permDetails": "विजेट और अन्य अनुमतियाँ"
+    "permDetails": "विजेट और अन्य अनुमतियाँ",
+    "connectionFailedDetail": "कनेक्शन विफल: {{error}}",
+    "documentStorageChangeFailed": "बदलाव लागू नहीं हुआ: {{error}}",
+    "apiTokenCopyFailed": "कॉपी नहीं हो सका। टोकन चुनें और हाथ से कॉपी करें।",
+    "weatherLocateDenied": "आपके स्थान की अनुमति नहीं है। इसे ब्राउज़र सेटिंग में चालू करें या जगह हाथ से भरें।",
+    "weatherLocateFailed": "आपका स्थान पता नहीं चल सका। जगह हाथ से भरें।",
+    "outlookAutoSyncOverrides": "Outlook जुड़े हुए एकल अपवादों वाली शृंखलाएँ सिंक नहीं कर सकता। उनका लक्ष्य कैलेंडर बंद करें ताकि वे यहाँ संपादन योग्य रहें। किसी अपवाद को हटाने की ज़रूरत नहीं है।",
+    "memberRemoveOwnAccount": "आप अपना खाता नहीं हटा सकते।",
+    "memberRemoveLastAdmin": "कम से कम एक व्यवस्थापक रहना चाहिए।",
+    "memberRemoveLastSsoAdmin": "यह SSO से जुड़ा अंतिम व्यवस्थापक है। पहले किसी दूसरे व्यवस्थापक को जोड़ें।",
+    "backupWebdavUrlInvalid": "पता http:// या https:// से शुरू होना चाहिए।",
+    "icsSubscriptionGone": "यह सदस्यता अब मौजूद नहीं है।"
   },
   "subscriptions": {
     "tabLabel": "सदस्यताएँ",

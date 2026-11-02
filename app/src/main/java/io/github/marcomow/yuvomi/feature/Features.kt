@@ -66,6 +66,7 @@ object Features {
         InventoryOperation.entries, ContactsOperation.entries, BirthdaysOperation.entries,
         HealthOperation.entries, BudgetOperation.entries, SettingsOperation.entries,
         SubscriptionsOperation.entries, SplitExpensesOperation.entries, TagsOperation.entries,
+        io.github.marcomow.yuvomi.feature.reminders.RemindersOperation.entries,
     ).flatten()
 
     /** Module ids that have native screens: Overview, Tasks and [all]. */

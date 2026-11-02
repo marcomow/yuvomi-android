@@ -745,7 +745,8 @@
     "checkAllSubtasks": "すべて完了にする",
     "subtasksAllDone": "「{{title}}」とすべてのサブタスクを完了しました。",
     "seriesDoneNamed": "「{{title}}」を完了しました - 次回: {{date}}",
-    "kanbanRestore": "復元"
+    "kanbanRestore": "復元",
+    "errorTagGone": "このタグはもう存在しません。"
   },
   "meals": {
     "ingredientCount_one": "{{count}} 品の材料",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "元に戻す",
-      "resetToast": "変更がリセットされました。"
+      "resetToast": "変更がリセットされました。",
+      "resetPendingToast": "リセットしました。元の内容は次回の同期で戻ります。"
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "アイコンを検索",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "次のドキュメント: {{name}}",
     "emptyFolderTitle": "「{{name}}」は空です",
     "viewerImageFallbackHint": "この画像を表示できませんでした。ダウンロードして開いてください。",
-    "moreDetailsHint": "説明とステータス"
+    "moreDetailsHint": "説明とステータス",
+    "subjectLabel": "対象者",
+    "subjectHint": "ドキュメントを閲覧できる人は変わりません。",
+    "subjectNoAccess": "{{name}}さんはこのドキュメントを開けないため、リマインダーは届きません。",
+    "personFilterLabel": "人",
+    "personFilterAll": "すべての人"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "ファイルには見出し行しかなく生理期間がありません。",
     "errorCycleImportTooManyRows": "一度にインポートできる生理期間は最大{{limit}}件です。ファイルを分けてください。",
     "errorVitalImpossible": "この値はありえません。入力内容を確認してください。",
-    "errorVitalBpOrder": "収縮期の値は拡張期の値より大きくなければなりません。"
+    "errorVitalBpOrder": "収縮期の値は拡張期の値より大きくなければなりません。",
+    "errorVitalUnit": "この単位はこの測定には使えません。"
   },
   "housekeeping": {
     "title": "家事",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "人を設定できるのはタスクに入るリストだけです。",
     "syncAssigneeNotMember": "ここで選べるのは世帯のメンバーだけです。",
     "syncAssigneeUnknown": "この人はもう存在しません。ページを再読み込みしてください。",
-    "permDetails": "ウィジェットとその他の権限"
+    "permDetails": "ウィジェットとその他の権限",
+    "connectionFailedDetail": "接続に失敗しました: {{error}}",
+    "documentStorageChangeFailed": "変更は適用されませんでした: {{error}}",
+    "apiTokenCopyFailed": "コピーできませんでした。トークンを選択して手動でコピーしてください。",
+    "weatherLocateDenied": "位置情報へのアクセスが許可されていません。ブラウザの設定で許可するか、場所を手動で入力してください。",
+    "weatherLocateFailed": "位置情報を取得できませんでした。場所を手動で入力してください。",
+    "outlookAutoSyncOverrides": "Outlook はリンクされた単一の例外を含むシリーズを同期できません。ここで編集できるよう、対象カレンダーをオフにしてください。例外を削除する必要はありません。",
+    "memberRemoveOwnAccount": "自分のアカウントは削除できません。",
+    "memberRemoveLastAdmin": "管理者が少なくとも1人必要です。",
+    "memberRemoveLastSsoAdmin": "これは SSO にリンクされた最後の管理者です。先に別の管理者をリンクしてください。",
+    "backupWebdavUrlInvalid": "アドレスは http:// または https:// で始める必要があります。",
+    "icsSubscriptionGone": "この購読はもう存在しません。"
   },
   "subscriptions": {
     "tabLabel": "サブスクリプション",

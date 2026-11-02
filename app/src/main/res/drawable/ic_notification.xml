@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The status-bar icon of reminder notifications: upstream's three circles, one colour. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="96"
+    android:viewportHeight="96">
+    <group android:translateX="-33" android:translateY="-41">
+        <path android:fillColor="#FFFFFF" android:pathData="M37,72a27,27 0,1 0,54 0a27,27 0,1 0,-54 0z" />
+        <path android:fillColor="#FFFFFF" android:pathData="M75,78a25,25 0,1 0,50 0a25,25 0,1 0,-50 0z" />
+        <path android:fillColor="#FFFFFF" android:pathData="M56,106a24,24 0,1 0,48 0a24,24 0,1 0,-48 0z" />
+    </group>
+</vector>

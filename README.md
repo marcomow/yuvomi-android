@@ -38,6 +38,13 @@ Two home-screen widgets (long-press the home screen, then Widgets, then Yuvomi):
 They use the app's own sign-in and show nothing while you are signed out
 ([spec](docs/spec/widgets.md), [ADR 0020](docs/adr/0020-home-screen-widgets.md)).
 
+## Reminders on the phone
+
+With a Yuvomi server 2.84.0 or newer, your reminders (tasks, events and everything else that
+reminds you) arrive as notifications on the phone, also while the app is closed. Allow
+notifications when Android asks. Switch it off in Settings, Notifications
+([spec](docs/spec/reminders.md), [ADR 0021](docs/adr/0021-reminders-on-the-phone.md)).
+
 ## What is native
 
 - Sign in with your Yuvomi username and password, plus your second factor if you use one.
@@ -106,7 +113,7 @@ publishes a signed release APK (`.github/workflows/release.yml`, [RELEASING.md](
 
 ## Staying in sync with upstream
 
-`upstream/VERSION` pins the Yuvomi release this app is built against (currently **2.83.0**). A
+`upstream/VERSION` pins the Yuvomi release this app is built against (currently **2.84.0**). A
 weekly workflow checks for a newer release, regenerates the OpenAPI snapshot, strings and colours
 from upstream's source, and opens a pull request that reports which of the operations this app
 uses changed. See [UPSTREAM-SYNC.md](docs/UPSTREAM-SYNC.md).

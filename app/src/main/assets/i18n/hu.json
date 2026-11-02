@@ -745,7 +745,8 @@
     "checkAllSubtasks": "Összes kipipálása",
     "subtasksAllDone": "„{{title}}” és minden részfeladat kész.",
     "seriesDoneNamed": "„{{title}}” kész - legközelebb: {{date}}",
-    "kanbanRestore": "Visszaállítás"
+    "kanbanRestore": "Visszaállítás",
+    "errorTagGone": "Ez a címke már nem létezik."
   },
   "meals": {
     "ingredientCount_one": "{{count}} hozzávaló",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Visszaállítás az eredetire",
-      "resetToast": "Változtatások visszaállítva."
+      "resetToast": "Változtatások visszaállítva.",
+      "resetPendingToast": "Visszaállítva. Az eredeti szöveg a következő szinkronnal tér vissza."
     },
     "iconLabel": "Ikon",
     "iconSearchPlaceholder": "Ikon keresése",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "Következő dokumentum: {{name}}",
     "emptyFolderTitle": "A(z) „{{name}}” mappa üres",
     "viewerImageFallbackHint": "Ezt a képet nem sikerült megjeleníteni. Töltse le a megnyitáshoz.",
-    "moreDetailsHint": "Leírás és állapot"
+    "moreDetailsHint": "Leírás és állapot",
+    "subjectLabel": "Érintett",
+    "subjectHint": "Nem változtat azon, hogy ki látja a dokumentumot.",
+    "subjectNoAccess": "{{name}} nem tudja megnyitni ezt a dokumentumot, és nem kap hozzá emlékeztetőt.",
+    "personFilterLabel": "Személy",
+    "personFilterAll": "Minden személy"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "A fájlban csak fejlécsor van, menstruáció nincs.",
     "errorCycleImportTooManyRows": "Egy importálás legfeljebb {{limit}} menstruációt tartalmazhat. Oszd fel a fájlt.",
     "errorVitalImpossible": "Ez az érték nem lehetséges. Ellenőrizd a bevitelt.",
-    "errorVitalBpOrder": "A szisztolés értéknek nagyobbnak kell lennie a diasztolésnál."
+    "errorVitalBpOrder": "A szisztolés értéknek nagyobbnak kell lennie a diasztolésnál.",
+    "errorVitalUnit": "Ez a mértékegység nem illik ehhez a méréshez."
   },
   "housekeeping": {
     "title": "Háztartás",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "Személyek csak a Feladatokba kerülő listákhoz állíthatók be.",
     "syncAssigneeNotMember": "Itt csak a háztartás tagjai választhatók.",
     "syncAssigneeUnknown": "Ez a személy már nem létezik. Töltsd újra az oldalt.",
-    "permDetails": "Widgetek és további jogok"
+    "permDetails": "Widgetek és további jogok",
+    "connectionFailedDetail": "A kapcsolódás sikertelen: {{error}}",
+    "documentStorageChangeFailed": "A módosítás nem lépett érvénybe: {{error}}",
+    "apiTokenCopyFailed": "A másolás nem sikerült. Jelölje ki a tokent, és másolja kézzel.",
+    "weatherLocateDenied": "A helyadatokhoz való hozzáférés nem engedélyezett. Engedélyezze a böngésző beállításaiban, vagy adja meg a helyet kézzel.",
+    "weatherLocateFailed": "A helyzetét nem sikerült meghatározni. Adja meg a helyet kézzel.",
+    "outlookAutoSyncOverrides": "Az Outlook nem tudja szinkronizálni a kapcsolt egyedi kivételekkel rendelkező sorozatokat. Kapcsolja ki a célnaptárukat, hogy itt szerkeszthetők maradjanak. Kivételeket nem kell törölnie.",
+    "memberRemoveOwnAccount": "A saját fiókját nem távolíthatja el.",
+    "memberRemoveLastAdmin": "Legalább egy rendszergazdának maradnia kell.",
+    "memberRemoveLastSsoAdmin": "Ez az utolsó SSO-hoz kapcsolt rendszergazda. Először kapcsoljon egy másik rendszergazdát.",
+    "backupWebdavUrlInvalid": "A címnek http:// vagy https:// előtaggal kell kezdődnie.",
+    "icsSubscriptionGone": "Ez az előfizetés már nem létezik."
   },
   "subscriptions": {
     "tabLabel": "Előfizetések",

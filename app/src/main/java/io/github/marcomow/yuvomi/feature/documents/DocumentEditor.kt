@@ -221,6 +221,7 @@ internal fun DocumentEditor(doc: Document?, vm: DocumentsViewModel, close: () ->
                             }
                         }
                     }
+                    SubjectPicker(doc, form, vm) { form = form.copy(subjectUserId = it) }
                     ExpiryField(form.expiresAt, onPick = { picking = true }, onClear = { form = form.copy(expiresAt = null) })
                     if (form.expiresAt != null) {
                         OutlinedTextField(
@@ -280,6 +281,37 @@ internal fun DocumentEditor(doc: Document?, vm: DocumentsViewModel, close: () ->
             },
             dismissButton = { TextButton(onClick = { picking = false }) { Text(t("common.cancel")) } },
         ) { DatePicker(state) }
+    }
+}
+
+/**
+ * DOCS-R35, `subjectPickerHtml` and `syncSubjectAccess`: "About", one member or no one, with
+ * the hint that it changes nobody's access, and a warning when the chosen person cannot open
+ * the document. Hidden in a household of one with nobody else to choose.
+ */
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun SubjectPicker(doc: Document?, form: DocumentForm, vm: DocumentsViewModel, pick: (Int?) -> Unit) {
+    val shell = LocalShell.current
+    val people = vm.subjectPeople(doc)
+    if (!vm.offersSubject || (shell.session.soloHousehold && people.size <= 1)) return
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Text(t("documents.subjectLabel"), style = MaterialTheme.typography.labelLarge)
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            FilterChip(selected = form.subjectUserId == null, onClick = { pick(null) }, label = { Text(t("userMultiSelect.nobody")) })
+            people.forEach { person ->
+                FilterChip(
+                    selected = form.subjectUserId == person.id,
+                    onClick = { pick(person.id) },
+                    label = { Text(person.displayName) },
+                    leadingIcon = { MemberAvatar(person.displayName, person.avatarColor, person.avatarData, size = 20.dp) },
+                )
+            }
+        }
+        Hint(t("documents.subjectHint"))
+        vm.subjectNoAccessName(doc, form)?.let { name ->
+            Text(t("documents.subjectNoAccess", "name" to name), style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.warning)
+        }
     }
 }
 

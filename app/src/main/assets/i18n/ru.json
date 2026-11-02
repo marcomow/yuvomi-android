@@ -861,7 +861,8 @@
     "doneSubtasksOpen_few": "«{{title}}» выполнено - ещё открыты {{count}} подзадачи.",
     "doneSubtasksOpen_many": "«{{title}}» выполнено - ещё открыто {{count}} подзадач.",
     "seriesDoneNamed": "«{{title}}» выполнено - следующий раз: {{date}}",
-    "kanbanRestore": "Восстановить"
+    "kanbanRestore": "Восстановить",
+    "errorTagGone": "Этого тега больше нет."
   },
   "meals": {
     "randomizeSuccess_few": "Запланировано {{count}} приёма пищи.",
@@ -1215,7 +1216,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "Сбросить к исходному",
-      "resetToast": "Изменения сброшены."
+      "resetToast": "Изменения сброшены.",
+      "resetPendingToast": "Сброшено. Исходный текст вернётся при следующей синхронизации."
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "Поиск иконки",
@@ -3097,7 +3099,12 @@
     "viewerNextNamed": "Следующий документ: {{name}}",
     "emptyFolderTitle": "Папка «{{name}}» пуста",
     "viewerImageFallbackHint": "Не удалось показать это изображение. Скачайте его, чтобы открыть.",
-    "moreDetailsHint": "Описание и статус"
+    "moreDetailsHint": "Описание и статус",
+    "subjectLabel": "Относится к",
+    "subjectHint": "Не меняет, кто видит документ.",
+    "subjectNoAccess": "{{name}} не может открыть этот документ и не получит напоминание.",
+    "personFilterLabel": "Человек",
+    "personFilterAll": "Все люди"
   },
   "health": {
     "fasting": {
@@ -4078,7 +4085,8 @@
     "errorCycleImportNoRows": "В файле только строка заголовка и нет ни одной менструации.",
     "errorCycleImportTooManyRows": "В одном импорте может быть не более {{limit}} менструаций. Разделите файл.",
     "errorVitalImpossible": "Такое значение невозможно. Проверьте ввод.",
-    "errorVitalBpOrder": "Систолическое значение должно быть больше диастолического."
+    "errorVitalBpOrder": "Систолическое значение должно быть больше диастолического.",
+    "errorVitalUnit": "Эта единица не подходит для данного измерения."
   },
   "housekeeping": {
     "title": "Уборка",
@@ -6457,7 +6465,18 @@
     "reminderListAssigneesTasksOnly": "Людей можно задать только для списков, которые идут в Задачи.",
     "syncAssigneeNotMember": "Здесь можно выбрать только членов семьи.",
     "syncAssigneeUnknown": "Этого человека больше нет. Перезагрузите страницу.",
-    "permDetails": "Виджеты и другие права"
+    "permDetails": "Виджеты и другие права",
+    "connectionFailedDetail": "Не удалось подключиться: {{error}}",
+    "documentStorageChangeFailed": "Изменение не применено: {{error}}",
+    "apiTokenCopyFailed": "Не удалось скопировать. Выделите токен и скопируйте его вручную.",
+    "weatherLocateDenied": "Доступ к геолокации запрещён. Разрешите его в настройках браузера или введите место вручную.",
+    "weatherLocateFailed": "Не удалось определить местоположение. Введите место вручную.",
+    "outlookAutoSyncOverrides": "Outlook не может синхронизировать серии со связанными отдельными исключениями. Отключите их целевой календарь, чтобы они оставались доступными для редактирования здесь. Удалять исключения не нужно.",
+    "memberRemoveOwnAccount": "Нельзя удалить собственную учётную запись.",
+    "memberRemoveLastAdmin": "Должен остаться хотя бы один администратор.",
+    "memberRemoveLastSsoAdmin": "Это последний администратор, связанный с SSO. Сначала свяжите другого администратора.",
+    "backupWebdavUrlInvalid": "Адрес должен начинаться с http:// или https://.",
+    "icsSubscriptionGone": "Этой подписки больше нет."
   },
   "subscriptions": {
     "tabLabel": "Подписки",

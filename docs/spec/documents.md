@@ -1,6 +1,6 @@
 # Spec: Documents
 
-Status: implemented · Upstream checked: 2.83.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 ## Purpose
 
@@ -22,6 +22,7 @@ Everything the web page (`public/pages/documents.js`) lets a member do:
 | Folders: new, rename, move, delete with impact | R26–R29 |
 | DMS: link from, upload to | R30–R31 |
 | Permissions, errors, offline | R32–R34 |
+| Who a document is about, expiry lead time (2.84.0) | R35–R38 |
 
 **What stays in the browser.** Uploading a whole folder tree (`bindFolderUpload`,
 `utils/folder-upload.js`: the upload plan with merge/duplicate/skip per conflict) is not native;
@@ -36,8 +37,10 @@ Share hand a private copy to another app through a `FileProvider`, and Download 
 "save as" (no storage permission). The web's single delete has no question and relies on undo;
 the app asks first (`documents.deleteConfirm`) and keeps the undo. Sort, direction, view and the
 expanded folders live for the screen's lifetime, not in persistent storage like the web's
-`localStorage`. The web page has no `?open=<id>` handling at 2.83.0; the app opens the viewer
-for `DocumentsRoutes.document(id)`, which Tasks links to.
+`localStorage`. The app opens the viewer for `DocumentsRoutes.document(id)`, which Tasks and the
+overview's "Key dates" tile link to. The web page's `?open=<id>` (2.84.0, `openLinkedDocument`)
+always loads the active documents and opens nothing for an unknown id; the app keeps DOCS-R14
+(it also finds an archived document and says when one is gone).
 
 ## Upstream references
 
@@ -95,7 +98,13 @@ All in `DocumentsOperation` (`upstream/operations-used.d/documents.txt`), wrappe
 `id, name, description, category, status, visibility, original_name, mime_type, file_size`
 (null for some DMS documents), `storage_provider, storage_backend, storage_key, dms_account_id,
 dms_provider, external_url, folder_id, folder_name, created_by, updated_at, expires_at,
-expiry_reminder_days, allowed_member_ids[]`.
+expiry_reminder_days, allowed_member_ids[]`, and since 2.84.0 `subject_user_id, subject_name,
+subject_color` (the person the document is about, joined from `users`).
+
+`POST` and `PUT /documents` take `subject_user_id` (a household member's id, or null). The
+server refuses an id that is not a member with the non-member sentence (`vSubjectUserId`); an
+already stored person stays valid when they are no longer a member. `GET /documents` also takes
+`?subject_user_id=`, but like the web page the app filters the loaded list on the client.
 
 ## Requirements
 
@@ -112,7 +121,7 @@ expiry_reminder_days, allowed_member_ids[]`.
   folder (not the search), plus the chosen one; each counts under the folder and the search; no
   chips in a view without documents unless one is chosen (`renderCategoryChips`,
   `categoryFacetCounts`).
-- **DOCS-R5** Deadline chip: documents expiring within 30 days or expired, counted under
+- **DOCS-R5** Deadline chip: documents expiring within their lead time (DOCS-R38) or expired, counted under
   category, folder and search; shown only when it finds something or is on (`renderExpiringChip`,
   `dateStatus`).
 - **DOCS-R6** The folder chip leads the chip row and names the open folder; it opens a sheet with
@@ -224,6 +233,35 @@ expiry_reminder_days, allowed_member_ids[]`.
 - **DOCS-R34** Offline (ADR 0007): the cached list and folders show read-only under
   `OfflineBanner`.
 
+### Who a document is about, expiry lead time (2.84.0, #1705)
+
+- **DOCS-R35** The dialog has "About" (`documents.subjectLabel`) after the chosen members: "No
+  one" (`userMultiSelect.nobody`) and one chip per household member, plus the stored person when
+  they are no longer a member (`subjectPickerHtml`, `withChosenPeople`); one choice at most, with
+  the hint `documents.subjectHint`. Hidden in a household of one with nobody else to choose, and
+  on a server older than 2.84.0 (`DocumentRules.SUBJECT_SINCE`), which would drop the choice.
+  While the chosen person cannot open the document, `documents.subjectNoAccess` names them: they
+  did not file it (the creator, or the member for a new upload), the visibility is not "Entire
+  family", and they are not among the chosen members of "Selected members" (`syncSubjectAccess`,
+  the three branches of `documentVisibleSql`). Save sends `subject_user_id` always, null for no
+  one. The person never changes who may see the document.
+- **DOCS-R36** The person filter is one chip after the folder chip with a menu: "All people"
+  (`documents.personFilterAll`) and each person the loaded documents are about, in the household's
+  order; the chip names the chosen person with their avatar, else `documents.personFilterLabel`.
+  It shows once a document of the view names a person, or while one is chosen; a chosen person
+  missing from the view (the archive) stays in the menu (`renderPersonChip`, `subjectPeople`). The
+  person is part of every other facet's scope: category chips and counts, folder counts, the
+  deadline chip and its count (`matchesPerson`, `inCategoryScope`); "Reset filters" clears it, and
+  a folder chosen with a person is no longer the plain empty-folder state (`emptyStateFor`).
+- **DOCS-R37** Rows and cards show the person (avatar disc and name) right after the expiry chip;
+  the viewer after the expiry line (`subjectMetaHtml`). The name comes from the row
+  (`subject_name`), the picture from the members.
+- **DOCS-R38** "Soon" follows the document's own lead time: the expiry chip, the viewer line, the
+  Deadlines filter and its count mark a document from `expiry_reminder_days` days before the date
+  on, 30 days when it has none, an explicit 0 only on the day itself (`expiryLeadDays`,
+  `documentExpiryStatus` in document-expiry.js). The same day decides the reminder and the
+  overview's "Key dates" (OVERVIEW-R17).
+
 ## Acceptance criteria
 
 | ID | Given / When / Then | Level | Status |
@@ -245,6 +283,9 @@ expiry_reminder_days, allowed_member_ids[]`.
 | DOCS-A15 | Given a folder delete with documents then a stale preview is 409 `FOLDER_CONTENT_CHANGED` and a fresh one deletes them. | contract | written |
 | DOCS-A16 | Given DMS calls then members are refused and a missing account is named. | contract | written |
 | DOCS-A17 | Given `documents?open=<id>` then the viewer opens, also from the archive; an unknown id says so. | ui | passing |
+| DOCS-A18 | Given the dialog then "About" sends `subject_user_id` (null for no one), and a person who cannot open the document is named in `documents.subjectNoAccess`; on a 2.83.0 server the field is not offered; the server stores, lists and clears it and refuses a non-member; the document reaches the countdowns with `person_name`. | unit + contract | passing / written |
+| DOCS-A19 | Given documents about two people then the person chip filters the list and every facet counts under it; "All people" and "Reset filters" clear it; the row names the person. | unit + ui | passing |
+| DOCS-A20 | Given lead times of 90, 7, 0 and none then the chip and the Deadlines filter mark from that day on (30 without). | unit | passing |
 
 Contract tests run in CI only (no Docker here); "written" means the test exists and has not
 been run against a server yet.

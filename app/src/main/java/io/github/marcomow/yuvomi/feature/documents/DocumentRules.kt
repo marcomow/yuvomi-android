@@ -38,7 +38,7 @@ object DocumentRules {
     const val MAX_FOLDER_DEPTH = 5
     private const val MAX_HOPS = 64
 
-    /** `DATE_STATUS_ALERT_DAYS`. */
+    /** `DATE_STATUS_ALERT_DAYS`, and `DEFAULT_EXPIRY_LEAD_DAYS` of document-expiry.js (DOCS-R38). */
     const val ALERT_DAYS = 30
 
     /** `THUMB_MAX_BYTES`: larger files get no list preview. */
@@ -46,6 +46,9 @@ object DocumentRules {
 
     /** `maxUploadBytes()` before `/meta/options` answered. */
     const val DEFAULT_MAX_UPLOAD_BYTES = 5L * 1024 * 1024
+
+    /** The first upstream version that stores who a document is about (DOCS-R35). */
+    const val SUBJECT_SINCE = "2.84.0"
 
     const val REMINDER_MIN_DAYS = 0
     const val REMINDER_MAX_DAYS = 365
@@ -69,8 +72,10 @@ object DocumentRules {
         val folderId: String = FOLDER_ALL,
         val expiringSoon: Boolean = false,
         val query: String = "",
+        /** `state.personId` (DOCS-R36): the person the documents are about, or null for all. */
+        val personId: Int? = null,
     ) {
-        val hasFacet: Boolean get() = category.isNotEmpty() || folderId.isNotEmpty() || expiringSoon
+        val hasFacet: Boolean get() = category.isNotEmpty() || folderId.isNotEmpty() || expiringSoon || personId != null
         val normalizedQuery: String get() = normalizeQuery(query)
         val selectedFolder: Int? get() = folderId.toIntOrNull()?.takeIf { it > 0 }
     }
@@ -87,8 +92,12 @@ object DocumentRules {
         }
     }
 
+    /** `matchesPerson` (DOCS-R36). */
+    fun matchesPerson(doc: Document, filter: Filter): Boolean = filter.personId == null || doc.subjectUserId == filter.personId
+
+    /** `isExpiringOrOverdue` with the document's own lead time (`expiryStatusOf`, DOCS-R38). */
     fun isExpiringOrOverdue(doc: Document, today: LocalDate): Boolean =
-        dateStatus(doc.expiresAt, today)?.let { it.state != DateState.VALID } ?: false
+        expiryStatus(doc, today)?.let { it.state != DateState.VALID } ?: false
 
     private fun matchesExpiring(doc: Document, filter: Filter, today: LocalDate) = !filter.expiringSoon || isExpiringOrOverdue(doc, today)
 
@@ -104,15 +113,16 @@ object DocumentRules {
     ): List<Document> {
         val query = filter.normalizedQuery
         val kept = docs.filter {
-            matchesCategory(it, filter) && matchesFolder(it, filter, folders) && matchesExpiring(it, filter, today) && matchesQuery(it, query)
+            matchesCategory(it, filter) && matchesFolder(it, filter, folders) && matchesPerson(it, filter) &&
+                matchesExpiring(it, filter, today) && matchesQuery(it, query)
         }
         return sort(kept, sort, direction, locale)
     }
 
-    /** `categoryFacetCounts` under the folder axis and the search; `""` counts all. */
+    /** `categoryFacetCounts` under the folder and person axes and the search; `""` counts all. */
     fun categoryCounts(docs: List<Document>, folders: List<DocumentFolder>, filter: Filter, withQuery: Boolean = true): Map<String, Int> {
         val query = if (withQuery) filter.normalizedQuery else ""
-        val scope = docs.filter { matchesFolder(it, filter, folders) && matchesQuery(it, query) }
+        val scope = docs.filter { matchesFolder(it, filter, folders) && matchesPerson(it, filter) && matchesQuery(it, query) }
         return buildMap {
             put("", scope.size)
             scope.groupingBy { it.category }.eachCount().forEach { (k, v) -> put(k, v) }
@@ -125,10 +135,10 @@ object DocumentRules {
         return CATEGORIES.filter { (present[it] ?: 0) > 0 || it == filter.category }
     }
 
-    /** `folderFacetCounts` under the category axis and the search; a folder counts its subtree. */
+    /** `folderFacetCounts` under the category and person axes and the search; a folder counts its subtree. */
     fun folderCounts(docs: List<Document>, folders: List<DocumentFolder>, filter: Filter): Map<String, Int> {
         val query = filter.normalizedQuery
-        val scope = docs.filter { matchesCategory(it, filter) && matchesQuery(it, query) }
+        val scope = docs.filter { matchesCategory(it, filter) && matchesPerson(it, filter) && matchesQuery(it, query) }
         val own = scope.mapNotNull { it.folderId }.groupingBy { it }.eachCount()
         return buildMap {
             put(FOLDER_ALL, scope.size)
@@ -140,11 +150,51 @@ object DocumentRules {
     /** `expiringCount`, and whether the deadline chip shows at all (`renderExpiringChip`). */
     fun expiringCount(docs: List<Document>, folders: List<DocumentFolder>, filter: Filter, today: LocalDate): Int {
         val query = filter.normalizedQuery
-        return docs.count { matchesCategory(it, filter) && matchesFolder(it, filter, folders) && matchesQuery(it, query) && isExpiringOrOverdue(it, today) }
+        return docs.count {
+            matchesCategory(it, filter) && matchesFolder(it, filter, folders) && matchesPerson(it, filter) &&
+                matchesQuery(it, query) && isExpiringOrOverdue(it, today)
+        }
     }
 
     fun showsExpiringChip(docs: List<Document>, folders: List<DocumentFolder>, filter: Filter, today: LocalDate): Boolean =
-        filter.expiringSoon || docs.any { matchesCategory(it, filter) && matchesFolder(it, filter, folders) && isExpiringOrOverdue(it, today) }
+        filter.expiringSoon ||
+            docs.any { matchesCategory(it, filter) && matchesFolder(it, filter, folders) && matchesPerson(it, filter) && isExpiringOrOverdue(it, today) }
+
+    // ── The person a document is about (DOCS-R35 to R37, #1705) ──
+
+    /** `documentSubject`: name and colour from the row, the picture from the members. */
+    fun subject(doc: Document, members: List<DocumentPerson>): DocumentPerson? {
+        val id = doc.subjectUserId ?: return null
+        return DocumentPerson(id, doc.subjectName.orEmpty(), doc.subjectColor, members.firstOrNull { it.id == id }?.avatarData)
+    }
+
+    /** `subjectPeople`: the people the loaded documents are about, in the household's order. */
+    fun subjectPeople(docs: List<Document>, members: List<DocumentPerson>): List<DocumentPerson> {
+        val people = LinkedHashMap<Int, DocumentPerson>()
+        for (doc in docs) subject(doc, members)?.let { people.putIfAbsent(it.id, it) }
+        fun rank(p: DocumentPerson) = members.indexOfFirst { it.id == p.id }.let { if (it == -1) members.size else it }
+        return people.values.sortedBy(::rank)
+    }
+
+    /**
+     * `renderPersonChip`: the choices of the person filter. Empty (no chip) while no document
+     * names a person and none is chosen; a chosen person missing from this view stays, so there
+     * is a way back.
+     */
+    fun personFilterPeople(docs: List<Document>, members: List<DocumentPerson>, personId: Int?): List<DocumentPerson> {
+        val people = subjectPeople(docs, members)
+        if (personId == null || people.any { it.id == personId }) return people
+        return people + listOfNotNull(members.firstOrNull { it.id == personId })
+    }
+
+    /**
+     * `syncSubjectAccess`: may the chosen person open the document? The three branches of
+     * `documentVisibleSql()` as a preview: the person filed it, the whole family sees it, or
+     * they are one of the chosen members. No person means nothing to warn about.
+     */
+    fun subjectMayOpen(personId: Int?, creatorId: Int, visibility: String, allowedMemberIds: Set<Int>): Boolean =
+        personId == null || personId == creatorId || visibility == VISIBILITY_FAMILY ||
+            (visibility == VISIBILITY_RESTRICTED && personId in allowedMemberIds)
 
     // ── Sorting ──
 
@@ -259,6 +309,16 @@ object DocumentRules {
     }
 
     // ── Expiry (date-status.js, document-expiry.js) ──
+
+    /** `expiryLeadDays` (DOCS-R38): the document's own lead time; an explicit 0 stays 0. */
+    fun expiryLeadDays(doc: Document): Int = doc.expiryReminderDays ?: ALERT_DAYS
+
+    /** `documentExpiryStatus(dateStatus(doc.expires_at), doc)`: "soon" from the document's lead time on. */
+    fun expiryStatus(doc: Document, today: LocalDate): DateStatus? {
+        val status = dateStatus(doc.expiresAt, today) ?: return null
+        if (status.state == DateState.EXPIRED) return status
+        return status.copy(state = if (status.days <= expiryLeadDays(doc)) DateState.EXPIRING else DateState.VALID)
+    }
 
     enum class DateState { VALID, EXPIRING, EXPIRED }
 

@@ -745,7 +745,8 @@
     "checkAllSubtasks": "全部勾选",
     "subtasksAllDone": "“{{title}}”及所有子任务已完成。",
     "seriesDoneNamed": "“{{title}}”已完成 - 下次：{{date}}",
-    "kanbanRestore": "恢复"
+    "kanbanRestore": "恢复",
+    "errorTagGone": "此标签已不存在。"
   },
   "meals": {
     "ingredientCount_one": "{{count}} 种食材",
@@ -1081,7 +1082,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "重置为原始",
-      "resetToast": "更改已重置。"
+      "resetToast": "更改已重置。",
+      "resetPendingToast": "已重置。原始内容将在下次同步时恢复。"
     },
     "iconLabel": "Icon",
     "iconSearchPlaceholder": "搜索图标",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "下一个文档：{{name}}",
     "emptyFolderTitle": "“{{name}}”是空的",
     "viewerImageFallbackHint": "无法显示此图片。请下载后打开。",
-    "moreDetailsHint": "说明和状态"
+    "moreDetailsHint": "说明和状态",
+    "subjectLabel": "涉及",
+    "subjectHint": "不会更改可查看文档的人。",
+    "subjectNoAccess": "{{name}} 无法打开此文档，也不会收到提醒。",
+    "personFilterLabel": "人员",
+    "personFilterAll": "所有人员"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "文件只有标题行没有任何经期。",
     "errorCycleImportTooManyRows": "一次导入最多 {{limit}} 个经期。请拆分文件。",
     "errorVitalImpossible": "这个数值不可能。请检查输入。",
-    "errorVitalBpOrder": "收缩压必须高于舒张压。"
+    "errorVitalBpOrder": "收缩压必须高于舒张压。",
+    "errorVitalUnit": "这个单位不适用于此测量。"
   },
   "housekeeping": {
     "title": "家务",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "只有进入任务的清单才能设置人员。",
     "syncAssigneeNotMember": "这里只能选择家庭成员。",
     "syncAssigneeUnknown": "此人已不存在。请重新加载页面。",
-    "permDetails": "小组件和其他权限"
+    "permDetails": "小组件和其他权限",
+    "connectionFailedDetail": "连接失败:{{error}}",
+    "documentStorageChangeFailed": "更改未应用:{{error}}",
+    "apiTokenCopyFailed": "无法复制。请选中令牌并手动复制。",
+    "weatherLocateDenied": "不允许访问您的位置。请在浏览器设置中允许,或手动输入地点。",
+    "weatherLocateFailed": "无法确定您的位置。请手动输入地点。",
+    "outlookAutoSyncOverrides": "Outlook 无法同步带有已关联单个例外的系列。请关闭其目标日历,以便在此继续编辑。您无需删除任何例外。",
+    "memberRemoveOwnAccount": "您无法移除自己的账户。",
+    "memberRemoveLastAdmin": "至少必须保留一名管理员。",
+    "memberRemoveLastSsoAdmin": "这是最后一名关联 SSO 的管理员。请先关联另一名管理员。",
+    "backupWebdavUrlInvalid": "地址必须以 http:// 或 https:// 开头。",
+    "icsSubscriptionGone": "此订阅已不存在。"
   },
   "subscriptions": {
     "tabLabel": "订阅",

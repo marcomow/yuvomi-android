@@ -364,4 +364,91 @@ class DocumentLogicTest {
         assertEquals("42", item.key)
         assertEquals("42", DocumentBodies.dmsLink(1, item)["dms_document_id"]!!.jsonPrimitive.content)
     }
+
+    // ── Who a document is about, lead time (2.84.0: DOCS-A18 to A20) ──
+
+    private fun about(id: Int, person: Int?, name: String? = null, category: String = "identity", folder: Int? = null, expires: String? = null, lead: Int? = null) =
+        doc(id, category = category, folder = folder, expires = expires).copy(subjectUserId = person, subjectName = name, expiryReminderDays = lead)
+
+    private val members = listOf(DocumentPerson(1, "Alex"), DocumentPerson(2, "Linda", avatarData = "data:x"), DocumentPerson(3, "Emma"))
+
+    @Test fun `DOCS-A20 the chip and the deadline filter follow the document's own lead time`() {
+        // 2026-11-02 + 60 days = 2027-01-01.
+        val ninety = about(1, null, expires = "2027-01-01", lead = 90)
+        val seven = about(2, null, expires = "2026-11-23", lead = 7) // 21 days ahead
+        val none = about(3, null, expires = "2026-11-23")
+        val zeroToday = about(4, null, expires = "2026-11-02", lead = 0)
+        val zeroTomorrow = about(5, null, expires = "2026-11-03", lead = 0)
+        val expired = about(6, null, expires = "2026-10-01", lead = 0)
+        assertEquals(DocumentRules.DateState.EXPIRING, DocumentRules.expiryStatus(ninety, today)!!.state)
+        assertEquals(DocumentRules.DateState.VALID, DocumentRules.expiryStatus(seven, today)!!.state)
+        assertEquals(DocumentRules.DateState.EXPIRING, DocumentRules.expiryStatus(none, today)!!.state)
+        assertEquals(DocumentRules.DateState.EXPIRING, DocumentRules.expiryStatus(zeroToday, today)!!.state)
+        assertEquals(DocumentRules.DateState.VALID, DocumentRules.expiryStatus(zeroTomorrow, today)!!.state)
+        assertEquals(DocumentRules.DateState.EXPIRED, DocumentRules.expiryStatus(expired, today)!!.state)
+        assertEquals(30, DocumentRules.expiryLeadDays(none))
+        assertEquals(0, DocumentRules.expiryLeadDays(zeroToday))
+        assertNull(DocumentRules.expiryChip(DocumentRules.expiryStatus(seven, today)))
+        assertEquals("documents.expiringShort", DocumentRules.expiryChip(DocumentRules.expiryStatus(ninety, today))!!.shortKey)
+        val docs = listOf(ninety, seven, none, zeroToday, zeroTomorrow, expired)
+        val filter = DocumentRules.Filter(expiringSoon = true)
+        assertEquals(listOf(1, 3, 4, 6), DocumentRules.visible(docs, emptyList(), filter, "updated", "asc", today).map { it.id }.sorted())
+        assertEquals(4, DocumentRules.expiringCount(docs, emptyList(), DocumentRules.Filter(), today))
+        assertNull(DocumentRules.expiryStatus(about(7, null), today))
+    }
+
+    @Test fun `DOCS-A19 the person filter narrows the list and every facet`() {
+        val docs = listOf(
+            about(1, 2, "Linda", category = "identity", folder = 1, expires = "2026-11-10"),
+            about(2, 3, "Emma", category = "school", folder = 1),
+            about(3, null, category = "identity"),
+            about(4, 2, "Linda", category = "medical", folder = 2),
+        )
+        val folders = listOf(DocumentFolder(1, "Home"), DocumentFolder(2, "Car"))
+        // In the household's order, each once; nobody without a document.
+        assertEquals(listOf(2, 3), DocumentRules.subjectPeople(docs, members).map { it.id })
+        val linda = DocumentRules.subjectPeople(docs, members).first()
+        assertEquals("Linda", linda.displayName)
+        assertEquals("data:x", linda.avatarData)
+        // A chosen person missing from the view stays in the menu; no subjects and none chosen: no chip.
+        assertEquals(listOf(1), DocumentRules.personFilterPeople(listOf(docs[2]), members, 1).map { it.id })
+        assertTrue(DocumentRules.personFilterPeople(listOf(docs[2]), members, null).isEmpty())
+
+        val f = DocumentRules.Filter(personId = 2)
+        assertTrue(f.hasFacet)
+        assertEquals(listOf(1, 4), DocumentRules.visible(docs, folders, f, "updated", "asc", today).map { it.id }.sorted())
+        val categories = DocumentRules.categoryCounts(docs, folders, f)
+        assertEquals(2, categories[""])
+        assertEquals(1, categories["identity"])
+        assertNull(categories["school"])
+        assertEquals(listOf("medical", "identity"), DocumentRules.presentCategories(docs, folders, f))
+        val byFolder = DocumentRules.folderCounts(docs, folders, f)
+        assertEquals(1, byFolder["1"])
+        assertEquals(1, byFolder["2"])
+        assertEquals(0, byFolder[DocumentRules.FOLDER_NONE])
+        assertEquals(1, DocumentRules.expiringCount(docs, folders, f, today))
+        assertFalse(DocumentRules.showsExpiringChip(docs, folders, DocumentRules.Filter(personId = 3), today))
+        // A folder with a person is a filtered view, not the plain empty folder.
+        assertEquals(EmptyKind.NoMatch, EmptyKind.of(DocumentRules.Filter(folderId = "1", personId = 2), folders, 0))
+    }
+
+    @Test fun `DOCS-A18 the subject is sent always and the no-access preview follows documentVisibleSql`() {
+        val form = DocumentForm(name = "Passport", subjectUserId = 3)
+        assertEquals(3, DocumentBodies.payload(form)["subject_user_id"]!!.jsonPrimitive.content.toInt())
+        assertEquals(JsonNull, DocumentBodies.payload(form.copy(subjectUserId = null))["subject_user_id"])
+        assertEquals(2, DocumentForm.of(about(1, 2, "Linda")).subjectUserId)
+        // Nobody chosen, the filer, the whole family or a chosen member may open it.
+        assertTrue(DocumentRules.subjectMayOpen(null, 1, "private", emptySet()))
+        assertTrue(DocumentRules.subjectMayOpen(1, 1, "private", emptySet()))
+        assertTrue(DocumentRules.subjectMayOpen(3, 1, "family", emptySet()))
+        assertTrue(DocumentRules.subjectMayOpen(3, 1, "restricted", setOf(3)))
+        assertFalse(DocumentRules.subjectMayOpen(3, 1, "restricted", setOf(2)))
+        assertFalse(DocumentRules.subjectMayOpen(3, 1, "private", setOf(3)))
+        // The row's subject decodes from the list answer.
+        val decoded = DocumentsApi.decodeDocuments(
+            """{"data":[{"id":5,"name":"Passport","subject_user_id":3,"subject_name":"Emma","subject_color":"#F00"}]}""",
+        ).single()
+        assertEquals(DocumentPerson(3, "Emma", "#F00", null), DocumentRules.subject(decoded, emptyList()))
+        assertNull(DocumentRules.subject(doc(6), members))
+    }
 }

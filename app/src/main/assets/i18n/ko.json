@@ -745,7 +745,8 @@
     "checkAllSubtasks": "모두 완료로 표시",
     "subtasksAllDone": "'{{title}}'와 모든 하위 작업을 완료했습니다.",
     "seriesDoneNamed": "'{{title}}' 완료 - 다음: {{date}}",
-    "kanbanRestore": "복원"
+    "kanbanRestore": "복원",
+    "errorTagGone": "이 태그는 더 이상 존재하지 않습니다."
   },
   "meals": {
     "ingredientCount_one": "재료 {{count}}개",
@@ -1091,7 +1092,8 @@
     "timeSuffix": "",
     "ics": {
       "reset": "원본으로 되돌리기",
-      "resetToast": "변경 사항이 초기화되었습니다."
+      "resetToast": "변경 사항이 초기화되었습니다.",
+      "resetPendingToast": "초기화했습니다. 원래 내용은 다음 동기화 때 돌아옵니다."
     },
     "iconLabel": "아이콘",
     "iconSearchPlaceholder": "아이콘 검색",
@@ -2861,7 +2863,12 @@
     "viewerNextNamed": "다음 문서: {{name}}",
     "emptyFolderTitle": "\"{{name}}\" 폴더가 비어 있습니다",
     "viewerImageFallbackHint": "이 이미지를 표시할 수 없습니다. 다운로드하여 여세요.",
-    "moreDetailsHint": "설명 및 상태"
+    "moreDetailsHint": "설명 및 상태",
+    "subjectLabel": "대상",
+    "subjectHint": "문서를 볼 수 있는 사람은 바뀌지 않습니다.",
+    "subjectNoAccess": "{{name}}님은 이 문서를 열 수 없으므로 알림을 받지 않습니다.",
+    "personFilterLabel": "사람",
+    "personFilterAll": "모든 사람"
   },
   "health": {
     "fasting": {
@@ -3828,7 +3835,8 @@
     "errorCycleImportNoRows": "파일에 머리글 행만 있고 생리 기간이 없습니다.",
     "errorCycleImportTooManyRows": "한 번에 최대 {{limit}}개의 생리 기간만 가져올 수 있습니다. 파일을 나누세요.",
     "errorVitalImpossible": "불가능한 값입니다. 입력한 내용을 확인해 주세요.",
-    "errorVitalBpOrder": "수축기 값은 이완기 값보다 커야 합니다."
+    "errorVitalBpOrder": "수축기 값은 이완기 값보다 커야 합니다.",
+    "errorVitalUnit": "이 단위는 이 측정에 사용할 수 없습니다."
   },
   "housekeeping": {
     "title": "가사 도우미",
@@ -6139,7 +6147,18 @@
     "reminderListAssigneesTasksOnly": "사람은 할 일로 가는 목록에만 정할 수 있습니다.",
     "syncAssigneeNotMember": "여기서는 가구 구성원만 고를 수 있습니다.",
     "syncAssigneeUnknown": "이 사람은 더 이상 없습니다. 페이지를 새로 고치세요.",
-    "permDetails": "위젯 및 기타 권한"
+    "permDetails": "위젯 및 기타 권한",
+    "connectionFailedDetail": "연결 실패: {{error}}",
+    "documentStorageChangeFailed": "변경 사항이 적용되지 않았습니다: {{error}}",
+    "apiTokenCopyFailed": "복사하지 못했습니다. 토큰을 선택해 직접 복사하세요.",
+    "weatherLocateDenied": "위치 접근이 허용되지 않았습니다. 브라우저 설정에서 허용하거나 장소를 직접 입력하세요.",
+    "weatherLocateFailed": "위치를 확인할 수 없습니다. 장소를 직접 입력하세요.",
+    "outlookAutoSyncOverrides": "Outlook은 연결된 단일 예외가 있는 시리즈를 동기화할 수 없습니다. 여기에서 계속 편집할 수 있도록 대상 캘린더를 끄세요. 예외를 삭제할 필요는 없습니다.",
+    "memberRemoveOwnAccount": "내 계정은 제거할 수 없습니다.",
+    "memberRemoveLastAdmin": "관리자는 최소 한 명 남아 있어야 합니다.",
+    "memberRemoveLastSsoAdmin": "SSO에 연결된 마지막 관리자입니다. 먼저 다른 관리자를 연결하세요.",
+    "backupWebdavUrlInvalid": "주소는 http:// 또는 https://로 시작해야 합니다.",
+    "icsSubscriptionGone": "이 구독은 더 이상 존재하지 않습니다."
   },
   "subscriptions": {
     "tabLabel": "구독",
