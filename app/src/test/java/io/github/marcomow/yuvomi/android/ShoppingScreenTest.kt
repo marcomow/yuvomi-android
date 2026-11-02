@@ -163,7 +163,9 @@ class ShoppingScreenTest {
         compose.onNodeWithText(strings.t("shopping.catFruitVeg")).assertExists()
         compose.onNodeWithText(strings.t("shopping.tickedSection")).assertExists()
         compose.onAllNodesWithText("Bread").fetchSemanticsNodes().let { assertTrue(it.isEmpty()) }
-        compose.onNodeWithText("2 l · organic").assertExists()
+        compose.onNodeWithText("2 l").assertExists()
+        // TAGS-R13: the item's tag is a chip that opens the Tags view.
+        compose.onNodeWithText("#organic").assertExists()
 
         // Optimistic: the row says "uncheck" before the server has answered.
         compose.onNodeWithContentDescription(strings.t("shopping.markDoneLabel", "name" to "Milk")).performClick()

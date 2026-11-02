@@ -114,7 +114,7 @@ object WasteErrors {
     fun caseMessage(reason: String?, params: Map<String, Long>): WasteMessage? {
         val key = CASES[reason ?: return null] ?: return null
         val names = PARAMS[reason] ?: return WasteMessage(key)
-        val args = names.associateWith { name -> params[name] ?: KNOWN_PARAMS[reason]?.get(name) }
+        val args = names.associateWith { name -> params[name]?.toInt() ?: KNOWN_PARAMS[reason]?.get(name) }
         return if (args.values.any { it == null }) null else WasteMessage(key, args)
     }
 
