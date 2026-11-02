@@ -25,7 +25,7 @@ import io.github.marcomow.yuvomi.feature.signin.SignInViewModel
 
 /** Chooses sign-in, the version block, or the signed-in shell from the session state. */
 @Composable
-fun YuvomiRoot(container: AppContainer, deepLinkTask: Int?, onDeepLinkHandled: () -> Unit) {
+fun YuvomiRoot(container: AppContainer, deepLink: String?, onDeepLinkHandled: () -> Unit) {
     val strings by container.strings.collectAsState()
     val state by container.session.state.collectAsState()
 
@@ -55,7 +55,7 @@ fun YuvomiRoot(container: AppContainer, deepLinkTask: Int?, onDeepLinkHandled: (
                         if (s.session.verdict == VersionGate.Verdict.TOO_OLD) {
                             TooOldScreen(container, s.session)
                         } else {
-                            MainShell(container, s, deepLinkTask, onDeepLinkHandled)
+                            MainShell(container, s, deepLink, onDeepLinkHandled)
                         }
                     }
                 }

@@ -27,6 +27,16 @@ After that, the app updates itself: open your account (the avatar at the top rig
 **Install** when a newer version is shown, and allow the app to install updates the first time
 Android asks. It checks on its own about twice a day unless you switch "Check automatically" off.
 
+## Widgets
+
+Two home-screen widgets (long-press the home screen, then Widgets, then Yuvomi):
+
+- **Tasks** shows your open tasks, overdue and due today first. Tick one off right there.
+- **Shopping** shows the open items of the list you last opened in the app. Check one off there.
+
+They use the app's own sign-in and show nothing while you are signed out
+([spec](docs/spec/widgets.md), [ADR 0020](docs/adr/0020-home-screen-widgets.md)).
+
 ## What is native
 
 - Sign in with your Yuvomi username and password, plus your second factor if you use one.

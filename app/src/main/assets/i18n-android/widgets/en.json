@@ -1,0 +1,11 @@
+{
+  "android": {
+    "widgets": {
+      "signedOut": "Sign in to Yuvomi to see this here.",
+      "loadFailed": "Could not be read. Tap to open Yuvomi.",
+      "stale": "Not up to date",
+      "more": "{{count}} more",
+      "more_one": "{{count}} more"
+    }
+  }
+}

@@ -2,4 +2,7 @@
 <!-- Only what Android itself reads. UI strings come from upstream (ADR 0011). -->
 <resources>
     <string name="app_name">Yuvomi</string>
+    <!-- The widget picker's descriptions (docs/spec/widgets.md, WIDGETS-R7). -->
+    <string name="widget_tasks_description">Your open tasks, overdue and due today first</string>
+    <string name="widget_shopping_description">The open items of your shopping list</string>
 </resources>

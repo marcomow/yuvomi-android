@@ -84,7 +84,7 @@ private data class Destination(val route: String, val prefixes: List<String>, va
  * ADR 0010, ADR 0015).
  */
 @Composable
-fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLinkTask: Int?, onDeepLinkHandled: () -> Unit) {
+fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLink: String?, onDeepLinkHandled: () -> Unit) {
     val session = state.session
     val connection = container.session.connection ?: return
     val strings = LocalStrings.current
@@ -123,9 +123,10 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLinkTas
         lastResume = now
     }
 
-    LaunchedEffect(deepLinkTask) {
-        if (deepLinkTask != null) {
-            nav.navigate(Routes.task(deepLinkTask))
+    // A task link (TASKS-R27) or a widget's row (WIDGETS-R2, R3).
+    LaunchedEffect(deepLink) {
+        if (deepLink != null) {
+            nav.navigate(deepLink)
             onDeepLinkHandled()
         }
     }

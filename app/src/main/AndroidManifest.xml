@@ -30,6 +30,19 @@
                 <data android:scheme="yuvomi-android" android:host="tasks" />
             </intent-filter>
         </activity>
+        <!-- Home-screen widgets (docs/spec/widgets.md). -->
+        <receiver android:name=".feature.widgets.TasksWidgetReceiver" android:exported="false" android:label="@string/widget_tasks_description">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/tasks_widget_info" />
+        </receiver>
+        <receiver android:name=".feature.widgets.ShoppingWidgetReceiver" android:exported="false" android:label="@string/widget_shopping_description">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data android:name="android.appwidget.provider" android:resource="@xml/shopping_widget_info" />
+        </receiver>
         <!-- Documents' "Open with" and "Share" hand a cached copy to another app. -->
         <provider
             android:name="androidx.core.content.FileProvider"
