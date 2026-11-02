@@ -24,4 +24,3 @@ POST /api/v1/split-expenses/groups/{id}/recurring
 PUT /api/v1/split-expenses/recurring/{id}
 DELETE /api/v1/split-expenses/recurring/{id}
 POST /api/v1/split-expenses/recurring/{id}/pause
-GET /api/v1/budget/meta

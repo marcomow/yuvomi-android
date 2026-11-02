@@ -5,8 +5,8 @@ import io.github.marcomow.yuvomi.core.api.ApiOperation
 /**
  * The upstream operations the budget page's SplitExpenses tab calls (docs/spec/splitexpenses.md). Must
  * match `upstream/operations-used.d/splitexpenses.txt` exactly (ContractFilesTest).
- * The household members come from Meals' `FAMILY_MEMBERS` (`GET /family/members`); `BUDGET_META`
- * (the budget's expense categories) is under Budget's path.
+ * The household members come from core `Operation.FAMILY_MEMBERS`, the budget's expense
+ * categories from `BudgetOperation.META`.
  */
 enum class SplitExpensesOperation(override val method: String, override val template: String) : ApiOperation {
     META("GET", "/api/v1/split-expenses/meta"),
@@ -35,5 +35,4 @@ enum class SplitExpensesOperation(override val method: String, override val temp
     RECURRING_UPDATE("PUT", "/api/v1/split-expenses/recurring/{id}"),
     RECURRING_DELETE("DELETE", "/api/v1/split-expenses/recurring/{id}"),
     RECURRING_PAUSE("POST", "/api/v1/split-expenses/recurring/{id}/pause"),
-    BUDGET_META("GET", "/api/v1/budget/meta"),
 }

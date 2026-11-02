@@ -1,9 +1,10 @@
 package io.github.marcomow.yuvomi.feature.splitexpenses
 
 import io.github.marcomow.yuvomi.core.api.ApiJson
+import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decodeData
-import io.github.marcomow.yuvomi.feature.meals.MealsOperation
+import io.github.marcomow.yuvomi.feature.budget.BudgetOperation
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -40,7 +41,7 @@ class SplitApi(private val client: YuvomiClient) {
         client.call(SplitExpensesOperation.MEMBERS, gid(id)).decodeData(ListSerializer(SplitPerson.serializer()))
 
     suspend fun familyMembers(): List<SplitPerson> =
-        client.call(MealsOperation.FAMILY_MEMBERS).decodeData(ListSerializer(SplitPerson.serializer()))
+        client.call(Operation.FAMILY_MEMBERS).decodeData(ListSerializer(SplitPerson.serializer()))
 
     suspend fun candidates(id: Int): List<MemberCandidate> =
         client.call(SplitExpensesOperation.MEMBER_CANDIDATES, gid(id)).decodeData(ListSerializer(MemberCandidate.serializer()))
@@ -121,7 +122,7 @@ class SplitApi(private val client: YuvomiClient) {
 
     /** The budget's expense categories; a member without Budget read gets none (`.catch(() => null)`). */
     suspend fun budgetCategories(): List<BudgetCategory> =
-        client.call(SplitExpensesOperation.BUDGET_META).decodeData(BudgetMeta.serializer()).expenseCategories
+        client.call(BudgetOperation.META).decodeData(BudgetMeta.serializer()).expenseCategories
 
     private fun pagination(answer: JsonElement): Pagination =
         (answer as? JsonObject)?.get("pagination")?.let { runCatching { ApiJson.decodeFromJsonElement(Pagination.serializer(), it) }.getOrNull() } ?: Pagination()
