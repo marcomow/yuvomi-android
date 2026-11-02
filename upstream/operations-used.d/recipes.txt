@@ -1,3 +1,9 @@
 # The upstream operations of docs/spec/recipes.md, as `METHOD /api/v1/path` with
 # OpenAPI path templates. Must match the module's operation enum exactly
 # (ContractFilesTest); the weekly sync report checks every line.
+PUT /api/v1/recipes/{id}
+DELETE /api/v1/recipes/{id}
+GET /api/v1/recipes/{id}/image
+GET /api/v1/recipes/{id}/provider-thumbnail
+PUT /api/v1/recipes/{id}/ingredient-match
+POST /api/v1/recipes/{id}/to-shopping-list

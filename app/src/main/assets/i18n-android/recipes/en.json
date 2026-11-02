@@ -1,0 +1,10 @@
+{
+  "android": {
+    "recipes": {
+      "readOnly": "You have read-only access to this module - changes aren't possible.",
+      "imageType": "Use a PNG, JPEG or WebP image.",
+      "imageFileTooLarge": "Image file is too large.",
+      "imageRead": "Could not read the selected image."
+    }
+  }
+}
