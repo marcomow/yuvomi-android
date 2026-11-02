@@ -1,5 +1,9 @@
 {
   "android": {
-    "birthdays": {}
+    "birthdays": {
+      "loadError": "Birthdays could not be loaded.",
+      "photoTooLarge": "This picture is too large.",
+      "photoType": "Choose a PNG, JPEG or WebP picture."
+    }
   }
 }

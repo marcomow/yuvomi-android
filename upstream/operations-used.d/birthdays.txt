@@ -1,0 +1,12 @@
+# The upstream operations of docs/spec/birthdays.md, as `METHOD /api/v1/path` with
+# OpenAPI path templates. Must match the module's operation enum exactly
+# (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/birthdays
+POST /api/v1/birthdays
+PUT /api/v1/birthdays/{id}
+DELETE /api/v1/birthdays/{id}
+GET /api/v1/birthdays/import/candidates
+POST /api/v1/birthdays/import
+GET /api/v1/birthdays/feed
+POST /api/v1/birthdays/feed/regenerate
+DELETE /api/v1/birthdays/feed
