@@ -1,0 +1,17 @@
+GET /api/v1/budget/subscriptions
+POST /api/v1/budget/subscriptions
+PUT /api/v1/budget/subscriptions/{id}
+DELETE /api/v1/budget/subscriptions/{id}
+POST /api/v1/budget/subscriptions/{id}/renew
+POST /api/v1/budget/subscriptions/{id}/renew/undo
+GET /api/v1/budget/subscriptions/meta
+PUT /api/v1/budget/subscriptions/meta/order
+GET /api/v1/budget/subscriptions/settings
+PUT /api/v1/budget/subscriptions/settings
+POST /api/v1/budget/subscriptions/categories
+PUT /api/v1/budget/subscriptions/categories/{id}
+DELETE /api/v1/budget/subscriptions/categories/{id}
+POST /api/v1/budget/subscriptions/payment-methods
+PUT /api/v1/budget/subscriptions/payment-methods/{id}
+DELETE /api/v1/budget/subscriptions/payment-methods/{id}
+POST /api/v1/budget/subscriptions/logo-search

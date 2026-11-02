@@ -1,5 +1,11 @@
 {
   "android": {
-    "splitexpenses": {}
+    "splitexpenses": {
+      "conflict": "This could not be done in the current state. Groups with expenses or payments can only be archived.",
+      "dateFormat": "Choose a valid date.",
+      "emailInUse": "This e-mail address already belongs to another account.",
+      "groupArchived": "This group is archived. Restore it to make changes.",
+      "passwordShort": "The password must be at least 8 characters long."
+    }
   }
 }

@@ -1,5 +1,10 @@
 {
   "android": {
-    "subscriptions": {}
+    "subscriptions": {
+      "intervalRange": "Enter a whole number from 1 to 365.",
+      "moreDetails": "More details",
+      "reminderRange": "Enter a whole number of days from 0 to 365.",
+      "removeLogo": "Remove logo"
+    }
   }
 }
