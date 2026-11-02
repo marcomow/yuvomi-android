@@ -10,6 +10,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Apps
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Dashboard
+import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -127,14 +128,30 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLinkTas
     val tasks = Destination(Routes.TASKS, listOf("tasks", "task/", "editor"), "nav.tasks", Icons.Outlined.CheckCircle)
         .takeIf { session.access("tasks") != "none" }
     val more = Destination(Routes.MORE, listOf("more"), "nav.more", Icons.Outlined.Apps)
-    // The bar and the rail hold Overview, Tasks, the BAR modules and More; "More" lists the rest.
-    val barDestinations = listOfNotNull(overview, tasks) +
-        Features.all.filter { it.placement == Placement.BAR }.mapNotNull(::feature) + more
+    val current = nav.currentBackStackEntryAsState().value?.destination?.route
+
+    // The bar and the rail: Overview, the member's three slots (BarSlots), More.
+    val shown = shell.shownModules()
+    val slots = BarSlots.bar(session.preferences, shown)
+    val kitchenFeatures = Features.all.filter { it.id in BarSlots.KITCHEN_MODULES }
+    var lastKitchen by rememberSaveable { mutableStateOf<String?>(null) }
+    LaunchedEffect(current) {
+        kitchenFeatures.firstOrNull { f -> f.routePrefixes.any { current?.startsWith(it) == true } }?.let { lastKitchen = it.id }
+    }
+    fun slot(id: String): Destination? = when (id) {
+        "tasks" -> tasks
+        BarSlots.KITCHEN -> BarSlots.kitchenTarget(lastKitchen, shown)
+            ?.let { target -> kitchenFeatures.first { it.id == target } }
+            ?.let { target ->
+                Destination(target.startRoute, kitchenFeatures.flatMap { it.routePrefixes }, "nav.kitchen", Icons.Outlined.Restaurant)
+            }
+        else -> Features.all.firstOrNull { it.id == id }?.let(::feature)
+    }
+    val barDestinations = listOf(overview) + slots.mapNotNull(::slot) + more
 
     CompositionLocalProvider(LocalShell provides shell) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val wide = maxWidth >= 600.dp
-            val current = nav.currentBackStackEntryAsState().value?.destination?.route
             val destinations = barDestinations
             val selected = destinations.firstOrNull { d -> d.prefixes.any { current?.startsWith(it) == true } }?.route
                 ?: Routes.MORE.takeIf { current != null && current != Routes.OVERVIEW }

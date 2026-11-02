@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.OpenInNew
+import androidx.compose.material.icons.outlined.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
@@ -22,29 +23,45 @@ import io.github.marcomow.yuvomi.core.design.ModuleCatalog
 import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.t
 import io.github.marcomow.yuvomi.feature.Features
+import io.github.marcomow.yuvomi.feature.settings.SettingsRoutes
 
 /**
- * "More": the native modules that are not in the bar (ADR 0015), then every module the member
- * may open that is not native yet; those open in the browser (ADR 0006).
+ * "More": the native modules that are not in the bar, in the member's navigation order and without
+ * the ones they hide (BarSlots), a way to change the bar, then any module that only the web app has
+ * (third-party extensions); those open in the browser (ADR 0006).
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreScreen() {
     val shell = LocalShell.current
-    val native = Features.all.filter { it.placement == Placement.MORE && shell.shows(it.id) }
-    val modules = ModuleCatalog.all.filter { m -> m.id !in Features.nativeIds && shell.shows(m.id) }
+    val prefs = shell.session.preferences
+    val shown = shell.shownModules()
+    // Everything not in the bar, in the member's navigation order (BarSlots).
+    val native = BarSlots.more(prefs, shown, BarSlots.bar(prefs, shown)).mapNotNull { id ->
+        val m = ModuleCatalog.get(id) ?: return@mapNotNull null
+        val route = if (id == "tasks") "tasks" else Features.all.firstOrNull { it.id == id }?.startRoute ?: return@mapNotNull null
+        m to route
+    }
+    val modules = ModuleCatalog.all.filter { m -> m.id !in Features.nativeIds && m.id !in prefs.hiddenModules && shell.shows(m.id) }
     Column(Modifier.fillMaxSize()) {
         TopAppBar(
             title = { Text(t("nav.more")) },
             actions = { AccountButton() },
         )
         LazyColumn(Modifier.fillMaxSize()) {
-            items(native, key = { "native-" + it.id }) { f ->
-                val m = ModuleCatalog.get(f.id) ?: return@items
+            items(native, key = { "native-" + it.first.id }) { (m, route) ->
                 ListItem(
                     headlineContent = { Text(t(m.labelKey)) },
                     leadingContent = { ModuleBadge(m.icon, Yuvomi.colors.module(m.tone)) },
-                    modifier = Modifier.clickable { shell.navigate(f.startRoute) },
+                    modifier = Modifier.clickable { shell.navigate(route) },
+                )
+            }
+            item(key = "customise-bar") {
+                ListItem(
+                    headlineContent = { Text(t("android.more.customiseBar")) },
+                    supportingContent = { Text(t("settings.mobileNavigationHint")) },
+                    leadingContent = { Icon(Icons.Outlined.Tune, contentDescription = null) },
+                    modifier = Modifier.clickable { shell.navigate(SettingsRoutes.leaf("modules-navigation")) },
                 )
             }
             if (modules.isNotEmpty()) item(key = "web-header") {

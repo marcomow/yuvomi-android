@@ -24,6 +24,14 @@ class ShellContext(
     val navigate: (route: String) -> Unit = {},
 ) {
     /** Whether the member sees module [id]: not switched off for the household, and some access (ADR 0006). */
+    /**
+     * The module ids the member can open natively: Tasks, then every native module [shows]
+     * allows (kitchen modules individually). The bar and "More" are drawn from this.
+     */
+    fun shownModules(): List<String> =
+        listOfNotNull("tasks".takeIf { session.access("tasks") != "none" }) +
+            io.github.marcomow.yuvomi.feature.Features.all.map { it.id }.filter(::shows)
+
     fun shows(id: String): Boolean {
         val module = io.github.marcomow.yuvomi.core.design.ModuleCatalog.get(id) ?: return false
         return id !in session.preferences.disabledModules &&

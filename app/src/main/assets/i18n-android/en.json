@@ -18,7 +18,8 @@
       "unsupported": "This server does not offer this anymore. The app may need an update."
     },
     "more": {
-      "hint": "These parts of Yuvomi are not in the app yet. They open in your browser."
+      "hint": "These parts of Yuvomi are not in the app yet. They open in your browser.",
+      "customiseBar": "Customise the bar"
     },
     "nav": {
       "webApp": "Web app"

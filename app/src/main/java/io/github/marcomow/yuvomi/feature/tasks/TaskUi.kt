@@ -55,6 +55,7 @@ import io.github.marcomow.yuvomi.core.i18n.Strings
 import io.github.marcomow.yuvomi.core.i18n.t
 import io.github.marcomow.yuvomi.core.time.HouseholdTime
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
+import io.github.marcomow.yuvomi.feature.tags.TagChip
 import java.time.LocalDate
 
 /** TASKS-R7: `label_key` through upstream's strings when present, else `name`. */
@@ -147,13 +148,6 @@ private fun Meta(icon: ImageVector?, text: String?, description: String? = null)
             if (icon != null) Spacer(Modifier.width(2.dp))
             Text(text, style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
         }
-    }
-}
-
-@Composable
-fun TagChip(tag: String, color: Color = Yuvomi.colors.module("tasks")) {
-    Surface(shape = RoundedCornerShape(50), color = color.copy(alpha = 0.12f)) {
-        Text(tag, style = MaterialTheme.typography.labelSmall, color = color, modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp))
     }
 }
 

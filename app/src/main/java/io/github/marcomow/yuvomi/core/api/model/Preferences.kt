@@ -14,4 +14,10 @@ data class Preferences(
     @SerialName("dashboard_today_glance") val dashboardTodayGlance: FlexBool = true,
     @SerialName("tasks_default_visibility") val tasksDefaultVisibility: String = "all",
     @SerialName("tasks_default_locked") val tasksDefaultLocked: FlexBool = false,
+    /** The member's three phone-bar slots (`resolveMobileNavOrder`); empty means the defaults. */
+    @SerialName("mobile_nav_order") val mobileNavOrder: List<String> = emptyList(),
+    /** Modules the member keeps out of their navigation (per member, unlike [disabledModules]). */
+    @SerialName("hidden_modules") val hiddenModules: List<String> = emptyList(),
+    /** The member's (else the household's) navigation order. */
+    @SerialName("module_order") val moduleOrder: List<String> = emptyList(),
 )
