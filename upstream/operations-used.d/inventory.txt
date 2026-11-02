@@ -1,0 +1,26 @@
+# The upstream operations of docs/spec/inventory.md, as `METHOD /api/v1/path` with
+# OpenAPI path templates. Must match the module's operation enum exactly
+# (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/inventory/items
+POST /api/v1/inventory/items
+GET /api/v1/inventory/items/{id}
+PUT /api/v1/inventory/items/{id}
+DELETE /api/v1/inventory/items/{id}
+GET /api/v1/inventory/items/{id}/history
+POST /api/v1/inventory/items/{id}/entries
+DELETE /api/v1/inventory/items/{id}/entries/{entryId}
+POST /api/v1/inventory/items/{id}/dates/{dateId}/complete
+GET /api/v1/inventory/categories
+POST /api/v1/inventory/categories
+PATCH /api/v1/inventory/categories/reorder
+PUT /api/v1/inventory/categories/{key}
+DELETE /api/v1/inventory/categories/{key}
+GET /api/v1/inventory/locations
+POST /api/v1/inventory/locations
+PATCH /api/v1/inventory/locations/reorder
+PUT /api/v1/inventory/locations/{id}
+DELETE /api/v1/inventory/locations/{id}
+POST /api/v1/inventory/locations/{parentId}/subcategories
+PATCH /api/v1/inventory/locations/{parentId}/subcategories/reorder
+PUT /api/v1/inventory/locations/{parentId}/subcategories/{id}
+DELETE /api/v1/inventory/locations/{parentId}/subcategories/{id}

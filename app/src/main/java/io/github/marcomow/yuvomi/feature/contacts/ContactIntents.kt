@@ -4,6 +4,7 @@ import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import androidx.core.net.toUri
 
 /**
  * The web app's `tel:`, `mailto:` and OpenStreetMap links as Android intents (CONT-R6):
@@ -11,17 +12,17 @@ import android.net.Uri
  * and a maps app (or the browser) with the address.
  */
 object ContactIntents {
-    fun dialIntent(raw: String): Intent = Intent(Intent.ACTION_DIAL, Uri.parse("tel:" + Uri.encode(ContactPhones.dial(raw), "+*#")))
+    fun dialIntent(raw: String): Intent = Intent(Intent.ACTION_DIAL, ("tel:" + Uri.encode(ContactPhones.dial(raw), "+*#")).toUri())
 
-    fun emailIntent(address: String): Intent = Intent(Intent.ACTION_SENDTO, Uri.parse("mailto:" + Uri.encode(address, "@.+-_")))
+    fun emailIntent(address: String): Intent = Intent(Intent.ACTION_SENDTO, ("mailto:" + Uri.encode(address, "@.+-_")).toUri())
 
     /** A `geo:` search where a maps app exists, else the web app's OpenStreetMap search. */
     fun mapsIntents(address: String): List<Intent> = listOf(
-        Intent(Intent.ACTION_VIEW, Uri.parse("geo:0,0?q=" + Uri.encode(address))),
-        Intent(Intent.ACTION_VIEW, Uri.parse(ContactsRules.mapsUrl(address))),
+        Intent(Intent.ACTION_VIEW, ("geo:0,0?q=" + Uri.encode(address)).toUri()),
+        Intent(Intent.ACTION_VIEW, ContactsRules.mapsUrl(address).toUri()),
     )
 
-    fun webIntent(url: String): Intent = Intent(Intent.ACTION_VIEW, Uri.parse(ContactsRules.externalHref(url)))
+    fun webIntent(url: String): Intent = Intent(Intent.ACTION_VIEW, ContactsRules.externalHref(url).toUri())
 
     /** Starts the first intent some app answers; false when none does. */
     fun start(context: Context, vararg intents: Intent): Boolean {
