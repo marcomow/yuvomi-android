@@ -1,6 +1,11 @@
 # Spec: Pantry
 
-Status: draft · Upstream checked: 2.83.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.83.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+
+Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/pantry/` (`PantryView`, `PantryStatus`,
+`PantryUnits` and `PantryText` are the pure ports; `PantryViewModel` the list, `PantryEditor`,
+`PantryLocations` the other two screens). Routes: `pantry?filter={filter}` (the list, also
+`PantryRoutes.START`), `pantry/item?id={id}` (editor), `pantry/locations` (manager).
 
 ## Purpose
 
@@ -53,7 +58,8 @@ them; only a 405 does.
 
 ## Requirements
 
-Status: all requirements below are built unless noted.
+Status: all requirements below are built. Where the app knowingly differs from the web page, the
+requirement says so ("Differs:").
 
 ### List
 
@@ -94,7 +100,7 @@ Status: all requirements below are built unless noted.
   then `filterExpired`, `filterSoon`, `filterLow` (low includes out) with counts, each only when
   it has hits; then one chip per storage location that holds a batch, in location order, with
   the number of batches. The row is hidden when there is no chip besides "All" or no batch. An
-  active chip that loses its last hit falls back to "All". The route `pantry?filter=expired|soon|low`
+  active chip that loses its last hit falls back to "All". The route `pantry?filter=expired|soon|low` (`PantryRoutes.filtered`)
   opens with that chip (`pantryFilterFromSearch`).
 - **PANTRY-R9** With a chip the list is flat (`flatItems`): a place by name, best-before (none
   last), id; expired and soon by best-before; low by quantity ascending.
@@ -134,6 +140,8 @@ Status: all requirements below are built unless noted.
   at once and offers `common.undo` with `pantry.deleted` (`scheduleUndoableDelete`); only when the
   snackbar ends does `DELETE /pantry/{itemId}` go out. Leaving the screen does not lose it. A
   failure brings the row back and says why. Product totals ignore a batch in its undo window.
+  Differs: chip counts and searches ignore it too (upstream keeps counting it until the commit),
+  and a 404 on the commit (someone else deleted it) reloads the list as well.
 - **PANTRY-R15** A product without batches is deleted the same way (swipe, or Delete in its row
   menu) with `DELETE /pantry/products/{productId}`; a `409 pantry_product_has_batches` brings it
   back with `pantry.errorProductHasStock` and reloads (`removeProduct`).
@@ -174,7 +182,8 @@ Status: all requirements below are built unless noted.
   `category.deleted`, as upstream configures the shared manager. Upstream shows the server's
   English text for a duplicate name (409) and the last location (400); the app says
   `android.pantry.locationExists` and `android.pantry.locationLast`. The stock reloads after
-  every change.
+  every change. Differs: the web app's drag handle is left out; the row menu's move up and down
+  (which upstream offers too) do the same.
 
 ### Errors and offline
 
@@ -186,29 +195,34 @@ Status: all requirements below are built unless noted.
   `android.error.unsupported`; anything else `common.errorGeneric`.
 - **PANTRY-R22** Offline with a cached answer: the list shows read-only under the offline
   banner; every write says `common.errorOfflineMutation` and changes nothing (ADR 0007).
+  Differs: the PWA does not cache `/pantry` (it is not in `API_CACHE_WHITELIST`); the app caches
+  every module's last answer as ADR 0007 decides.
 
 ## Acceptance criteria
 
 | ID | Given / When / Then | Level | Status |
 |---|---|---|---|
-| PANTRY-A1 | Given the seeded server as `alex` then `GET /pantry` decodes with batches, products, locations and categories. | contract | |
-| PANTRY-A2 | Given the units then steps, rounding (0.1 + 0.2), clamping and the inflected label ("6 cans", "1 can", "1.5 kg", raw unknown unit) match `pantry-units.js`. | unit | |
-| PANTRY-A3 | Given today 2026-11-01 then expiry status and phrases for 10-30, 10-31, 11-01, 11-02, 11-05, 11-08, 11-09 and stock status for out, low and fine match `pantry-status.js`. | unit | |
-| PANTRY-A4 | Given batches and products then sections, product order, batch order, shapes and totals match `productSections`. | unit | |
-| PANTRY-A5 | Given batches then chips, counts, place chips and the fallback to "All" match `renderFilters`. | unit | |
-| PANTRY-A6 | Given a chip then the flat order matches `flatItems`; search matches name, note and place. | unit | |
-| PANTRY-A7 | Given a new batch then create, full edit, quantity patch and delete answer as the app expects, and the deleted batch is a 404. | contract | |
-| PANTRY-A8 | Given a product without batches then its delete is a 204; with a batch it is a 409 `pantry_product_has_batches`. | contract | |
-| PANTRY-A9 | Given a new location then it lists, renames, reorders and deletes (orphaning its batch); a duplicate name is a 409. | contract | |
-| PANTRY-A10 | Given a low batch then import-pantry adds it with the shortfall, a second time skips it, and undo-transfer removes it. | contract | |
-| PANTRY-A11 | Given the list on screen when plus is tapped three times then one `PATCH` goes out with the final quantity. | ui | |
-| PANTRY-A12 | Given `pantry: read` then the list shows no FAB and no stepper, and a tap opens the details. | ui | |
-| PANTRY-A13 | Given the editor's form then create sends the web app's payload with an `Idempotency-Key`. | ui | |
-| PANTRY-A14 | Given a deleted batch when undo is not used then one `DELETE` goes out after the snackbar; with undo none. | ui | |
-| PANTRY-A15 | Given several shopping lists when the cart is used then the picker asks, the transfer names the list, and undo sends the `added_ids`. | ui | |
+| PANTRY-A1 | Given the seeded server as `alex` then `GET /pantry` decodes with batches, products, locations and categories. | contract | written, runs in CI (`PantryContractTest`) |
+| PANTRY-A2 | Given the units then steps, rounding (0.1 + 0.2), clamping and the inflected label ("6 cans", "1 can", "1.5 kg", raw unknown unit) match `pantry-units.js`. | unit | passing (`PantryLogicTest`) |
+| PANTRY-A3 | Given today 2026-11-01 then expiry status and phrases for 10-30, 10-31, 11-01, 11-02, 11-05, 11-08, 11-09 and stock status for out, low and fine match `pantry-status.js`. | unit | passing (`PantryLogicTest`) |
+| PANTRY-A4 | Given batches and products then sections, product order, batch order, shapes and totals match `productSections`. | unit | passing (`PantryLogicTest`) |
+| PANTRY-A5 | Given batches then chips, counts, place chips and the fallback to "All" match `renderFilters`. | unit | passing (`PantryLogicTest`) |
+| PANTRY-A6 | Given a chip then the flat order matches `flatItems`; search matches name, note and place. | unit | passing (`PantryLogicTest`) |
+| PANTRY-A7 | Given a new batch then create, full edit, quantity patch and delete answer as the app expects, and the deleted batch is a 404. | contract | written, runs in CI (`PantryContractTest`) |
+| PANTRY-A8 | Given a product without batches then its delete is a 204; with a batch it is a 409 `pantry_product_has_batches`. | contract | written, runs in CI (`PantryContractTest`) |
+| PANTRY-A9 | Given a new location then it lists, renames, reorders and deletes (orphaning its batch); a duplicate name is a 409. | contract | written, runs in CI (`PantryContractTest`) |
+| PANTRY-A10 | Given a low batch then import-pantry adds it with the shortfall, a second time skips it, and undo-transfer removes it. | contract | written, runs in CI (`PantryContractTest`) |
+| PANTRY-A11 | Given the list on screen when plus is tapped three times then one `PATCH` goes out with the final quantity. | ui | passing (`PantryScreenTest`) |
+| PANTRY-A12 | Given `pantry: read` then the list shows no FAB and no stepper, and a tap opens the details. | ui | passing (`PantryScreenTest`) |
+| PANTRY-A13 | Given the editor's form then create sends the web app's payload with an `Idempotency-Key`. | ui | passing (`PantryScreenTest`) |
+| PANTRY-A14 | Given a product without batches deleted from its row menu when undo is used then no `DELETE` goes out; without undo one goes out after the snackbar. Batches share the same path. | ui | passing (`PantryScreenTest`) |
+| PANTRY-A15 | Given several shopping lists when the cart is used then the picker asks, the transfer names the list, and undo sends the `added_ids`. | ui | passing (`PantryScreenTest`) |
+| PANTRY-A16 | Given seeded-like stock then the screen shows category sections, a product's total, places and badges, its batches when opened, and a flat list under a chip. | ui | passing (`PantryScreenTest`) |
 
 ## Strings
 
 Upstream keys from `pantry`, `kitchen`, `common`, `shopping` (`cat*`, `errorListGone`),
 `category` and `emptyHint`. App-only, in `app/src/main/assets/i18n-android/pantry/en.json`:
-`android.pantry.locationExists`, `android.pantry.locationLast`. The "more details" fold is upstream's `modal.moreDetails`.
+`android.pantry.locationExists`, `android.pantry.locationLast`. The "more details" fold is
+upstream's `modal.moreDetails`; the date picker confirms with `common.confirm` and clears with
+`datepicker.clear`.

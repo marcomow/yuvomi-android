@@ -91,6 +91,8 @@ private fun Swipeable(onDelete: (() -> Unit)?, content: @Composable () -> Unit) 
             scope.launch { state.reset() }
         },
         backgroundContent = {
+            // Only while swiping: a hidden "Delete" would otherwise be read out with every row.
+            if (state.dismissDirection != SwipeToDismissBoxValue.EndToStart) return@SwipeToDismissBox
             Box(
                 Modifier
                     .fillMaxSize()

@@ -305,9 +305,9 @@ fun PantryEditorScreen(list: PantryViewModel, itemId: Int?, close: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun <T> Picker(label: String, value: String, options: List<Pair<T, String>>, modifier: Modifier = Modifier.fillMaxWidth(), onPick: (T) -> Unit) {
+private fun <T> Picker(label: String, value: String, options: List<Pair<T, String>>, modifier: Modifier = Modifier, onPick: (T) -> Unit) {
     var open by remember { mutableStateOf(false) }
-    ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }, modifier = modifier) {
+    ExposedDropdownMenuBox(expanded = open, onExpandedChange = { open = it }, modifier = modifier.fillMaxWidth()) {
         OutlinedTextField(
             value = value,
             onValueChange = {},

@@ -100,7 +100,7 @@ class PantryViewModel(
     fun refresh(pulled: Boolean = false) {
         val api = api ?: return
         val startedAt = ++loadSeq
-        _state.update { it.copy(refreshing = pulled, errorKey = null) }
+        _state.update { it.copy(refreshing = pulled, errorKey = null, loading = it.loading || it.errorKey != null) }
         viewModelScope.launch {
             try {
                 val json = api.stock()
