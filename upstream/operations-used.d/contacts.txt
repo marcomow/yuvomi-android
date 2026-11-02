@@ -1,0 +1,17 @@
+# The upstream operations of docs/spec/contacts.md, as `METHOD /api/v1/path` with
+# OpenAPI path templates. Must match the module's operation enum exactly
+# (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/contacts
+POST /api/v1/contacts
+GET /api/v1/contacts/meta
+GET /api/v1/contacts/categories
+POST /api/v1/contacts/categories
+PATCH /api/v1/contacts/categories/reorder
+PUT /api/v1/contacts/categories/{key}
+DELETE /api/v1/contacts/categories/{key}
+GET /api/v1/contacts/{id}
+PUT /api/v1/contacts/{id}
+DELETE /api/v1/contacts/{id}
+GET /api/v1/contacts/{id}/vcard
+PUT /api/v1/birthdays/{id}
+POST /api/v1/birthdays/import

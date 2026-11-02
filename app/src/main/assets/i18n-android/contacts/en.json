@@ -1,5 +1,8 @@
 {
   "android": {
-    "contacts": {}
+    "contacts": {
+      "exported": "vCard saved.",
+      "noApp": "No app on this device can do that."
+    }
   }
 }
