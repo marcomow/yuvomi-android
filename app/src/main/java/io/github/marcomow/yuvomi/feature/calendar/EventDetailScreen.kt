@@ -3,6 +3,7 @@ package io.github.marcomow.yuvomi.feature.calendar
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -181,7 +182,7 @@ fun EventDetailScreen(back: () -> Unit, edit: () -> Unit) {
                 // `mapRowAction`: an OpenStreetMap search, only when tapped (#1110).
                 TextButton(onClick = {
                     val url = "https://www.openstreetmap.org/search?query=" + Uri.encode(flatLocation(loc))
-                    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+                    runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, url.toUri())) }
                 }) {
                     Icon(Icons.Outlined.Map, null)
                     Spacer(Modifier.width(6.dp))
