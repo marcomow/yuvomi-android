@@ -39,7 +39,3 @@ GET /api/v1/budget/plans
 PUT /api/v1/budget/plans/{category}
 DELETE /api/v1/budget/plans/{category}
 GET /api/v1/budget/stats
-GET /api/v1/documents
-POST /api/v1/documents
-GET /api/v1/documents/{id}/preview
-GET /api/v1/documents/{id}/download

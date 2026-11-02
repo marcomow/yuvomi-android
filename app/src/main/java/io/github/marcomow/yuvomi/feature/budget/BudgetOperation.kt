@@ -56,8 +56,4 @@ enum class BudgetOperation(override val method: String, override val template: S
     STATS("GET", "/api/v1/budget/stats"),
 
     // Receipts are documents of the Documents module (#583, document-attach.js).
-    DOCUMENTS_LIST("GET", "/api/v1/documents"),
-    DOCUMENT_CREATE("POST", "/api/v1/documents"),
-    DOCUMENT_PREVIEW("GET", "/api/v1/documents/{id}/preview"),
-    DOCUMENT_DOWNLOAD("GET", "/api/v1/documents/{id}/download"),
 }

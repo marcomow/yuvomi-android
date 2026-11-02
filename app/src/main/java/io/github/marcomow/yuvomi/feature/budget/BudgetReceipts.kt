@@ -50,11 +50,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.t
+import io.github.marcomow.yuvomi.feature.documents.DocumentsOperation
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
+import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
 
 /** `isPreviewable` (`public/utils/document-preview.js`): images and PDFs open in the preview. */
 internal fun previewable(mime: String?): Boolean = mime != null && (mime.startsWith("image/") || mime == "application/pdf")
@@ -169,7 +170,7 @@ fun ReceiptLink(vm: BudgetViewModel, receipt: Receipt.Linked) {
     Row(
         Modifier.fillMaxWidth().clickable {
             if (!previewable(receipt.mimeType)) {
-                shell.openWeb(BudgetOperation.DOCUMENT_DOWNLOAD.path(mapOf("id" to receipt.documentId)))
+                shell.openWeb(DocumentsOperation.DOCUMENT_DOWNLOAD.path(mapOf("id" to receipt.documentId)))
                 return@clickable
             }
             scope.launch {
@@ -177,7 +178,7 @@ fun ReceiptLink(vm: BudgetViewModel, receipt: Receipt.Linked) {
                 pages = withContext(Dispatchers.IO) { render(bytes, receipt.mimeType, context.cacheDir) }
                 if (pages.isNullOrEmpty()) {
                     pages = null
-                    shell.openWeb(BudgetOperation.DOCUMENT_DOWNLOAD.path(mapOf("id" to receipt.documentId)))
+                    shell.openWeb(DocumentsOperation.DOCUMENT_DOWNLOAD.path(mapOf("id" to receipt.documentId)))
                 }
             }
         }.padding(vertical = 6.dp),

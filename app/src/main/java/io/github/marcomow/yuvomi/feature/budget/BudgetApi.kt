@@ -4,7 +4,7 @@ import io.github.marcomow.yuvomi.core.api.ApiJson
 import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decodeData
-import io.github.marcomow.yuvomi.feature.meals.MealsOperation
+import io.github.marcomow.yuvomi.feature.documents.DocumentsOperation
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -221,7 +221,7 @@ class BudgetApi(private val client: YuvomiClient) {
 
     /** `GET /family/members` (Meals' operation): the people a booking can be assigned to. */
     suspend fun members(): List<BudgetMember> {
-        val data = (client.call(MealsOperation.FAMILY_MEMBERS) as? JsonObject)?.get("data")
+        val data = (client.call(Operation.FAMILY_MEMBERS) as? JsonObject)?.get("data")
         val list = when (data) {
             is JsonArray -> data
             is JsonObject -> data["users"] as? JsonArray ?: JsonArray(emptyList())
@@ -233,11 +233,11 @@ class BudgetApi(private val client: YuvomiClient) {
     // ── Receipts (document-attach.js) ──
 
     suspend fun documents(): List<BudgetDocument> =
-        client.call(BudgetOperation.DOCUMENTS_LIST).decodeData(ListSerializer(BudgetDocument.serializer()))
+        client.call(DocumentsOperation.DOCUMENTS_LIST).decodeData(ListSerializer(BudgetDocument.serializer()))
 
     /** Uploads one receipt as `bindDocumentAttachField(...).commit()` does; returns its document id. */
     suspend fun uploadReceipt(name: String, originalName: String, dataUrl: String, folderName: String, idempotencyKey: String): BudgetDocument =
-        client.call(BudgetOperation.DOCUMENT_CREATE, body = buildJsonObject {
+        client.call(DocumentsOperation.DOCUMENT_CREATE, body = buildJsonObject {
             put("name", name)
             put("description", "")
             put("category", "finance")
@@ -252,10 +252,10 @@ class BudgetApi(private val client: YuvomiClient) {
 
     /** A receipt's bytes: `/preview` for images and PDFs, `/download` otherwise (`attachmentLinksNode`). */
     suspend fun receipt(id: Int, preview: Boolean): ByteArray =
-        client.bytes((if (preview) BudgetOperation.DOCUMENT_PREVIEW else BudgetOperation.DOCUMENT_DOWNLOAD).path(mapOf("id" to id)))
+        client.bytes((if (preview) DocumentsOperation.DOCUMENT_PREVIEW else DocumentsOperation.DOCUMENT_DOWNLOAD).path(mapOf("id" to id)))
 
     fun receiptWebPath(id: Int, preview: Boolean): String =
-        (if (preview) BudgetOperation.DOCUMENT_PREVIEW else BudgetOperation.DOCUMENT_DOWNLOAD).path(mapOf("id" to id))
+        (if (preview) DocumentsOperation.DOCUMENT_PREVIEW else DocumentsOperation.DOCUMENT_DOWNLOAD).path(mapOf("id" to id))
 
     companion object {
         fun nullable(value: Any?): JsonElement = when (value) {
