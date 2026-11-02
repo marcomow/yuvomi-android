@@ -100,7 +100,7 @@ class YuvomiClient(
                 throw ApiProblem.SessionExpired()
             }
             if (!it.isSuccessful) throw ApiProblem.Http(it.code, null, null)
-            return it.body.bytes()
+            return readBody { it.body.bytes() }
         }
     }
 
@@ -116,8 +116,20 @@ class YuvomiClient(
 
     private suspend fun execute(request: Request): Pair<Int, String> {
         val response = await(http.newCall(request))
-        return response.use { it.code to it.body.string() }
+        return response.use { it.code to readBody { it.body.string() } }
     }
+
+    /**
+     * Reading the body can fail after the headers arrived (a dropped connection, a truncated
+     * answer). That is a network failure like any other, not an exception the callers' `ApiProblem`
+     * handlers would miss.
+     */
+    private inline fun <T> readBody(read: () -> T): T =
+        try {
+            read()
+        } catch (e: IOException) {
+            throw ApiProblem.Network(e)
+        }
 
     private suspend fun await(call: Call): Response = suspendCancellableCoroutine { cont ->
         cont.invokeOnCancellation { call.cancel() }

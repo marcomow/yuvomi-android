@@ -13,6 +13,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
+import mockwebserver3.SocketEffect
 import okhttp3.OkHttpClient
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -140,6 +141,22 @@ class YuvomiClientTest {
             client.bytes("https://evil.example/x.png"); fail()
         } catch (e: IllegalArgumentException) {
             assertEquals(0, server.requestCount)
+        }
+    }
+
+    /** A connection that drops while the body is read is a network failure, not a crash. */
+    @Test fun `a body cut off mid-read is ApiProblem Network`() = runTest {
+        server.enqueue(
+            MockResponse.Builder().code(200).addHeader("Content-Type", "application/json")
+                .body("{\"data\":[" + "1,".repeat(50_000) + "1]}")
+                .onResponseBody(SocketEffect.ShutdownConnection)
+                .build(),
+        )
+        try {
+            client.call(Operation.TASKS_LIST)
+            fail("expected a network failure")
+        } catch (e: ApiProblem.Network) {
+            // expected
         }
     }
 }
