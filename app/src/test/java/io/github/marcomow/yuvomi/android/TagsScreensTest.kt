@@ -1,6 +1,7 @@
 package io.github.marcomow.yuvomi.android
 
 import androidx.compose.ui.test.hasSetTextAction
+import androidx.compose.ui.test.hasText
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
@@ -122,7 +123,9 @@ class TagsScreensTest {
         // Garden (task tag) + #garden (task text, note) + garden (shopping item tag): one tag, the most used spelling.
         compose.onNodeWithText("#Garden").assertDoesNotExist()
         compose.onNodeWithText("#compost").assertExists()
-        compose.onNodeWithText(strings.t("android.tags.notLoaded", "modules" to strings.t("nav.pantry"))).assertExists()
+        // Pantry answers 500; sources this test does not script (404) are named too.
+        val notLoaded = strings.t("android.tags.notLoaded", "modules" to "\u0000").substringBefore("\u0000")
+        compose.onNode(hasText(notLoaded, substring = true) and hasText(strings.t("nav.pantry"), substring = true)).assertExists()
         // Every task status, later starts included.
         val tasksRead = reads.first { it.startsWith("GET /api/v1/tasks?") }
         assertTrue(tasksRead, tasksRead.contains("status=open") && tasksRead.contains("status=done") && tasksRead.contains("include_future=1"))

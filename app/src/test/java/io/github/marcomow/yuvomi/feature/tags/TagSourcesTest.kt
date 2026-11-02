@@ -165,11 +165,14 @@ class TagSourcesTest {
 
     /** TAGS-R1: every native module without a source of its own elsewhere is registered. */
     @Test fun `registry lists the sources once each`() {
-        val ids = TagSources.all.map { it.moduleId }
-        assertEquals(ids.distinct(), ids)
+        // One object per source; Budget's page has three (budget, subscriptions, split expenses).
+        assertEquals(TagSources.all.distinct(), TagSources.all)
         assertEquals(
-            setOf("tasks", "calendar", "notes", "schedule", "meals", "recipes", "shopping", "pantry", "documents", "health", "budget"),
-            ids.toSet(),
+            setOf(
+                "tasks", "calendar", "notes", "schedule", "meals", "recipes", "shopping", "pantry", "documents", "health",
+                "budget", "rewards", "birthdays", "contacts", "inventory",
+            ),
+            TagSources.all.map { it.moduleId }.toSet(),
         )
     }
 }
