@@ -1,0 +1,31 @@
+# The upstream operations of docs/spec/calendar.md, as `METHOD /api/v1/path` with
+# OpenAPI path templates. Must match the module's operation enum exactly
+# (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/calendar
+POST /api/v1/calendar
+GET /api/v1/calendar/search
+GET /api/v1/calendar/holidays
+GET /api/v1/calendar/{id}
+PUT /api/v1/calendar/{id}
+DELETE /api/v1/calendar/{id}
+POST /api/v1/calendar/{id}/reset
+POST /api/v1/calendar/{id}/exceptions
+PUT /api/v1/calendar/{seriesId}/occurrences/{recurrenceId}
+DELETE /api/v1/calendar/{seriesId}/occurrences/{recurrenceId}
+PUT /api/v1/calendar/{seriesId}/occurrences/{recurrenceId}/following
+DELETE /api/v1/calendar/{seriesId}/occurrences/{recurrenceId}/following
+GET /api/v1/calendar/calendars
+POST /api/v1/calendar/calendars
+PATCH /api/v1/calendar/calendars/reorder
+PUT /api/v1/calendar/calendars/{id}
+DELETE /api/v1/calendar/calendars/{id}
+POST /api/v1/calendar/calendars/{id}/feed/regenerate
+DELETE /api/v1/calendar/calendars/{id}/feed
+GET /api/v1/calendar/sync-targets
+# Outside /calendar (the layers and reminders the page overlays and writes).
+GET /api/v1/reminders/all
+PUT /api/v1/reminders
+DELETE /api/v1/reminders
+GET /api/v1/schedule/entries
+GET /api/v1/waste/occurrences
+GET /api/v1/documents/{id}/preview
