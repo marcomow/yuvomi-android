@@ -51,10 +51,16 @@ one. How they are made: [RELEASING.md](docs/RELEASING.md).
   statistics; subscriptions and split expenses.
 - **Settings:** your account and two-factor sign-in, language and region, modules, family and
   permissions, notification channels, e-mail, backups and API tokens.
+- **Rewards:** points, requests, the rewards catalogue, pocket money and history.
+- **Birthdays, Contacts:** the birthday list with name days and the calendar feed; contacts
+  with call, e-mail and map buttons, categories, vCard import and export.
+- **Inventory, Housekeeping, Waste:** items with tracked dates and service logs; housekeeping
+  visits, chores, reports and payments; waste pickups, schedules, ICS sources and reminders.
+- **Tags:** everything that shares a tag, across modules. Tasks and shopping items have real
+  tags; anywhere else, a `#hashtag` in the text counts.
 - Everything else opens in your browser.
 
-Not native yet: notifications, single sign-on, Rewards, Birthdays, Contacts, Inventory,
-Housekeeping and Waste (in progress).
+Not native yet: notifications, single sign-on, third-party extension modules.
 
 ## How it is built
 

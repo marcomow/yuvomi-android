@@ -23,6 +23,13 @@ spec; fix whichever is wrong.
 | [Subscriptions](subscriptions.md) | Implemented | 2.83.0 |
 | [Split expenses](splitexpenses.md) | Implemented | 2.83.0 |
 | [Settings](settings.md) | Implemented | 2.83.0 |
+| [Rewards](rewards.md) | Implemented | 2.83.0 |
+| [Birthdays](birthdays.md) | Implemented | 2.83.0 |
+| [Contacts](contacts.md) | Implemented | 2.83.0 |
+| [Inventory](inventory.md) | Implemented | 2.83.0 |
+| [Housekeeping](housekeeping.md) | Implemented | 2.83.0 |
+| [Waste](waste.md) | Implemented | 2.83.0 |
+| [Tags](tags.md) | Implemented | 2.83.0 |
 
 Where each acceptance criterion is tested: see the `@Test` names and KDoc in `app/src/test/`,
 which carry the criterion IDs (`SIGNIN-A6`, `TASKS-A17`, ...). Criteria tagged **ui** are covered

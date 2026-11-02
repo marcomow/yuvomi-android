@@ -2,6 +2,7 @@ package io.github.marcomow.yuvomi.feature.tags
 
 import io.github.marcomow.yuvomi.feature.birthdays.BirthdaysTagSource
 import io.github.marcomow.yuvomi.feature.contacts.ContactsTagSource
+import io.github.marcomow.yuvomi.feature.housekeeping.HousekeepingTagSource
 import io.github.marcomow.yuvomi.feature.inventory.InventoryTagSource
 import io.github.marcomow.yuvomi.feature.rewards.RewardsTagSource
 import io.github.marcomow.yuvomi.feature.schedule.ScheduleTagSource
@@ -17,6 +18,7 @@ import io.github.marcomow.yuvomi.feature.tags.sources.PantryTagSource
 import io.github.marcomow.yuvomi.feature.tags.sources.RecipesTagSource
 import io.github.marcomow.yuvomi.feature.tags.sources.ShoppingTagSource
 import io.github.marcomow.yuvomi.feature.tags.sources.TasksTagSource
+import io.github.marcomow.yuvomi.feature.waste.WasteTagSource
 
 /**
  * Every module's [TagSource]. The Tags view groups by [TagIndex.moduleRank] (the order of
@@ -42,5 +44,7 @@ object TagSources {
         BirthdaysTagSource,
         ContactsTagSource,
         InventoryTagSource,
+        HousekeepingTagSource,
+        WasteTagSource,
     )
 }

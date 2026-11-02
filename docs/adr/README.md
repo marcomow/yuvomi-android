@@ -23,3 +23,4 @@ Template: **Status**, **Context**, **Decision**, **Consequences**, **Alternative
 | 0014 | [Continuous delivery of the APK](0014-continuous-delivery.md) | Accepted (supersedes parts of 0013) |
 | 0015 | [Five more native modules, each in its own package](0015-more-native-modules.md) | Accepted (widens 0010) |
 | 0016 | [Calendar, Schedule, Documents, Health, Budget and Settings native](0016-most-modules-native.md) | Accepted (extends 0015, replaces its rail rule) |
+| 0017 | [Every upstream module native, and a cross-module Tags view](0017-all-modules-native-and-tags.md) | Accepted (completes 0016) |

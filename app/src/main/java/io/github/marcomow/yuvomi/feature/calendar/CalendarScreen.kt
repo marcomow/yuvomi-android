@@ -152,14 +152,14 @@ fun CalendarScreen(openId: Int?, openEvent: () -> Unit, openEditor: () -> Unit, 
     val actions = CalendarActions(
         openEvent = { ev ->
             // Housekeeping visits are edited in their module (`openEventDetail`).
-            if (ev.housekeepingVisitId != null) shell.navigate(HousekeepingRoutes.START)
+            if (ev.housekeepingVisitId != null) shell.navigate(HousekeepingRoutes.visit(ev.housekeepingVisitId))
             else {
                 store.open(ev)
                 openEvent()
             }
         },
         openTask = { shell.navigate(Routes.task(it.id)) },
-        openWaste = { shell.navigate(WasteRoutes.START) },
+        openWaste = { w -> shell.navigate(w.typeId?.let { WasteRoutes.pickup(it, w.dateKey.ifBlank { null }) } ?: WasteRoutes.START) },
         openSchedule = { scheduleShown = it },
         openDay = { store.openDay(it) },
         select = { store.select(it) },

@@ -170,7 +170,7 @@ class TagSourcesTest {
         assertEquals(
             setOf(
                 "tasks", "calendar", "notes", "schedule", "meals", "recipes", "shopping", "pantry", "documents", "health",
-                "budget", "rewards", "birthdays", "contacts", "inventory",
+                "budget", "rewards", "birthdays", "contacts", "inventory", "housekeeping", "waste",
             ),
             TagSources.all.map { it.moduleId }.toSet(),
         )
