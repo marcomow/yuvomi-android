@@ -38,6 +38,11 @@ enum class Operation(override val method: String, override val template: String)
     MEALS_LIST("GET", "/api/v1/meals"),
     MEAL_CREATE("POST", "/api/v1/meals"),
     KITCHEN_SUMMARY("GET", "/api/v1/kitchen/summary"),
+
+    // Household directory and sync targets that several modules read.
+    FAMILY_MEMBERS("GET", "/api/v1/family/members"),
+    AUTH_USERS("GET", "/api/v1/auth/users"),
+    CALENDAR_SYNC_TARGETS("GET", "/api/v1/calendar/sync-targets"),
     ;
 
     override val isSignIn: Boolean get() = this == LOGIN || this == VERIFY_2FA

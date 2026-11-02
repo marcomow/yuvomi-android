@@ -1,11 +1,12 @@
 package io.github.marcomow.yuvomi.feature.health
 
 import io.github.marcomow.yuvomi.core.api.ApiOperation
+import io.github.marcomow.yuvomi.core.api.Operation
 
 /**
  * The upstream operations Health calls (docs/spec/health.md). Must match
  * `upstream/operations-used.d/health.txt` exactly (ContractFilesTest). The household's members
- * come from `MealsOperation.FAMILY_MEMBERS`, the cycle opt-in from the core `GET /preferences`.
+ * come from `Operation.FAMILY_MEMBERS`, the cycle opt-in from the core `GET /preferences`.
  */
 enum class HealthOperation(override val method: String, override val template: String) : ApiOperation {
     // Shared by every area: who the member may record for, and their default visibility.

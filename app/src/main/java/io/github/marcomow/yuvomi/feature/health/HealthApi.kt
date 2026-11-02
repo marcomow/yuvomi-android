@@ -4,7 +4,6 @@ import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decodeData
-import io.github.marcomow.yuvomi.feature.meals.MealsOperation
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.JsonElement
@@ -29,7 +28,7 @@ class HealthApi(private val client: YuvomiClient) {
 
     // ── Shared ──
 
-    suspend fun members(): List<HealthMember> = list(client.call(MealsOperation.FAMILY_MEMBERS), HealthMember.serializer())
+    suspend fun members(): List<HealthMember> = list(client.call(Operation.FAMILY_MEMBERS), HealthMember.serializer())
 
     suspend fun careFor(): List<Int> = list(client.call(HealthOperation.CAREGIVERS_ME), Int.serializer())
 

@@ -1,9 +1,9 @@
 package io.github.marcomow.yuvomi.feature.documents
 
 import io.github.marcomow.yuvomi.core.api.ApiJson
+import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decodeData
-import io.github.marcomow.yuvomi.feature.meals.MealsOperation
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
@@ -19,10 +19,10 @@ class DocumentsApi(private val client: YuvomiClient) {
     suspend fun meta(): JsonElement = client.call(DocumentsOperation.META_OPTIONS)
 
     /** `loadMembers`: who can be chosen ... */
-    suspend fun members(): JsonElement = client.call(MealsOperation.FAMILY_MEMBERS)
+    suspend fun members(): JsonElement = client.call(Operation.FAMILY_MEMBERS)
 
     /** ... and the names of whoever already has access (staff and guests included). */
-    suspend fun directory(): JsonElement = client.call(DocumentsOperation.AUTH_USERS)
+    suspend fun directory(): JsonElement = client.call(Operation.AUTH_USERS)
 
     suspend fun create(body: JsonObject, idempotencyKey: String): Document =
         client.call(DocumentsOperation.DOCUMENT_CREATE, body = body, idempotencyKey = idempotencyKey).decodeData(Document.serializer())

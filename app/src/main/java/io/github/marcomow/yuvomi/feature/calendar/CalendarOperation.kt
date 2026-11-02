@@ -1,13 +1,14 @@
 package io.github.marcomow.yuvomi.feature.calendar
 
 import io.github.marcomow.yuvomi.core.api.ApiOperation
+import io.github.marcomow.yuvomi.core.api.Operation
 
 /**
  * The upstream operations Calendar calls (docs/spec/calendar.md). Must match
  * `upstream/operations-used.d/calendar.txt` exactly (ContractFilesTest).
  *
  * Also used, from other enums: `Operation.PREFERENCES`, `Operation.TASKS_LIST` (the task layer)
- * and `MealsOperation.FAMILY_MEMBERS` (the people of the pickers and filters).
+ * and `Operation.FAMILY_MEMBERS` (the people of the pickers and filters).
  */
 enum class CalendarOperation(override val method: String, override val template: String) : ApiOperation {
     EVENTS_LIST("GET", "/api/v1/calendar"),
@@ -30,7 +31,6 @@ enum class CalendarOperation(override val method: String, override val template:
     CALENDAR_DELETE("DELETE", "/api/v1/calendar/calendars/{id}"),
     CALENDAR_FEED_REGENERATE("POST", "/api/v1/calendar/calendars/{id}/feed/regenerate"),
     CALENDAR_FEED_DELETE("DELETE", "/api/v1/calendar/calendars/{id}/feed"),
-    SYNC_TARGETS("GET", "/api/v1/calendar/sync-targets"),
 
     // Outside /calendar: the layers and reminders the web page reads and writes.
     REMINDERS_ALL("GET", "/api/v1/reminders/all"),

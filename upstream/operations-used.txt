@@ -40,3 +40,8 @@ POST /api/v1/recipes
 GET /api/v1/meals
 POST /api/v1/meals
 GET /api/v1/kitchen/summary
+
+# Shared household reads (several modules)
+GET /api/v1/family/members
+GET /api/v1/auth/users
+GET /api/v1/calendar/sync-targets

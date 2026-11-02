@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.i18n.t
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -209,7 +210,7 @@ fun PersonalTasksSection(ctx: SectionContext, openLeaf: (String) -> Unit) {
 @Composable
 fun PersonalCalendarSection(ctx: SectionContext) {
     val slots by ctx.vm.slots.collectAsState()
-    LaunchedEffect(Unit) { ctx.vm.load("calendar-sync-targets") { it.data(SettingsOperation.CALENDAR_SYNC_TARGETS) } }
+    LaunchedEffect(Unit) { ctx.vm.load("calendar-sync-targets") { it.data(Operation.CALENDAR_SYNC_TARGETS) } }
     val p = prefs(ctx) ?: return
     val targets = slots["calendar-sync-targets"]?.value?.obj()
     val saved = p.strings("calendar_default_reminders").mapNotNull { it.toIntOrNull() }.toSet()

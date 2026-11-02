@@ -19,5 +19,4 @@ enum class MealsOperation(override val method: String, override val template: St
     WEEK_TO_SHOPPING_LIST("POST", "/api/v1/meals/week-to-shopping-list"),
 
     /** Only the meal plan reads the household's members (the cook picker and its avatars). */
-    FAMILY_MEMBERS("GET", "/api/v1/family/members"),
 }

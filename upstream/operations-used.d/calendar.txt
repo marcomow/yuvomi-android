@@ -21,7 +21,6 @@ PUT /api/v1/calendar/calendars/{id}
 DELETE /api/v1/calendar/calendars/{id}
 POST /api/v1/calendar/calendars/{id}/feed/regenerate
 DELETE /api/v1/calendar/calendars/{id}/feed
-GET /api/v1/calendar/sync-targets
 # Outside /calendar (the layers and reminders the page overlays and writes).
 GET /api/v1/reminders/all
 PUT /api/v1/reminders

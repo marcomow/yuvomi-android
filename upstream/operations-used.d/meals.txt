@@ -10,4 +10,3 @@ PATCH /api/v1/meals/ingredients/{ingId}
 DELETE /api/v1/meals/ingredients/{ingId}
 POST /api/v1/meals/{id}/to-shopping-list
 POST /api/v1/meals/week-to-shopping-list
-GET /api/v1/family/members

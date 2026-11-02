@@ -7,7 +7,6 @@ import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decode
 import io.github.marcomow.yuvomi.core.api.decodeData
 import io.github.marcomow.yuvomi.feature.documents.DocumentsOperation
-import io.github.marcomow.yuvomi.feature.meals.MealsOperation
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -50,11 +49,11 @@ class CalendarApi(val client: YuvomiClient) {
 
     suspend fun calendars(): JsonElement = client.call(CalendarOperation.CALENDARS_LIST)
 
-    suspend fun members(): JsonElement = client.call(MealsOperation.FAMILY_MEMBERS)
+    suspend fun members(): JsonElement = client.call(Operation.FAMILY_MEMBERS)
 
     suspend fun preferences(): CalendarPrefs = client.call(Operation.PREFERENCES).decodeData(CalendarPrefs.serializer())
 
-    suspend fun syncTargets(): SyncTargets = client.call(CalendarOperation.SYNC_TARGETS).decodeData(SyncTargets.serializer())
+    suspend fun syncTargets(): SyncTargets = client.call(Operation.CALENDAR_SYNC_TARGETS).decodeData(SyncTargets.serializer())
 
     suspend fun reminders(eventId: Int): List<StoredReminder> =
         client.call(CalendarOperation.REMINDERS_ALL, query = reminderQuery(eventId)).decodeData(ListSerializer(StoredReminder.serializer()))

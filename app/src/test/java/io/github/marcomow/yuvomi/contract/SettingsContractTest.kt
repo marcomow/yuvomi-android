@@ -2,6 +2,7 @@ package io.github.marcomow.yuvomi.contract
 
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.api.AuthApi
+import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.feature.settings.ChannelForm
 import io.github.marcomow.yuvomi.feature.settings.PermissionDraft
@@ -14,6 +15,9 @@ import io.github.marcomow.yuvomi.feature.settings.int
 import io.github.marcomow.yuvomi.feature.settings.obj
 import io.github.marcomow.yuvomi.feature.settings.str
 import io.github.marcomow.yuvomi.feature.settings.strings
+import java.util.UUID
+import javax.crypto.Mac
+import javax.crypto.spec.SecretKeySpec
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonPrimitive
@@ -26,9 +30,6 @@ import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
-import java.util.UUID
-import javax.crypto.Mac
-import javax.crypto.spec.SecretKeySpec
 
 /**
  * docs/spec/settings.md against upstream's image at the pinned version, seeded by `seed-demo.js`.
@@ -178,7 +179,7 @@ class SettingsContractTest : ContractTestBase() {
         val alex = api("alex")
         val (id, username) = freshMember(alex)
         try {
-            assertTrue(alex.data(SettingsOperation.USERS).arr().any { it.obj().str("username") == username })
+            assertTrue(alex.data(Operation.AUTH_USERS).arr().any { it.obj().str("username") == username })
             val edited = alex.call(SettingsOperation.USER_UPDATE, mapOf("id" to id), body = buildJsonObject {
                 put("display_name", "Edited")
                 put("family_role", "child")
@@ -359,7 +360,7 @@ class SettingsContractTest : ContractTestBase() {
     @Test fun `SET-A36 sync targets read as lists`() = runBlocking {
         val alex = api("alex")
         assertTrue(alex.data(SettingsOperation.TASKS_SYNC_TARGETS).obj()["caldav"] is JsonArray)
-        val calendar = alex.data(SettingsOperation.CALENDAR_SYNC_TARGETS).obj()
+        val calendar = alex.data(Operation.CALENDAR_SYNC_TARGETS).obj()
         assertTrue(calendar["google"] is JsonArray && calendar["caldav"] is JsonArray)
     }
 

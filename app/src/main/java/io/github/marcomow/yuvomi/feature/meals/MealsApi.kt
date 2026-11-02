@@ -26,7 +26,7 @@ class MealsApi(private val client: YuvomiClient) {
     suspend fun recipes(): JsonElement = kitchen.recipes()
     suspend fun lists(): JsonElement = kitchen.shoppingLists()
     suspend fun categories(): JsonElement = kitchen.shoppingCategories()
-    suspend fun members(): JsonElement = client.call(MealsOperation.FAMILY_MEMBERS)
+    suspend fun members(): JsonElement = client.call(Operation.FAMILY_MEMBERS)
 
     suspend fun suggestions(query: String): List<MealSuggestion> =
         client.call(MealsOperation.SUGGESTIONS, query = listOf("q" to query)).decodeData(ListSerializer(MealSuggestion.serializer()))

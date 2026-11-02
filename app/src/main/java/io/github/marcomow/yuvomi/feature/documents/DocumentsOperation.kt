@@ -29,5 +29,4 @@ enum class DocumentsOperation(override val method: String, override val template
     DMS_PUSH("POST", "/api/v1/documents/dms/push"),
 
     /** The account directory: names of people a document is already shared with (#1207). */
-    AUTH_USERS("GET", "/api/v1/auth/users"),
 }

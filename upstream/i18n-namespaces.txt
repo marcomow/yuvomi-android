@@ -42,3 +42,4 @@ schedule
 settings
 subscriptions
 waste
+email

@@ -24,7 +24,6 @@ enum class SettingsOperation(override val method: String, override val template:
     PREFERENCES_UPDATE("PUT", "/api/v1/preferences"),
 
     // Family and roles (admin-family.js)
-    USERS("GET", "/api/v1/auth/users"),
     USER_CREATE("POST", "/api/v1/auth/users"),
     USER_UPDATE("PATCH", "/api/v1/auth/users/{id}"),
     USER_DELETE("DELETE", "/api/v1/auth/users/{id}"),
@@ -77,7 +76,6 @@ enum class SettingsOperation(override val method: String, override val template:
 
     // Module sheets: sync targets for new tasks and events (personal-tasks.js, personal-calendar.js)
     TASKS_SYNC_TARGETS("GET", "/api/v1/tasks/sync-targets"),
-    CALENDAR_SYNC_TARGETS("GET", "/api/v1/calendar/sync-targets"),
 
     // Default points and moving open tasks along (modules-rewards.js)
     TASKS_POINTS_AFFECTED("GET", "/api/v1/tasks/points/affected"),

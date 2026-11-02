@@ -39,6 +39,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.marcomow.yuvomi.core.api.ApiProblem
+import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.design.MemberAvatar
 import io.github.marcomow.yuvomi.core.design.Yuvomi
@@ -102,12 +103,12 @@ private const val OIDC_CONFIG = "oidc-config"
 fun FamilySection(ctx: SectionContext) {
     val slots by ctx.vm.slots.collectAsState()
     LaunchedEffect(Unit) {
-        ctx.vm.load(USERS) { it.data(SettingsOperation.USERS) }
+        ctx.vm.load(USERS) { it.data(Operation.AUTH_USERS) }
         ctx.vm.load(INVITES) { it.data(SettingsOperation.INVITES) }
         ctx.vm.load(TWO_FACTOR_OVERVIEW) { it.call(SettingsOperation.TWO_FACTOR_OVERVIEW) }
         ctx.vm.load(OIDC_CONFIG) { it.call(SettingsOperation.OIDC_CONFIG) }
     }
-    fun reloadUsers() = ctx.vm.load(USERS, force = true) { it.data(SettingsOperation.USERS) }
+    fun reloadUsers() = ctx.vm.load(USERS, force = true) { it.data(Operation.AUTH_USERS) }
     val usersSlot = slots[USERS]
     val users = usersSlot?.value.arr().map { it.obj() }
     val ssoAvailable = slots[OIDC_CONFIG]?.value?.obj()?.bool("enabled") == true
