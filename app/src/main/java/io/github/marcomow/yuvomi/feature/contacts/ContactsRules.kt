@@ -292,7 +292,7 @@ object ContactsRules {
 
     // ── Errors (friendly-error.js) ──
 
-    /** `CASE_PARAMS`: the limit the sentence names. The client keeps no `params`, so the pinned server's limits stand in. */
+    /** `CASE_PARAMS`: the limit the sentence names. The server's `params.limit` first; the pinned server's limits stand in when it sends none. */
     private val LIMITS = mapOf(
         "contacts_name_too_long" to 200,
         "contacts_phone_too_long" to 100,
@@ -354,7 +354,7 @@ object ContactsRules {
             http.status == 429 -> strings.t(CASES[http.reason] ?: "common.errorRateLimited")
             http.reason == "email_in_use" -> strings.t("common.emailInUse")
             http.reason in CASES -> {
-                val limit = LIMITS[http.reason]
+                val limit = http.params["limit"] ?: LIMITS[http.reason]?.toLong()
                 if (limit != null) strings.t(CASES.getValue(http.reason!!), "limit" to limit) else strings.t(CASES.getValue(http.reason!!))
             }
             http.operationUnsupported -> strings.t("android.error.unsupported")

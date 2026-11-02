@@ -9,8 +9,10 @@ sealed class ApiProblem(message: String? = null, cause: Throwable? = null) : Exc
      * The server answered with an error. [reason] is upstream's stable machine
      * reason (`tasks_task_not_found`, `task_locked`, ...); [serverMessage] is its
      * English `error` text, never shown to the user (ARCHITECTURE.md, rule 4).
+     * [params] are the whole numbers of the answer's `params` (a limit, a status), which a
+     * sentence may name ([FriendlyError]).
      */
-    class Http(val status: Int, val reason: String?, val serverMessage: String?) :
+    class Http(val status: Int, val reason: String?, val serverMessage: String?, val params: Map<String, Long> = emptyMap()) :
         ApiProblem("HTTP $status ${reason ?: ""} ${serverMessage ?: ""}".trim()) {
 
         /** A 405, or a 404 without a reason: the operation itself is gone (ARCHITECTURE.md, rule 6). */

@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.calendar
 
+import io.github.marcomow.yuvomi.feature.tags.HashtagText
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.Uri
@@ -312,7 +313,7 @@ private fun DetailRow(icon: ImageVector, label: String, value: String) {
         Spacer(Modifier.width(12.dp))
         Column {
             if (label.isNotEmpty()) Text(label, style = MaterialTheme.typography.labelMedium, color = Yuvomi.colors.textSecondary)
-            Text(value, style = MaterialTheme.typography.bodyMedium)
+            HashtagText(value, style = MaterialTheme.typography.bodyMedium)
         }
     }
 }

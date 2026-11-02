@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.calendar
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 
 /**
@@ -44,7 +45,10 @@ object CalendarErrors {
     }
 
     /** An i18n key for [e]; [fallback] is the place's general sentence. */
-    fun key(e: Throwable, fallback: String = "common.errorGeneric"): String = when (e) {
+    fun key(e: Throwable, fallback: String = "common.errorGeneric"): String =
+        FriendlyError.finish(e, keyBase(e, fallback), fallback)
+
+    private fun keyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> "common.errorRestoreInProgress"

@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.health
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 import java.time.DayOfWeek
@@ -226,7 +227,10 @@ object HealthErrors {
     /** `isGone`: the row is gone, the screen reloads. */
     fun isGone(e: Throwable): Boolean = e is ApiProblem.Http && e.status == 404 && e.reason != null
 
-    fun key(e: Throwable, fallback: String): String = when (e) {
+    fun key(e: Throwable, fallback: String): String =
+        FriendlyError.finish(e, keyBase(e, fallback), fallback)
+
+    private fun keyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason != null && e.reason in REASONS -> REASONS.getValue(e.reason)

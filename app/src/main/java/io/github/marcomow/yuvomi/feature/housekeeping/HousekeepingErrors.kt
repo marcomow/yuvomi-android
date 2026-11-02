@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.housekeeping
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 
 /**
@@ -41,7 +42,10 @@ object HousekeepingErrors {
     private val GONE = setOf(WORKER_GONE, VISIT_GONE, TASK_GONE, NO_OPEN_SESSION)
 
     /** The i18n key for [e]; [fallback] is the general sentence of the place. */
-    fun key(e: Throwable, fallback: String = FALLBACK): String = when (e) {
+    fun key(e: Throwable, fallback: String = FALLBACK): String =
+        FriendlyError.finish(e, keyBase(e, fallback), fallback)
+
+    private fun keyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> "common.errorRestoreInProgress"

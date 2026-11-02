@@ -82,6 +82,15 @@ class YuvomiClientTest {
         }
     }
 
+    @Test fun `an error keeps the whole numbers of its params`() = runTest {
+        server.enqueue(json("""{"error":"Too long.","reason":"calendar_name_invalid","params":{"limit":100,"text":"x","neg":-1,"frac":1.5}}""", 400))
+        try {
+            client.call(Operation.DASHBOARD); fail()
+        } catch (e: ApiProblem.Http) {
+            assertEquals(mapOf("limit" to 100L), e.params)
+        }
+    }
+
     @Test fun `a 401 at login is wrong credentials, not expiry`() = runTest {
         server.enqueue(json("""{"error":"Invalid credentials.","code":401}""", 401))
         try {

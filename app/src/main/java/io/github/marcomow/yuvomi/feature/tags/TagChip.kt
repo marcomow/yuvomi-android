@@ -29,7 +29,7 @@ fun TagChip(tag: String, modifier: Modifier = Modifier, onClick: (() -> Unit)? =
     val label = "#" + tag.removePrefix("#")
     val open = onClick ?: { shell.navigate(TagsRoutes.tag(tag)) }
     val description = t("android.tags.open", "tag" to tag.removePrefix("#"))
-    val tone = Yuvomi.colors.module("tasks")
+    val tone = tagTone()
     Surface(
         onClick = open,
         shape = RoundedCornerShape(50),

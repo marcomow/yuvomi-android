@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.notes
 
+import io.github.marcomow.yuvomi.feature.tags.rememberHashtagLinker
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -57,6 +58,8 @@ fun NoteMarkdownView(
     previewLines: Int? = null,
 ) {
     val linkColor = MaterialTheme.colorScheme.primary
+    val linker = rememberHashtagLinker()
+    val tagged: (AnnotatedString) -> AnnotatedString = if (previewLines == null) linker else { it -> it }
     val blocks = NoteMarkdown.parse(content)
     var budget = previewLines ?: Int.MAX_VALUE
     val doneLabel = t("notes.checklistDone")
@@ -66,7 +69,7 @@ fun NoteMarkdownView(
         for (block in blocks) {
             if (block !is NoteMarkdown.Check && budget <= 0) continue
             when (block) {
-                is NoteMarkdown.Check -> CheckRow(block, linkColor, onCheck, doneLabel, openLabel, toggleLabel)
+                is NoteMarkdown.Check -> CheckRow(block, linkColor, tagged, onCheck, doneLabel, openLabel, toggleLabel)
                 is NoteMarkdown.Paragraph -> {
                     val lines = if (previewLines != null) block.lines.take(budget) else block.lines
                     budget -= lines.size
@@ -74,7 +77,7 @@ fun NoteMarkdownView(
                         buildAnnotatedString {
                             lines.forEachIndexed { i, line ->
                                 if (i > 0) append('\n')
-                                append(styled(line, linkColor))
+                                append(tagged(styled(line, linkColor)))
                             }
                         },
                         maxLines = if (previewLines != null) lines.size.coerceAtLeast(1) else Int.MAX_VALUE,
@@ -84,7 +87,7 @@ fun NoteMarkdownView(
                 is NoteMarkdown.Heading -> {
                     budget -= 1
                     Text(
-                        styled(block.text, linkColor),
+                        tagged(styled(block.text, linkColor)),
                         style = when (block.level) {
                             1 -> MaterialTheme.typography.titleLarge
                             2 -> MaterialTheme.typography.titleMedium
@@ -99,7 +102,7 @@ fun NoteMarkdownView(
                     Row(Modifier.height(androidx.compose.foundation.layout.IntrinsicSize.Min)) {
                         Box(Modifier.width(3.dp).heightIn(min = 18.dp).background(Yuvomi.colors.border))
                         Text(
-                            styled(block.text, linkColor),
+                            tagged(styled(block.text, linkColor)),
                             color = Yuvomi.colors.textSecondary,
                             modifier = Modifier.padding(start = 8.dp),
                             maxLines = if (previewLines != null) 1 else Int.MAX_VALUE,
@@ -111,14 +114,14 @@ fun NoteMarkdownView(
                     budget -= 1
                     Row {
                         Text("•", modifier = Modifier.width(18.dp))
-                        Text(styled(block.text, linkColor), maxLines = if (previewLines != null) 1 else Int.MAX_VALUE, overflow = TextOverflow.Ellipsis)
+                        Text(tagged(styled(block.text, linkColor)), maxLines = if (previewLines != null) 1 else Int.MAX_VALUE, overflow = TextOverflow.Ellipsis)
                     }
                 }
                 is NoteMarkdown.Numbered -> {
                     budget -= 1
                     Row {
                         Text("${block.number}.", modifier = Modifier.width(26.dp))
-                        Text(styled(block.text, linkColor), maxLines = if (previewLines != null) 1 else Int.MAX_VALUE, overflow = TextOverflow.Ellipsis)
+                        Text(tagged(styled(block.text, linkColor)), maxLines = if (previewLines != null) 1 else Int.MAX_VALUE, overflow = TextOverflow.Ellipsis)
                     }
                 }
                 NoteMarkdown.Rule -> HorizontalDivider(Modifier.padding(vertical = 6.dp))
@@ -132,6 +135,7 @@ fun NoteMarkdownView(
 private fun CheckRow(
     block: NoteMarkdown.Check,
     linkColor: Color,
+    tagged: (AnnotatedString) -> AnnotatedString,
     onCheck: ((Int, Boolean, String) -> Unit)?,
     doneLabel: String,
     openLabel: String,
@@ -156,7 +160,7 @@ private fun CheckRow(
             modifier = Modifier.padding(end = 8.dp).size(22.dp),
         )
         Text(
-            styled(block.text, linkColor),
+            tagged(styled(block.text, linkColor)),
             textDecoration = if (block.checked) TextDecoration.LineThrough else null,
             color = if (block.checked) Yuvomi.colors.textSecondary else Color.Unspecified,
         )

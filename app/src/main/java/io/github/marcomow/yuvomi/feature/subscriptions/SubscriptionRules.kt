@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.subscriptions
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 import java.text.Collator
@@ -341,7 +342,10 @@ object SubscriptionErrors {
     private val GONE = setOf(SUBSCRIPTION_GONE, CATEGORY_GONE, METHOD_GONE, SELECTED_CATEGORY_GONE, SELECTED_METHOD_GONE, ACCOUNT_GONE)
 
     /** An i18n key for [e]; [fallback] is the general sentence of the place. */
-    fun key(e: Throwable, fallback: String = "common.unknownError"): String = when (e) {
+    fun key(e: Throwable, fallback: String = "common.unknownError"): String =
+        FriendlyError.finish(e, keyBase(e, fallback), fallback)
+
+    private fun keyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> "common.errorRestoreInProgress"

@@ -56,8 +56,8 @@ object DocumentErrors {
             e.reason == "restore_in_progress" -> Message("common.errorRestoreInProgress")
             e.status == 403 -> Message(REFUSALS[e.reason] ?: "common.errorNoPermission")
             e.status == 429 -> Message(CASES[e.reason] ?: "common.errorRateLimited")
-            // CASE_PARAMS: the server sends `params.limit`; it is the shared constant.
-            e.reason == "documents_folder_too_deep" -> Message(CASES.getValue(e.reason), mapOf("limit" to DocumentRules.MAX_FOLDER_DEPTH))
+            // CASE_PARAMS: the server's `params.limit`, else the shared constant.
+            e.reason == "documents_folder_too_deep" -> Message(CASES.getValue(e.reason), mapOf("limit" to (e.params["limit"] ?: DocumentRules.MAX_FOLDER_DEPTH)))
             e.reason != null && e.reason in CASES -> Message(CASES.getValue(e.reason))
             e.operationUnsupported -> Message("android.error.unsupported")
             else -> Message(fallback)

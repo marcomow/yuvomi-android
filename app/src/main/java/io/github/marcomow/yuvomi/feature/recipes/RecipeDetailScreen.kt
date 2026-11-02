@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.recipes
 
+import io.github.marcomow.yuvomi.feature.tags.HashtagText
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -148,7 +149,7 @@ fun RecipeDetailScreen(vm: RecipesViewModel, recipeId: Int, back: () -> Unit, ed
                             )
                         }
                         if (!recipe.notes.isNullOrEmpty()) {
-                            Section(t("recipes.notesLabel")) { Text(recipe.notes, style = MaterialTheme.typography.bodyMedium) }
+                            Section(t("recipes.notesLabel")) { HashtagText(recipe.notes, style = MaterialTheme.typography.bodyMedium) }
                         }
                         // The two ways out of the recipe, labelled, after seeing what is in it.
                         FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {

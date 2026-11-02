@@ -20,6 +20,11 @@ class Strings(
 
     /** Upstream's `t(key, params)`: plural when `count` is a number, then `{{name}}` filling. */
     fun t(key: String, args: Map<String, Any?> = emptyMap()): String {
+        if ('?' in key) {
+            // A sentence with the server's numbers ([FriendlyError.withArgs]).
+            val (plain, given) = io.github.marcomow.yuvomi.core.api.FriendlyError.decode(key)
+            return t(plain, given + args)
+        }
         val count = (args["count"] as? Number)?.toDouble()
         val template = if (count != null) resolvePlural(key, count) else lookup(key) ?: key
         val fill = { text: String -> fill(text, args) }

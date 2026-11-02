@@ -70,6 +70,11 @@ Everything else is read through the modules' own API classes (see R2).
 - **TAGS-R7** Tapping an item opens its native route (or its web path when it has no route).
 - **TAGS-R8** An item's other tags show as `TagChip`s; `TagChip(tag)` is a reusable composable
   that opens `TagsRoutes.tag(tag)`.
+- **TAGS-R13** Tags are tappable wherever an item shows them. A `#hashtag` in shown text
+  (`HashtagText`, or `linkHashtags` on styled text such as a note's Markdown) is a link to the
+  tag, except inside an existing link. Shopping rows show their real tags and hashtags as
+  `TagChips`. Covered: note view (not board previews, whose card is the tap target), recipe notes,
+  event details, shopping rows and an item's read view.
 - **TAGS-R9** Rename and delete are offered only for a real task tag (in `GET /tasks/tags`), when
   the member has `tasks: write` and is online (upstream: `openTagManager` returns when read-only).
 - **TAGS-R10** Rename: unchanged or empty name sends nothing (`_rename`); `.`/`..` are refused

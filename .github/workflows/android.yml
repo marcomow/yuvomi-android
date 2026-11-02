@@ -25,7 +25,9 @@ jobs:
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
       - name: Unit, Robolectric and contract-file tests
-        run: ./gradlew --no-daemon testDebugUnitTest
+        # A hung test prints the test workers' stacks after 12 minutes and fails at 20
+        # (app/build.gradle.kts), well before the job's own limit, so the reports are kept.
+        run: .github/scripts/test-watchdog.sh ./gradlew --no-daemon testDebugUnitTest
       - name: Lint
         run: ./gradlew --no-daemon lintDebug
       - name: Debug APK

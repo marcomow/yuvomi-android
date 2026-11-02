@@ -15,19 +15,29 @@ object Hashtags {
     private val hexColour = Regex("""[0-9a-fA-F]{3}|[0-9a-fA-F]{4}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8}""")
     private const val MAX_LEN = 64
 
+    /** A hashtag in a text: where it sits (including the `#`) and the tag without `#`. */
+    data class Found(val range: IntRange, val tag: String)
+
+    /** Every hashtag in [text] in order, repeats included, by the rules above. */
+    fun find(text: String?): List<Found> {
+        if (text.isNullOrEmpty() || '#' !in text) return emptyList()
+        return pattern.findAll(text).mapNotNull { m ->
+            val raw = m.groupValues[1]
+            val tag = raw.trimEnd('-', '_').take(MAX_LEN)
+            when {
+                tag.none { it.isLetter() } -> null
+                hexColour.matches(tag) && tag.any { it.isDigit() } -> null
+                // The `#` plus the kept characters; a trimmed tail is not part of the link.
+                else -> Found(m.range.first..(m.range.first + tag.length), tag)
+            }
+        }.toList()
+    }
+
     /** The hashtags in [texts], without `#`, first spelling kept per [TagKey]. */
     fun extract(vararg texts: String?): Set<String> {
         val seen = HashSet<String>()
         val out = LinkedHashSet<String>()
-        for (text in texts) {
-            if (text.isNullOrEmpty() || '#' !in text) continue
-            for (m in pattern.findAll(text)) {
-                val tag = m.groupValues[1].trimEnd('-', '_').take(MAX_LEN)
-                if (tag.none { it.isLetter() }) continue
-                if (hexColour.matches(tag) && tag.any { it.isDigit() }) continue
-                if (seen.add(TagKey.of(tag))) out += tag
-            }
-        }
+        for (text in texts) for (found in find(text)) if (seen.add(TagKey.of(found.tag))) out += found.tag
         return out
     }
 }

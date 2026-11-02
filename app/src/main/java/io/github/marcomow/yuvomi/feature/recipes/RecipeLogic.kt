@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.recipes
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 import io.github.marcomow.yuvomi.core.session.Session
@@ -302,7 +303,10 @@ object RecipeErrors {
         "recipes_selected_pantry_item_not_found", "meals_selected_recipe_not_found",
     )
 
-    fun key(e: Throwable, fallback: String = "common.errorGeneric"): String = when (e) {
+    fun key(e: Throwable, fallback: String = "common.errorGeneric"): String =
+        FriendlyError.finish(e, keyBase(e, fallback), fallback)
+
+    private fun keyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> "common.errorRestoreInProgress"

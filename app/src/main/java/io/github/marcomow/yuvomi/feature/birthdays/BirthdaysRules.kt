@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.birthdays
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 import java.text.Normalizer
@@ -250,7 +251,10 @@ object BirthdaysRules {
         "csrf_invalid" to "common.errorFormExpired",
     )
 
-    fun errorKey(e: Throwable, fallback: String = "common.errorGeneric"): String = when (e) {
+    fun errorKey(e: Throwable, fallback: String = "common.errorGeneric"): String =
+        FriendlyError.finish(e, errorKeyBase(e, fallback), fallback)
+
+    private fun errorKeyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> "common.errorRestoreInProgress"

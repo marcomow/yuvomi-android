@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.budget
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 
@@ -248,7 +249,10 @@ object BudgetText {
     }
 
     /** `errorSentence`. */
-    fun errorKey(e: Throwable, fallback: String = "common.errorGeneric"): String = knownKey(e) ?: fallback
+    fun errorKey(e: Throwable, fallback: String = "common.errorGeneric"): String =
+        FriendlyError.finish(e, errorKeyBase(e, fallback), fallback)
+
+    private fun errorKeyBase(e: Throwable, fallback: String): String = knownKey(e) ?: fallback
 
     /** `loadErrorSentence`, or null when it knows nothing better than the caller. */
     private fun loadErrorKey(e: Throwable): String? = when {

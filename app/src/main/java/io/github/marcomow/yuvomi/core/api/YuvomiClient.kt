@@ -86,7 +86,7 @@ class YuvomiClient(
             csrf.update((me.jsonObject["csrfToken"] as? JsonPrimitive)?.contentOrNull)
             return callOnce(op, params, query, body, idempotencyKey, csrfRetry = false)
         }
-        throw ApiProblem.Http(status, reason, message)
+        throw ApiProblem.Http(status, reason, message, FriendlyError.readParams(error?.get("params") as? JsonObject))
     }
 
     /** Raw bytes of a same-server resource, e.g. an avatar at `/api/v1/people/3/avatar?v=…`. */

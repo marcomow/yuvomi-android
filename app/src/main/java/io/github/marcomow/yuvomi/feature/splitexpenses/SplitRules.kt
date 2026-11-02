@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.splitexpenses
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 import io.github.marcomow.yuvomi.feature.subscriptions.BudgetMoney
@@ -300,7 +301,10 @@ object SplitRules {
  * one; a few cases the server answers without a reason get the app's own sentence here.
  */
 object SplitErrors {
-    fun key(e: Throwable, fallback: String = "common.unexpectedError"): String = when (e) {
+    fun key(e: Throwable, fallback: String = "common.unexpectedError"): String =
+        FriendlyError.finish(e, keyBase(e, fallback), fallback)
+
+    private fun keyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> "common.errorRestoreInProgress"

@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.meals
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 
 /**
@@ -8,7 +9,10 @@ import io.github.marcomow.yuvomi.core.api.ApiProblem
  * what only the app has (a meal deleted from another device, an operation the server lost).
  */
 object MealsErrors {
-    fun key(e: Throwable, mealGoneOn404: Boolean = false): String = when (e) {
+    fun key(e: Throwable, mealGoneOn404: Boolean = false): String =
+        FriendlyError.finish(e, keyBase(e, mealGoneOn404), "common.errorGeneric")
+
+    private fun keyBase(e: Throwable, mealGoneOn404: Boolean): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.status == 403 && e.reason == "module_access_denied" -> "common.errorModuleNoAccess"

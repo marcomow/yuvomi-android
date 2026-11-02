@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.rewards
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 import java.text.NumberFormat
@@ -186,7 +187,10 @@ object RewardsRules {
 
     private val GONE = setOf(REWARD_GONE, REQUEST_GONE, ACCOUNT_GONE, PLAN_GONE)
 
-    fun errorKey(e: Throwable, fallback: String = "common.errorGeneric"): String = when (e) {
+    fun errorKey(e: Throwable, fallback: String = "common.errorGeneric"): String =
+        FriendlyError.finish(e, errorKeyBase(e, fallback), fallback)
+
+    private fun errorKeyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> "common.errorRestoreInProgress"

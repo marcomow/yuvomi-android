@@ -9,6 +9,7 @@
 #   upstream/openapi.json                OpenAPI document built from upstream source
 #   app/src/main/assets/i18n/*.json      shipped namespaces of every upstream locale
 #   app/src/main/assets/tokens.json      colour tokens, light and dark
+#   app/src/main/java/.../core/api/FriendlyErrorTable.kt  upstream's shared error sentences
 #   $SYNC_REPORT (default: upstream/.sync-report.md, git-ignored)  PR body
 #
 # Needs git, node >= 22 and python3. Never runs upstream's server, only reads
@@ -37,6 +38,7 @@ mkdir -p "$work/old"
 node "$here/scripts/extract_openapi.mjs" "$work/upstream" "$here/openapi.json" "$new_version"
 python3 -I "$here/scripts/extract_locales.py" "$work/upstream" "$here/i18n-namespaces.txt" "$root/app/src/main/assets/i18n"
 python3 -I "$here/scripts/extract_tokens.py" "$work/upstream" "$root/app/src/main/assets/tokens.json"
+python3 -I "$here/scripts/extract_friendly_errors.py" "$work/upstream" "$root/app/src/main/java/io/github/marcomow/yuvomi/core/api/FriendlyErrorTable.kt"
 
 printf '%s\n' "$new_version" > "$here/VERSION"
 

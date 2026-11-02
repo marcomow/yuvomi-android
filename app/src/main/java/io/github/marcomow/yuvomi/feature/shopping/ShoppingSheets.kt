@@ -470,7 +470,7 @@ private fun ReadRow(label: String, value: String?) {
     if (value.isNullOrBlank()) return
     Column {
         Text(label, style = MaterialTheme.typography.labelMedium, color = Yuvomi.colors.textSecondary)
-        Text(value)
+        io.github.marcomow.yuvomi.feature.tags.HashtagText(value)
     }
 }
 

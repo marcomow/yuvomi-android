@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.shopping
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 import java.math.BigDecimal
@@ -296,7 +297,10 @@ object ShoppingLogic {
     private val GONE = setOf("shopping_list_not_found", "shopping_item_not_found", "shopping_store_not_found", "shopping_category_not_found")
 
     /** `errorSentence`: the known case's key, else [fallback]. */
-    fun errorKey(e: Throwable, fallback: String = "common.errorGeneric"): String = when (e) {
+    fun errorKey(e: Throwable, fallback: String = "common.errorGeneric"): String =
+        FriendlyError.finish(e, errorKeyBase(e, fallback), fallback)
+
+    private fun errorKeyBase(e: Throwable, fallback: String): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.status == 403 -> REFUSALS[e.reason] ?: "common.errorNoPermission"

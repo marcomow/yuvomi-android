@@ -1,3 +1,5 @@
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
@@ -83,6 +85,23 @@ android {
                 showCauses = true
                 showStackTraces = true
             }
+            // A hung test fails the task instead of running into the CI job's limit (the
+            // watchdog in .github/scripts prints the stacks first), and slow tests are named.
+            it.timeout.set(Duration.ofMinutes(20))
+            it.addTestListener(object : TestListener {
+                private val started = ConcurrentHashMap<String, Long>()
+                override fun beforeSuite(suite: TestDescriptor) {}
+                override fun afterSuite(suite: TestDescriptor, result: TestResult) {}
+                override fun beforeTest(test: TestDescriptor) {
+                    started["${test.className}.${test.name}"] = System.nanoTime()
+                }
+                override fun afterTest(test: TestDescriptor, result: TestResult) {
+                    val name = "${test.className}.${test.name}"
+                    val start: Long = started.remove(name) ?: return
+                    val seconds = (System.nanoTime() - start) / 1_000_000_000L
+                    if (seconds >= 30L) println("Slow test (${seconds}s): $name")
+                }
+            })
             it.systemProperty("yuvomi.upstreamDir", rootProject.file("upstream").absolutePath)
             it.systemProperty("yuvomi.assetsDir", file("src/main/assets").absolutePath)
             it.systemProperty("yuvomi.sourceDir", file("src/main/java").absolutePath)

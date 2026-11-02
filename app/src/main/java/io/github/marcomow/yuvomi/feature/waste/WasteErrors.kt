@@ -92,7 +92,7 @@ object WasteErrors {
     )
 
     /**
-     * The numbers the server names in `params`, which [ApiProblem.Http] does not carry: the
+     * Stand-ins for the numbers the server names in `params`, for an answer without them: the
      * limits are the server's constants; a fetch status is unknown, so that sentence falls back.
      */
     private val KNOWN_PARAMS: Map<String, Map<String, Any>> = mapOf(
@@ -107,10 +107,14 @@ object WasteErrors {
     private val GONE = setOf(TYPE_GONE, SELECTED_TYPE_GONE, SCHEDULE_GONE, PICKUP_GONE, SOURCE_GONE, "waste_mapping_not_found", OVERRIDE_GONE, "waste_occurrence_not_found")
 
     /** The sentence for a reason with its numbers, or null when the case is unknown or a number is missing. */
-    fun caseMessage(reason: String?, params: JsonObject?): WasteMessage? {
+    fun caseMessage(reason: String?, params: JsonObject?): WasteMessage? =
+        caseMessage(reason, io.github.marcomow.yuvomi.core.api.FriendlyError.readParams(params))
+
+    /** [caseMessage] with the numbers already read ([ApiProblem.Http.params]). */
+    fun caseMessage(reason: String?, params: Map<String, Long>): WasteMessage? {
         val key = CASES[reason ?: return null] ?: return null
         val names = PARAMS[reason] ?: return WasteMessage(key)
-        val args = names.associateWith { name -> (params?.get(name) as? JsonPrimitive)?.intOrNull ?: KNOWN_PARAMS[reason]?.get(name) }
+        val args = names.associateWith { name -> params[name] ?: KNOWN_PARAMS[reason]?.get(name) }
         return if (args.values.any { it == null }) null else WasteMessage(key, args)
     }
 
@@ -120,8 +124,8 @@ object WasteErrors {
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> WasteMessage("common.errorRestoreInProgress")
             e.status == 403 -> WasteMessage(REFUSALS[e.reason] ?: "common.errorNoPermission")
-            e.status == 429 -> caseMessage(e.reason, null) ?: WasteMessage("common.errorRateLimited")
-            else -> caseMessage(e.reason, null) ?: if (e.operationUnsupported) WasteMessage("android.error.unsupported") else WasteMessage(fallback)
+            e.status == 429 -> caseMessage(e.reason, e.params) ?: WasteMessage("common.errorRateLimited")
+            else -> caseMessage(e.reason, e.params) ?: if (e.operationUnsupported) WasteMessage("android.error.unsupported") else WasteMessage(fallback)
         }
         else -> WasteMessage(fallback)
     }

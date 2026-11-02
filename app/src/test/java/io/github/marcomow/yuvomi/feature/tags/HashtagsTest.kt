@@ -26,4 +26,11 @@ class HashtagsTest {
         assertEquals(TagKey.of("ÄPFEL"), TagKey.of("äpfel"))
         assertEquals("garten", TagKey.of("Garten"))
     }
+
+    @Test fun `find gives each hashtag's place without its trimmed tail`() {
+        val text = "buy #milk- and #eggs, #1"
+        val found = Hashtags.find(text)
+        assertEquals(listOf("milk", "eggs"), found.map { it.tag })
+        assertEquals(listOf("#milk", "#eggs"), found.map { text.substring(it.range) })
+    }
 }

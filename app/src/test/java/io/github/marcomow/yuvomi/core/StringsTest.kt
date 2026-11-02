@@ -60,4 +60,7 @@ class StringsTest {
         assertEquals("de", LocalePicker.pick(listOf("xx", "de-AT")))
         assertEquals("en", LocalePicker.pick(listOf("xx")))
     }
+
+    @Test fun `a key carrying the server's numbers fills them in`() =
+        assertEquals("Done by 7.", strings().t("a.dot?name=7"))
 }

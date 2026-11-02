@@ -1,5 +1,8 @@
 package io.github.marcomow.yuvomi.feature.shopping
 
+import io.github.marcomow.yuvomi.feature.tags.Hashtags
+import io.github.marcomow.yuvomi.feature.tags.TagIndex
+import io.github.marcomow.yuvomi.feature.tags.TagChips
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -543,12 +546,11 @@ private fun ItemRow(
                         if (!item.url.isNullOrBlank()) Icon(Icons.Outlined.Link, null, Modifier.padding(start = 4.dp).size(14.dp), tint = Yuvomi.colors.textTertiary)
                         if (!item.notes.isNullOrBlank()) Icon(Icons.Outlined.StickyNote2, null, Modifier.padding(start = 4.dp).size(14.dp), tint = Yuvomi.colors.textTertiary)
                     }
-                    val meta = listOfNotNull(
-                        item.quantity?.takeIf { it.isNotBlank() },
-                        item.tags.firstOrNull(),
-                        (item.tags.size - 1).takeIf { it > 0 }?.let { "+$it" },
-                    )
-                    if (meta.isNotEmpty()) Text(meta.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
+                    item.quantity?.takeIf { it.isNotBlank() }?.let {
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
+                    }
+                    // Real tags and #hashtags in the item's own text, each opening the Tags view (TAGS-R13).
+                    TagChips(TagIndex.union(item.tags, Hashtags.extract(item.name, item.notes)), Modifier.padding(top = 4.dp))
                 }
                 when {
                     sorting && !done -> {

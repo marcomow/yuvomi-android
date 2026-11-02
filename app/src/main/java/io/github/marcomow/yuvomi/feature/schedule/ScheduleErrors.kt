@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.schedule
 
+import io.github.marcomow.yuvomi.core.api.FriendlyError
 import io.github.marcomow.yuvomi.core.api.ApiProblem
 
 /**
@@ -42,7 +43,10 @@ object ScheduleErrors {
     )
 
     /** The i18n key of the sentence for [e]. */
-    fun key(e: Throwable): String = when (e) {
+    fun key(e: Throwable): String =
+        FriendlyError.finish(e, keyBase(e), FALLBACK)
+
+    private fun keyBase(e: Throwable): String = when (e) {
         is ApiProblem.Network -> "common.errorOfflineMutation"
         is ApiProblem.Http -> when {
             e.reason == "restore_in_progress" -> "common.errorRestoreInProgress"
