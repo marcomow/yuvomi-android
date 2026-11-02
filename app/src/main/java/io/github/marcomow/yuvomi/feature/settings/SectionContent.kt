@@ -21,6 +21,16 @@ fun SectionContent(ctx: SectionContext, openLeaf: (String) -> Unit) {
         "personal-tasks" -> PersonalTasksSection(ctx, openLeaf)
         "personal-calendar" -> PersonalCalendarSection(ctx)
         "personal-health" -> PersonalHealthSection(ctx)
+        "modules-active" -> ActiveModulesSection(ctx)
+        "modules-navigation" -> NavigationSection(ctx)
+        "admin-family" -> FamilySection(ctx)
+        "admin-permissions" -> PermissionsSection(ctx)
+        "personal-notifications" -> NotificationsSection(ctx)
+        "admin-email" -> EmailSection(ctx, openLeaf)
+        "admin-backup" -> BackupSection(ctx)
+        "admin-system" -> SystemSection(ctx)
+        "admin-api" -> ApiTokensSection(ctx)
+        "personal-weather" -> PersonalWeatherSection(ctx, openLeaf)
         else -> WebSectionCard(ctx.section, ctx.shell.openWeb)
     }
 }
@@ -29,5 +39,7 @@ fun SectionContent(ctx: SectionContext, openLeaf: (String) -> Unit) {
 val NATIVE_SECTIONS: Set<String> = setOf(
     "personal-account", "personal-appearance", "options-budget", "options-health", "options-housekeeping",
     "options-tasks", "options-schedule", "modules-countdowns", "modules-rewards", "personal-tasks",
-    "personal-calendar", "personal-health",
+    "personal-calendar", "personal-health", "modules-active", "modules-navigation", "admin-family",
+    "admin-permissions", "personal-notifications", "admin-email", "admin-backup", "admin-system", "admin-api",
+    "personal-weather",
 )

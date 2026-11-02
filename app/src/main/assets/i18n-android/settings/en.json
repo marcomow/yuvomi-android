@@ -3,7 +3,43 @@
     "settings": {
       "openAuthenticator": "Open in authenticator app",
       "imageType": "Choose a PNG, JPEG or WebP picture.",
-      "imageRead": "The picture could not be read."
+      "imageRead": "The picture could not be read.",
+      "languageDevice": "The language of this app on this device.",
+      "inviteEmailRequired": "An email address is needed to send the invitation.",
+      "usernameInvalid": "3 to 64 letters, digits, dots, hyphens or underscores.",
+      "usernameTaken": "This username is already taken.",
+      "appVersion": "This app",
+      "backupSaved": "Backup saved.",
+      "pushInBrowser": "Push notifications are set up per browser in the web app. This app does not send notifications.",
+      "email": {
+        "host": "SMTP host",
+        "purposeHint": "Without an SMTP server, Yuvomi cannot send password reset links or notifications.",
+        "port": "Port",
+        "security": "Encryption",
+        "securitySsl": "SSL/TLS",
+        "securityStarttls": "STARTTLS",
+        "securityNone": "None",
+        "user": "Username",
+        "password": "Password",
+        "passwordKeep": "Leave empty to keep the stored password.",
+        "fromAddress": "Sender address",
+        "fromName": "Sender name",
+        "save": "Save",
+        "test": "Test connection",
+        "testSuccess": "Test email sent successfully.",
+        "testFailed": "Test failed: {{error}}",
+        "portInvalid": "Enter a port from {{min}} to {{max}}.",
+        "testFailedNotConfigured": "Enter the SMTP host and sender address first.",
+        "testFailedAuth": "The server rejected the username or password.",
+        "testFailedConnection": "The server cannot be reached at this host and port.",
+        "testFailedTls": "The encrypted connection failed. Check the encryption and the port.",
+        "testFailedRejected": "The server did not accept the test email. Check the sender address.",
+        "testFailedUnknown": "The test email could not be sent.",
+        "testNoRecipient": "The test email goes to your own email address, which is still missing. Add it under Account → Email.",
+        "testNoRecipientLink": "Open account",
+        "saveFailed": "Saving failed: {{error}}",
+        "saved": "Settings saved."
+      }
     }
   }
 }

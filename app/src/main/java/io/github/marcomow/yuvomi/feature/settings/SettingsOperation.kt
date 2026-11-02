@@ -85,7 +85,4 @@ enum class SettingsOperation(override val method: String, override val template:
 
     // Weather location (personal-weather.js, weather-location.js)
     WEATHER_GEOCODE("GET", "/api/v1/weather/geocode"),
-
-    // About (admin-system.js)
-    CHANGELOG("GET", "/api/v1/changelog"),
 }
