@@ -37,13 +37,14 @@ import io.github.marcomow.yuvomi.feature.shopping.ShoppingFeature
 import io.github.marcomow.yuvomi.feature.shopping.ShoppingOperation
 import io.github.marcomow.yuvomi.feature.splitexpenses.SplitExpensesOperation
 import io.github.marcomow.yuvomi.feature.subscriptions.SubscriptionsOperation
+import io.github.marcomow.yuvomi.feature.tags.TagsFeature
 import io.github.marcomow.yuvomi.feature.waste.WasteFeature
 import io.github.marcomow.yuvomi.feature.waste.WasteOperation
 
 /** The native modules beyond Overview and Tasks, in bar and "More" order (ADR 0015). */
 object Features {
     val all: List<Feature> = listOf(
-        ShoppingFeature, MealsFeature, RecipesFeature, NotesFeature, PantryFeature,
+        ShoppingFeature, MealsFeature, TagsFeature, RecipesFeature, NotesFeature, PantryFeature,
         CalendarFeature, RewardsFeature, ScheduleFeature, HousekeepingFeature, WasteFeature,
         DocumentsFeature, InventoryFeature, ContactsFeature, BirthdaysFeature, HealthFeature,
         BudgetFeature, SettingsFeature,
