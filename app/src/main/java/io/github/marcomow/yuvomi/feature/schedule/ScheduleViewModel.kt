@@ -151,10 +151,9 @@ class ScheduleViewModel(
                 val data = api.load(today)
                 container.cache.write(CACHE_KEY, ScheduleApi.encode(data))
                 lastLoaded = System.currentTimeMillis()
-                val firstLoad = state.value.tab == null
                 _state.update { it.copy(data = data, loading = false, refreshing = false, cachedAt = null, today = today, tab = it.tab ?: startTab(data)) }
                 applySelection(data)
-                if (firstLoad || state.value.tab == ScheduleTab.OVERVIEW) loadOverview()
+                if (state.value.tab == ScheduleTab.OVERVIEW) loadOverview()
                 if (state.value.tab == ScheduleTab.STATISTICS) loadStatistics()
             } catch (e: ApiProblem) {
                 val hasData = !state.value.loading

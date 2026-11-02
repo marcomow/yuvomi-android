@@ -29,6 +29,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.compose.LifecycleEventEffect
@@ -113,13 +115,15 @@ fun ScheduleScreen(vm: ScheduleViewModel, openSettings: () -> Unit) {
                 else -> "newLabel.schedulePlan" to "schedule.addPlan"
             }
             if (fab != null) {
+                val action = t(fab.second)
                 ExtendedFloatingActionButton(
                     onClick = {
                         overlay = if (fab.first == "newLabel.scheduleShiftType") Overlay.ShiftTypeEditor(null) else Overlay.CreateEntry(EntryMode.PATTERN)
                     },
                     icon = { Icon(Icons.Outlined.Add, null) },
                     text = { Text(t(fab.first)) },
-                    modifier = Modifier.padding(0.dp),
+                    // The accessible name is the action (`aria-label`), the visible word the noun.
+                    modifier = Modifier.semantics { contentDescription = action },
                 )
             }
         },
