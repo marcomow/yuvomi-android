@@ -1,5 +1,9 @@
 {
   "android": {
-    "settings": {}
+    "settings": {
+      "openAuthenticator": "Open in authenticator app",
+      "imageType": "Choose a PNG, JPEG or WebP picture.",
+      "imageRead": "The picture could not be read."
+    }
   }
 }
