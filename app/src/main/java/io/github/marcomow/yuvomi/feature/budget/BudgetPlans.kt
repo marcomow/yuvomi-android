@@ -149,7 +149,8 @@ private fun PlanRowItem(p: PlanRow, s: BudgetViewModel.UiState, strings: io.gith
             Row(Modifier.padding(top = 4.dp), verticalAlignment = Alignment.CenterVertically) {
                 if (p.over == true) Icon(Icons.Outlined.ErrorOutline, null, Modifier.size(14.dp), tint = Yuvomi.colors.danger)
                 else if (tone == "near") Icon(Icons.Outlined.Warning, null, Modifier.size(14.dp), tint = Yuvomi.colors.warning)
-                Text(" $foot", style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
+                Spacer(Modifier.width(4.dp))
+                Text(foot, style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
             }
         }
     }

@@ -708,7 +708,7 @@ class BudgetViewModel(
         val id = entry.id ?: return
         viewModelScope.launch {
             if (refuseOffline()) return@launch
-            val parentId = entry.recurrenceParentId ?: if (entry.isRecurring) id else id
+            val parentId = entry.recurrenceParentId ?: id
             val removed = if (series) {
                 state.value.entries.filter { it.id == parentId || it.recurrenceParentId == parentId }
             } else {

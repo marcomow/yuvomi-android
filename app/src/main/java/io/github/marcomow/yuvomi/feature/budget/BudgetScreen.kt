@@ -33,7 +33,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -50,7 +49,6 @@ import io.github.marcomow.yuvomi.feature.shell.AccountButton
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
 import io.github.marcomow.yuvomi.feature.splitexpenses.SplitExpensesRoutes
 import io.github.marcomow.yuvomi.feature.subscriptions.SubscriptionsRoutes
-import kotlinx.coroutines.launch
 
 /** The web page's seven tabs; Subscriptions and Split expenses are their own screens (`TAB_CAPS`). */
 private enum class TabItem(val labelKey: String, val tab: BudgetTab?) {
@@ -72,7 +70,6 @@ fun BudgetScreen(vm: BudgetViewModel, nav: BudgetNav) {
     val s by vm.state.collectAsState()
     val dates = remember(strings) { BudgetDates(strings.locale) }
     val editable = vm.writable && !s.offline
-    val scope = rememberCoroutineScope()
 
     // A split guest only ever sees the Split expenses tab (`access_scope === 'split_guest'`).
     if (shell.session.user.accessScope == "split_guest") {
