@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Files the Documents module hands to other apps ("Open with", "Share"); see docs/spec/documents.md. -->
+<paths>
+    <cache-path name="documents" path="documents-open/" />
+</paths>

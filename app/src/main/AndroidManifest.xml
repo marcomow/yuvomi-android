@@ -28,6 +28,16 @@
                 <data android:scheme="yuvomi-android" android:host="tasks" />
             </intent-filter>
         </activity>
+        <!-- Documents' "Open with" and "Share" hand a cached copy to another app. -->
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.files"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/document_files" />
+        </provider>
     </application>
 
     <queries>
