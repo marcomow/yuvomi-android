@@ -68,7 +68,6 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun FolderSheet(
-    s: DocumentsViewModel.UiState,
     vm: DocumentsViewModel,
     readOnly: Boolean,
     close: () -> Unit,
@@ -317,7 +316,8 @@ internal fun FolderDeleteDialog(folder: DocumentFolder, impact: FolderDeleteImpa
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun DmsLinkSheet(vm: DocumentsViewModel, close: () -> Unit) {
-    val accounts = vm.state.value.meta.dmsAccounts
+    val state by vm.state.collectAsState()
+    val accounts = state.meta.dmsAccounts
     if (accounts.isEmpty()) {
         LaunchedEffect(Unit) { close() }
         return

@@ -3,7 +3,6 @@ package io.github.marcomow.yuvomi.feature.documents
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.pdf.PdfRenderer
@@ -15,6 +14,7 @@ import android.webkit.MimeTypeMap
 import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.core.content.FileProvider
+import androidx.core.graphics.createBitmap
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -112,7 +112,7 @@ object DocumentFiles {
                 renderer.openPage(index).use { page ->
                     val width = widthPx.coerceIn(64, 2048)
                     val height = (width.toFloat() * page.height / page.width).toInt().coerceIn(64, 4096)
-                    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+                    val bitmap = createBitmap(width, height)
                     bitmap.eraseColor(Color.WHITE)
                     page.render(bitmap, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
                     bitmap.asImageBitmap()

@@ -233,7 +233,6 @@ fun DocumentsScreen(vm: DocumentsViewModel) {
         null -> Unit
         is DocumentsDialog.Editor -> DocumentEditor(d.doc, vm, close = { dialog = null })
         DocumentsDialog.Folders -> FolderSheet(
-            s = s,
             vm = vm,
             readOnly = readOnly,
             close = { dialog = null },

@@ -94,7 +94,7 @@ val documentsTone: Color @Composable get() = Yuvomi.colors.module("documents")
  * (`renderDocIconSlot`, `wireLocalThumbs`).
  */
 @Composable
-fun DocumentThumb(doc: Document, thumbs: DocumentThumbs?, size: Dp = 44.dp, modifier: Modifier = Modifier) {
+fun DocumentThumb(doc: Document, thumbs: DocumentThumbs?, modifier: Modifier = Modifier, size: Dp = 44.dp) {
     val px = with(LocalDensity.current) { (size * 2).roundToPx() }
     val image by produceState(thumbs?.cached(doc), doc.id, doc.updatedAt) {
         if (thumbs != null && thumbs.wants(doc)) value = thumbs.get(doc, px)

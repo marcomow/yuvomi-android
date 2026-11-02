@@ -164,6 +164,11 @@ internal fun DocumentEditor(doc: Document?, vm: DocumentsViewModel, close: () ->
                             )
                         }
                         Hint(t("documents.fileHint", "size" to DocumentRules.megabytes(max)))
+                        // A whole folder tree (`bindFolderUpload`, utils/folder-upload.js) stays in the web app.
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            TextButton(onClick = { shell.openWeb("/documents") }, enabled = !busy) { Text(t("documents.folderUpload.chooseFolder")) }
+                            Hint(t("android.browser.opensInBrowser"))
+                        }
                         if (vm.isAdmin) {
                             Hint(t("documents.activeUploadTarget", "target" to t(uploadTargetKey(s.meta.activeUploadBackend))))
                         }
