@@ -1,0 +1,19 @@
+# docs/spec/housekeeping.md (HousekeepingOperation)
+GET /api/v1/housekeeping/dashboard
+GET /api/v1/housekeeping/task-templates
+GET /api/v1/housekeeping/workers
+POST /api/v1/housekeeping/worker
+POST /api/v1/housekeeping/work-sessions/check-in
+POST /api/v1/housekeeping/work-sessions/check-out
+POST /api/v1/housekeeping/work-sessions/{id}/reopen
+GET /api/v1/housekeeping/visits
+GET /api/v1/housekeeping/visits/{id}
+PUT /api/v1/housekeeping/visits/{id}
+DELETE /api/v1/housekeeping/visits/{id}
+POST /api/v1/housekeeping/visits/{id}/pay
+POST /api/v1/housekeeping/visits/{id}/unpay
+GET /api/v1/housekeeping/decay-tasks
+POST /api/v1/housekeeping/decay-tasks
+PATCH /api/v1/housekeeping/decay-tasks/{taskId}
+POST /api/v1/housekeeping/decay-tasks/{taskId}/complete
+DELETE /api/v1/housekeeping/decay-tasks/{taskId}

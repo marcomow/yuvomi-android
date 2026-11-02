@@ -1,5 +1,8 @@
 {
   "android": {
-    "housekeeping": {}
+    "housekeeping": {
+      "usernameTaken": "This username is already taken.",
+      "usernameInvalid": "The username must be 3-64 characters long and may only contain letters, numbers, dots, hyphens, and underscores."
+    }
   }
 }
