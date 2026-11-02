@@ -13,5 +13,3 @@ GET /api/v1/contacts/{id}
 PUT /api/v1/contacts/{id}
 DELETE /api/v1/contacts/{id}
 GET /api/v1/contacts/{id}/vcard
-PUT /api/v1/birthdays/{id}
-POST /api/v1/birthdays/import

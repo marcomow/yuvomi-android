@@ -46,7 +46,8 @@ import io.github.marcomow.yuvomi.feature.waste.WasteOperation
 object Features {
     val all: List<Feature> = listOf(
         ShoppingFeature, MealsFeature, TagsFeature, RecipesFeature, NotesFeature, PantryFeature,
-        CalendarFeature, ScheduleFeature, DocumentsFeature, HealthFeature, BudgetFeature, SettingsFeature,
+        CalendarFeature, RewardsFeature, ScheduleFeature, DocumentsFeature, InventoryFeature, ContactsFeature,
+        BirthdaysFeature, HealthFeature, BudgetFeature, SettingsFeature,
     )
 
     /**
@@ -55,8 +56,7 @@ object Features {
      * native yet: "More" lists them as web modules.
      */
     val pending: List<Feature> = listOf(
-        RewardsFeature, HousekeepingFeature, WasteFeature, InventoryFeature, ContactsFeature,
-        BirthdaysFeature,
+        HousekeepingFeature, WasteFeature,
     )
 
     /** Every upstream operation the app calls; checked against upstream/operations-used*.txt. */

@@ -4,6 +4,7 @@ import io.github.marcomow.yuvomi.core.api.ApiJson
 import io.github.marcomow.yuvomi.core.api.FlexBool
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decodeData
+import io.github.marcomow.yuvomi.feature.birthdays.BirthdaysOperation
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.builtins.ListSerializer
@@ -199,13 +200,13 @@ class ContactsApi(private val client: YuvomiClient) {
 
     /** `linkContactToBirthday`. */
     suspend fun linkBirthday(birthdayId: Int, contactId: Int) {
-        client.call(ContactsOperation.BIRTHDAY_UPDATE, mapOf("id" to birthdayId), body = buildJsonObject { put("contact_id", contactId) })
+        client.call(BirthdaysOperation.UPDATE, mapOf("id" to birthdayId), body = buildJsonObject { put("contact_id", contactId) })
     }
 
     /** `addContactToBirthdays`. */
     suspend fun importBirthday(contactId: Int, idempotencyKey: String) {
         client.call(
-            ContactsOperation.BIRTHDAYS_IMPORT,
+            BirthdaysOperation.IMPORT,
             body = buildJsonObject { put("contact_ids", JsonArray(listOf(JsonPrimitive(contactId)))) },
             idempotencyKey = idempotencyKey,
         )

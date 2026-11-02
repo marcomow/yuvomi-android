@@ -48,6 +48,7 @@ import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.t
 import io.github.marcomow.yuvomi.core.time.HouseholdTime
 import io.github.marcomow.yuvomi.feature.Features
+import io.github.marcomow.yuvomi.feature.birthdays.BirthdaysRoutes
 import io.github.marcomow.yuvomi.feature.calendar.CalendarRoutes
 import io.github.marcomow.yuvomi.feature.meals.MealsRoutes
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
@@ -177,7 +178,7 @@ fun TileView(
                             else -> t("dashboard.daysLeft", "count" to days)
                         }
                         val age = b.nextAge?.let { " · $it" } ?: ""
-                        ListLine(b.name, whenText + age) { shell.openWeb("/birthdays") }
+                        ListLine(b.name, whenText + age) { shell.navigate(BirthdaysRoutes.START) }
                     }
                     if (tile.total > tile.birthdays.size) {
                         EmptyLine(t("dashboard.birthdaysMore", "count" to tile.total - tile.birthdays.size))

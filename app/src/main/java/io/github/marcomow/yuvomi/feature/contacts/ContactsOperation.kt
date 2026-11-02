@@ -21,6 +21,4 @@ enum class ContactsOperation(override val method: String, override val template:
     CONTACT_VCARD("GET", "/api/v1/contacts/{id}/vcard"),
 
     // Birthdays (permission `calendar`): the detail's "Link" and "Add to birthdays".
-    BIRTHDAY_UPDATE("PUT", "/api/v1/birthdays/{id}"),
-    BIRTHDAYS_IMPORT("POST", "/api/v1/birthdays/import"),
 }

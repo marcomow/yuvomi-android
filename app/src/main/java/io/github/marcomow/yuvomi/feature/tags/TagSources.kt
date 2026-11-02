@@ -1,6 +1,12 @@
 package io.github.marcomow.yuvomi.feature.tags
 
+import io.github.marcomow.yuvomi.feature.birthdays.BirthdaysTagSource
+import io.github.marcomow.yuvomi.feature.contacts.ContactsTagSource
+import io.github.marcomow.yuvomi.feature.inventory.InventoryTagSource
+import io.github.marcomow.yuvomi.feature.rewards.RewardsTagSource
 import io.github.marcomow.yuvomi.feature.schedule.ScheduleTagSource
+import io.github.marcomow.yuvomi.feature.splitexpenses.SplitExpensesTagSource
+import io.github.marcomow.yuvomi.feature.subscriptions.SubscriptionsTagSource
 import io.github.marcomow.yuvomi.feature.tags.sources.BudgetTagSource
 import io.github.marcomow.yuvomi.feature.tags.sources.CalendarTagSource
 import io.github.marcomow.yuvomi.feature.tags.sources.DocumentsTagSource
@@ -30,5 +36,11 @@ object TagSources {
         DocumentsTagSource,
         HealthTagSource,
         BudgetTagSource,
+        SubscriptionsTagSource,
+        SplitExpensesTagSource,
+        RewardsTagSource,
+        BirthdaysTagSource,
+        ContactsTagSource,
+        InventoryTagSource,
     )
 }
