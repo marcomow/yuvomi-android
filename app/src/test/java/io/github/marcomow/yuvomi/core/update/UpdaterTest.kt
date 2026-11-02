@@ -20,11 +20,13 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.Shadows.shadowOf
+import org.robolectric.annotation.Config
 import java.io.File
 import java.security.MessageDigest
 
 /** ADR 0018: check, download, verify, hand to the installer. GitHub is a mock server here. */
 @RunWith(RobolectricTestRunner::class)
+@Config(sdk = [35])
 class UpdaterTest {
     private lateinit var server: MockWebServer
     private lateinit var app: Application
@@ -70,7 +72,10 @@ class UpdaterTest {
     }
 
     @Test fun `the automatic check waits twelve hours and respects the switch`() = runBlocking {
+        // The settings store outlives a test in this process: start after any earlier check, switch on.
+        now = 10_000_000_000_000L
         val u = updater()
+        u.setAutomatic(true)
         assertEquals("0.2.0", u.checkIfDue()?.version)
         val before = server.requestCount
         now += 60_000
