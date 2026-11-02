@@ -1,3 +1,28 @@
 # The upstream operations of docs/spec/shopping.md, as `METHOD /api/v1/path` with
 # OpenAPI path templates. Must match the module's operation enum exactly
 # (ContractFilesTest); the weekly sync report checks every line.
+POST /api/v1/shopping
+PUT /api/v1/shopping/{listId}
+DELETE /api/v1/shopping/{listId}
+POST /api/v1/shopping/{listId}/duplicate
+GET /api/v1/shopping/{listId}/items
+POST /api/v1/shopping/{listId}/items
+PATCH /api/v1/shopping/items/{itemId}
+DELETE /api/v1/shopping/items/{itemId}
+PATCH /api/v1/shopping/{listId}/items/reorder
+DELETE /api/v1/shopping/{listId}/items/checked
+POST /api/v1/shopping/categories
+PUT /api/v1/shopping/categories/{catId}
+DELETE /api/v1/shopping/categories/{catId}
+PATCH /api/v1/shopping/categories/reorder
+GET /api/v1/shopping/stores
+POST /api/v1/shopping/stores
+PUT /api/v1/shopping/stores/{id}
+DELETE /api/v1/shopping/stores/{id}
+GET /api/v1/shopping/suggestions
+GET /api/v1/shopping/versions
+GET /api/v1/shopping/send-recipients
+POST /api/v1/shopping/{listId}/send
+POST /api/v1/shopping/{listId}/import-meal-plan
+POST /api/v1/pantry/import-shopping
+POST /api/v1/pantry/import-shopping/undo
