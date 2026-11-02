@@ -165,7 +165,7 @@ class HousekeepingScreenTest {
         compose.onNodeWithText(strings.t("housekeeping.checkOut")).performClick()
         waitForWrite("POST /api/v1/housekeeping/work-sessions/check-out")
         assertTrue(writes.single { it.startsWith("POST /api/v1/housekeeping/work-sessions/check-out") }.endsWith("""{"worker_id":4}"""))
-        assertTrue(keys.any { it.startsWith("POST /api/v1/housekeeping/work-sessions/check-out") })
+        compose.waitUntil(10_000) { keys.any { it.startsWith("POST /api/v1/housekeeping/work-sessions/check-out") } }
         waitText(strings.t("housekeeping.checkedOutNamed", "name" to "Maria Santos"))
         compose.onNodeWithText(strings.t("common.undo")).assertExists()
     }
