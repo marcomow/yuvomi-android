@@ -122,7 +122,9 @@ class HealthScreenTest {
         compose.setContent { YuvomiRoot(container, null) {} }
         compose.waitUntil(10_000) { compose.onAllNodes(hasText(strings.t("nav.more"))).fetchSemanticsNodes().isNotEmpty() }
         compose.onAllNodes(hasText(strings.t("nav.more"))).onFirst().performClick()
-        compose.waitUntil(10_000) { compose.onAllNodesWithText(strings.t("nav.health")).fetchSemanticsNodes().isNotEmpty() }
+        // Health sits low in "More": scroll the list until its row is composed.
+        compose.waitUntil(10_000) { compose.onAllNodes(hasScrollAction()).fetchSemanticsNodes().isNotEmpty() }
+        compose.onAllNodes(hasScrollAction()).onFirst().performScrollToNode(hasText(strings.t("nav.health")))
         compose.onAllNodesWithText(strings.t("nav.health")).onFirst().performClick()
         try {
             compose.waitUntil(10_000) { compose.onAllNodesWithText(strings.t("health.overview.dueToday.title")).fetchSemanticsNodes().isNotEmpty() }

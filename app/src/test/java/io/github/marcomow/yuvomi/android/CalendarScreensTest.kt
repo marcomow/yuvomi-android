@@ -1,5 +1,8 @@
 package io.github.marcomow.yuvomi.android
 
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.hasContentDescription
 import androidx.compose.ui.test.hasSetTextAction
 import androidx.compose.ui.test.hasText
@@ -21,6 +24,9 @@ import io.github.marcomow.yuvomi.core.i18n.Strings
 import io.github.marcomow.yuvomi.core.i18n.StringsLoader
 import io.github.marcomow.yuvomi.core.session.PlainSecretBox
 import io.github.marcomow.yuvomi.feature.shell.YuvomiRoot
+import java.time.LocalDate
+import java.time.ZoneOffset
+import java.util.concurrent.CopyOnWriteArrayList
 import kotlinx.coroutines.runBlocking
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
@@ -35,9 +41,6 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
-import java.time.LocalDate
-import java.time.ZoneOffset
-import java.util.concurrent.CopyOnWriteArrayList
 
 /** docs/spec/calendar.md: the views, the read view, the form and the read-only rules against a scripted server. */
 @RunWith(RobolectricTestRunner::class)
@@ -112,9 +115,10 @@ class CalendarScreensTest {
             container.session.login("alex", "demo1234")
         }
         compose.setContent { YuvomiRoot(container, null) {} }
-        compose.waitUntil(10_000) { compose.onAllNodesWithText(strings.t("nav.more")).fetchSemanticsNodes().isNotEmpty() }
-        compose.onAllNodesWithText(strings.t("nav.more")).onFirst().performClick()
-        compose.onNodeWithText(strings.t("nav.calendar")).performScrollTo().performClick()
+        // Calendar is one of upstream's default bar slots (BarSlots).
+        val tab = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab) and hasText(strings.t("nav.calendar"))
+        compose.waitUntil(10_000) { compose.onAllNodes(tab).fetchSemanticsNodes().isNotEmpty() }
+        compose.onAllNodes(tab).onFirst().performClick()
         try {
             compose.waitUntil(10_000) { compose.onAllNodesWithText("Dentist").fetchSemanticsNodes().isNotEmpty() }
         } catch (e: Throwable) {

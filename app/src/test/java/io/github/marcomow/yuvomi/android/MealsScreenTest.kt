@@ -111,8 +111,8 @@ class MealsScreenTest {
             container.session.login("alex", "demo1234")
         }
         compose.setContent { YuvomiRoot(container, null) {} }
-        // The bar entry, not an overview tile with the same word.
-        val tab = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab) and hasText(strings.t("nav.meals"))
+        // The bar's kitchen slot (an upstream default, BarSlots) opens Meals first.
+        val tab = SemanticsMatcher.expectValue(SemanticsProperties.Role, Role.Tab) and hasText(strings.t("nav.kitchen"))
         compose.waitUntil(10_000) { compose.onAllNodes(tab).fetchSemanticsNodes().isNotEmpty() }
         compose.onAllNodes(tab).onFirst().performClick()
         try {
