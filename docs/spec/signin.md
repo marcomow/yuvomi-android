@@ -171,7 +171,7 @@ Most messages reuse upstream's `login.*` keys (`login.invalidCredentials`,
 `app/src/main/assets/i18n-android/en.json`; the original list was:
 
 `android.signin.unofficial` "Unofficial Android client" · `android.signin.serverLabel` "Server
-address" · `android.signin.notYuvomi` "This doesn't look like a Yuvomi server." ·
+URL" · `android.signin.notYuvomi` "This doesn't look like a Yuvomi server." ·
 `android.signin.unreachable` "Could not reach the server." · `android.signin.certificate`
 "The server's certificate could not be verified." · `android.signin.cleartextWarning` "This
 connection is not encrypted. Use it only on your home network." · `android.signin.cleartextRefused`

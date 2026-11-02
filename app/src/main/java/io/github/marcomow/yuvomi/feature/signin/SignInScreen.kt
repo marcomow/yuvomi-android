@@ -46,6 +46,7 @@ import androidx.compose.ui.semantics.contentType
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -107,7 +108,12 @@ private fun ServerStep(s: SignInViewModel.UiState, vm: SignInViewModel) {
         label = { Text(t("android.signin.serverLabel")) },
         placeholder = { Text("https://home.example.org") },
         singleLine = true,
-        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Uri, imeAction = ImeAction.Go),
+        keyboardOptions = KeyboardOptions(
+            capitalization = KeyboardCapitalization.None,
+            autoCorrectEnabled = false,
+            keyboardType = KeyboardType.Uri,
+            imeAction = ImeAction.Go,
+        ),
         keyboardActions = KeyboardActions(onGo = { vm.probe() }),
         modifier = Modifier.fillMaxWidth(),
     )

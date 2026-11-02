@@ -36,7 +36,7 @@
       "cleartextWarning": "This connection is not encrypted. Use it only on your home network.",
       "invalidAddress": "This is not a valid server address.",
       "notYuvomi": "This doesn't look like a Yuvomi server.",
-      "serverLabel": "Server address",
+      "serverLabel": "Server URL",
       "setupRequired": "This server is not set up yet. Finish the setup in your browser.",
       "signedOut": "You were signed out.",
       "ssoUnsupported": "This household signs in with single sign-on, which this app does not support yet.",
