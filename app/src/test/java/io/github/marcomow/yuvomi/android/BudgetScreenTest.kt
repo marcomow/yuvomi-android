@@ -144,7 +144,9 @@ class BudgetScreenTest {
         compose.setContent { io.github.marcomow.yuvomi.feature.shell.YuvomiRoot(container, null) {} }
         compose.waitUntil(10_000) { compose.onAllNodes(hasText(strings.t("nav.more"))).fetchSemanticsNodes().isNotEmpty() }
         compose.onAllNodes(hasText(strings.t("nav.more"))).onFirst().performClick()
-        compose.waitUntil(10_000) { compose.onAllNodesWithText(strings.t("nav.budget")).fetchSemanticsNodes().isNotEmpty() }
+        // Budget sits low in "More": scroll the list until its row is composed.
+        compose.waitUntil(10_000) { compose.onAllNodes(hasScrollToNodeAction()).fetchSemanticsNodes().isNotEmpty() }
+        compose.onAllNodes(hasScrollToNodeAction()).onFirst().performScrollToNode(hasText(strings.t("nav.budget")))
         compose.onAllNodesWithText(strings.t("nav.budget")).onFirst().performClick()
         try {
             compose.waitUntil(10_000) { compose.onAllNodesWithText("€2,019.75").fetchSemanticsNodes().isNotEmpty() }
