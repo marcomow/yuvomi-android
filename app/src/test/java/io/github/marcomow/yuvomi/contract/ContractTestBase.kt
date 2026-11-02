@@ -10,6 +10,7 @@ import io.github.marcomow.yuvomi.core.session.SessionCookieJar
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -32,8 +33,29 @@ abstract class ContractTestBase {
     /** A fresh client with its own cookie jar and CSRF store, like the app's. */
     protected fun client(): YuvomiClient {
         val csrf = CsrfStore()
-        val http = OkHttpClient.Builder().cookieJar(SessionCookieJar()).addInterceptor(csrf.interceptor).build()
+        val http = OkHttpClient.Builder()
+            .cookieJar(SessionCookieJar())
+            .addInterceptor(waitOutRateLimit)
+            .addInterceptor(csrf.interceptor)
+            .build()
         return YuvomiClient(url!!, http, csrf)
+    }
+
+    /**
+     * Upstream limits every IP to 300 API requests a minute (server/index.js, `apiLimiter`, not
+     * configurable), and the whole contract suite sends more than that from one runner. A 429 is
+     * answered before any handler runs, so the request is waited out and sent again.
+     */
+    private val waitOutRateLimit = Interceptor { chain ->
+        var response = chain.proceed(chain.request())
+        var tries = 0
+        while (response.code == 429 && tries++ < 5) {
+            val seconds = (response.header("Retry-After") ?: response.header("RateLimit-Reset"))?.trim()?.toLongOrNull() ?: 60
+            response.close()
+            Thread.sleep((seconds.coerceIn(1, 65) + 1) * 1000)
+            response = chain.proceed(chain.request())
+        }
+        response
     }
 
     /** Signs [username] in on a fresh client. */

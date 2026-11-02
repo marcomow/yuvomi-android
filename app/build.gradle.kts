@@ -71,6 +71,13 @@ android {
     testOptions {
         unitTests.isIncludeAndroidResources = true
         unitTests.all {
+            // A failing test prints its exception in the build log, which is all CI keeps.
+            it.testLogging {
+                events("failed")
+                exceptionFormat = org.gradle.api.tasks.testing.logging.TestExceptionFormat.FULL
+                showCauses = true
+                showStackTraces = true
+            }
             it.systemProperty("yuvomi.upstreamDir", rootProject.file("upstream").absolutePath)
             it.systemProperty("yuvomi.assetsDir", file("src/main/assets").absolutePath)
             it.systemProperty("yuvomi.sourceDir", file("src/main/java").absolutePath)
