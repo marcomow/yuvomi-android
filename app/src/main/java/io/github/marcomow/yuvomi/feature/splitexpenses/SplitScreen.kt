@@ -112,7 +112,7 @@ fun SplitScreen(groupId: Int?, nav: SplitNav) {
     val strings = LocalStrings.current
     val store = remember(shell.connection) { SplitStore.of(shell.container) } ?: return
     val s by store.state.collectAsState()
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     val ro = shell.budgetReadOnly()
     val me = shell.session.user.id
     var picker by remember { mutableStateOf(false) }
@@ -668,7 +668,7 @@ private fun RecurringReadSheet(r: RecurringExpense, s: SplitStore.State, close: 
 private fun AddMemberDialog(store: SplitStore, close: () -> Unit, guest: () -> Unit) {
     val shell = LocalShell.current
     val strings = LocalStrings.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     var candidates by remember { mutableStateOf<List<MemberCandidate>?>(null) }
     var chosen by remember { mutableStateOf<String?>(null) }
     var role by remember { mutableStateOf("guest") }

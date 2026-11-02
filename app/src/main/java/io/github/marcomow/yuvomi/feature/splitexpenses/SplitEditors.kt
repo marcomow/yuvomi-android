@@ -130,7 +130,7 @@ fun ExpenseEditorScreen(id: Int?, prefill: SplitPrefill?, close: () -> Unit) {
         LoadingBox()
         return
     }
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     var form by remember(existing?.id, group.id) {
         mutableStateOf(existing?.let { ExpenseForm.of(it, strings.locale) } ?: ExpenseForm.blank(group, shell.session.user.id, shell.time.today(), s.people, prefill, strings.locale))
     }
@@ -178,7 +178,7 @@ fun RecurringEditorScreen(id: Int?, close: () -> Unit) {
         LaunchedEffect(Unit) { close() }
         return
     }
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     val initial = remember(existing?.id) { existing?.let { ExpenseForm.of(it, strings.locale) } ?: ExpenseForm.blankRecurring(group, shell.session.user.id, shell.time.today(), s.people) }
     var form by remember(existing?.id) { mutableStateOf(initial) }
     var errors by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
@@ -278,7 +278,7 @@ fun GroupEditorScreen(id: Int?, close: () -> Unit) {
         LaunchedEffect(Unit) { close() }
         return
     }
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     var name by remember { mutableStateOf(existing?.name.orEmpty()) }
     var description by remember { mutableStateOf(existing?.description.orEmpty()) }
     var type by remember { mutableStateOf(existing?.type ?: "general") }
@@ -363,7 +363,7 @@ fun SettlementScreen(close: () -> Unit) {
     val me = shell.session.user.id
     val debts = s.data.balances.simplifiedDebts
     val proposed = remember { SplitFormRules.proposedDebt(debts, me) }
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     var payer by remember { mutableStateOf(proposed?.fromUserId ?: me) }
     var payee by remember { mutableStateOf(proposed?.toUserId ?: s.people.firstOrNull { it.uid != me }?.uid ?: me) }
     var currency by remember { mutableStateOf(proposed?.currency ?: group.defaultCurrency) }
@@ -412,7 +412,7 @@ fun GuestScreen(close: () -> Unit) {
     val shell = LocalShell.current
     val strings = LocalStrings.current
     val store = remember(shell.connection) { SplitStore.of(shell.container) } ?: return
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     var name by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -434,7 +434,13 @@ fun GuestScreen(close: () -> Unit) {
     }) {
         Field(t("splitExpenses.displayName") + " *", name, errors["name"]) { name = it.take(128) }
         Field(t("splitExpenses.usernameOptional"), username) { username = it.take(64) }
-        Field(t("splitExpenses.temporaryPassword") + " *", password, errors["password"], keyboard = KeyboardType.Password) { password = it }
+        androidx.compose.material3.OutlinedTextField(
+            password, { password = it }, label = { Text(t("splitExpenses.temporaryPassword") + " *") }, singleLine = true,
+            isError = errors["password"] != null, supportingText = errors["password"]?.let { { Text(it) } },
+            visualTransformation = androidx.compose.ui.text.input.PasswordVisualTransformation(),
+            keyboardOptions = androidx.compose.foundation.text.KeyboardOptions(keyboardType = KeyboardType.Password),
+            modifier = Modifier.fillMaxWidth(),
+        )
         Field(t("splitExpenses.phone"), phone, keyboard = KeyboardType.Phone) { phone = it }
         Field(t("splitExpenses.email"), email, keyboard = KeyboardType.Email) { email = it }
         DateField(t("splitExpenses.birthDate"), birth, error = errors["birth"]) { birth = it }

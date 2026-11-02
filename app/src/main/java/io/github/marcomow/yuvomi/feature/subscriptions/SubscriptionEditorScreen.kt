@@ -77,7 +77,7 @@ fun SubscriptionEditorScreen(id: Int?, close: () -> Unit) {
         if (s.loaded) close() else LoadingBox()
         return
     }
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     val context = LocalContext.current
     var form by remember(existing?.id) {
         mutableStateOf(existing?.let { SubscriptionForm.of(it, strings.locale) } ?: SubscriptionForm.blank(s.settings, shell.time.today()))
@@ -170,7 +170,7 @@ fun SubscriptionEditorScreen(id: Int?, close: () -> Unit) {
             Text(t("subscriptions.billingCycleLabel"), style = MaterialTheme.typography.labelLarge)
             val count = form.interval.toIntOrNull() ?: 1
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
-                Field(t("android.subscriptions.every"), form.interval, errors[SubscriptionFormRules.INTERVAL], Modifier.width(110.dp), KeyboardType.Number) { v -> edit { it.copy(interval = v.filter(Char::isDigit).take(3)) } }
+                Field(SubscriptionRules.cycleSentenceParts(strings, form.cycle, count).first, form.interval, errors[SubscriptionFormRules.INTERVAL], Modifier.width(110.dp), KeyboardType.Number) { v -> edit { it.copy(interval = v.filter(Char::isDigit).take(3)) } }
                 ChoiceField(
                     t("subscriptions.billingCycleLabel"),
                     form.cycle,
@@ -288,7 +288,7 @@ internal fun SwitchRow(label: String, checked: Boolean, onChange: (Boolean) -> U
 @Composable
 private fun LogoSearchDialog(store: SubscriptionsStore, initial: String, close: () -> Unit, pick: (String) -> Unit) {
     val strings = LocalStrings.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     var query by remember { mutableStateOf(initial) }
     var options by remember { mutableStateOf<List<String>>(emptyList()) }
     var status by remember { mutableStateOf<String?>(strings.t("subscriptions.findLogoHint")) }

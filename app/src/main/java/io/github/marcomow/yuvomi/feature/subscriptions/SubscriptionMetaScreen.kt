@@ -59,7 +59,7 @@ fun SubscriptionMetaScreen(back: () -> Unit) {
     val strings = LocalStrings.current
     val store = remember(shell.connection) { SubscriptionsStore.of(shell.container) } ?: return
     val s by store.state.collectAsState()
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     var editing by remember { mutableStateOf<MetaRow?>(null) }
     var deleting by remember { mutableStateOf<MetaRow?>(null) }
     var newCategory by remember { mutableStateOf("") }

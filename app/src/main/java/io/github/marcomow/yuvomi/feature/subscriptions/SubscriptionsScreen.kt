@@ -101,7 +101,7 @@ fun SubscriptionsScreen(openId: Int?, back: () -> Unit, add: () -> Unit, edit: (
     val strings = LocalStrings.current
     val store = remember(shell.connection) { SubscriptionsStore.of(shell.container) } ?: return
     val s by store.state.collectAsState()
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     val ro = shell.budgetReadOnly()
     var reading by remember { mutableStateOf(openId) }
     var filterSheet by remember { mutableStateOf(false) }
@@ -352,7 +352,7 @@ private fun SubscriptionRow(sub: Subscription, base: String, writable: Boolean, 
         return
     }
     val state = rememberSwipeToDismissBoxState()
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     SwipeToDismissBox(
         state = state,
         enableDismissFromStartToEnd = canRenew,
@@ -588,7 +588,7 @@ private fun FilterSheet(s: SubscriptionsStore.State, store: SubscriptionsStore, 
 private fun SettingsDialog(s: SubscriptionsStore.State, store: SubscriptionsStore, close: () -> Unit) {
     val shell = LocalShell.current
     val strings = LocalStrings.current
-    val scope = rememberCoroutineScope()
+    val scope = rememberCoroutineScope { kotlinx.coroutines.Dispatchers.Main.immediate }
     var currency by remember { mutableStateOf(s.settings.baseCurrency) }
     var budget by remember { mutableStateOf(BudgetMoney.toInput(s.settings.monthlyBudget, s.settings.baseCurrency, strings.locale)) }
     var error by remember { mutableStateOf<String?>(null) }

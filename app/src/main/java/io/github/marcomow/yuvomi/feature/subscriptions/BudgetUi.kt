@@ -71,16 +71,17 @@ fun ShellContext.dateText(key: String?, weekday: Boolean = false): String {
     return if (weekday) formats.weekdayDate(d) else formats.date(d, time.today())
 }
 
-/** `relativeUnit(value, unit)` through ICU in the UI language ("in 3 months"). */
+/** `relativeUnit(value, unit)` through ICU in the UI language ("in 3 months", "3 months ago"). */
 fun relativeText(localeTag: String, value: Long, unit: String): String = runCatching {
     val f = android.icu.text.RelativeDateTimeFormatter.getInstance(android.icu.util.ULocale.forLanguageTag(localeTag))
     val u = when (unit) {
-        "week" -> android.icu.text.RelativeDateTimeFormatter.RelativeDateTimeUnit.WEEK
-        "month" -> android.icu.text.RelativeDateTimeFormatter.RelativeDateTimeUnit.MONTH
-        "year" -> android.icu.text.RelativeDateTimeFormatter.RelativeDateTimeUnit.YEAR
-        else -> android.icu.text.RelativeDateTimeFormatter.RelativeDateTimeUnit.DAY
+        "week" -> android.icu.text.RelativeDateTimeFormatter.RelativeUnit.WEEKS
+        "month" -> android.icu.text.RelativeDateTimeFormatter.RelativeUnit.MONTHS
+        "year" -> android.icu.text.RelativeDateTimeFormatter.RelativeUnit.YEARS
+        else -> android.icu.text.RelativeDateTimeFormatter.RelativeUnit.DAYS
     }
-    f.formatNumeric(value.toDouble(), u)
+    val direction = if (value < 0) android.icu.text.RelativeDateTimeFormatter.Direction.LAST else android.icu.text.RelativeDateTimeFormatter.Direction.NEXT
+    f.format(kotlin.math.abs(value).toDouble(), direction, u)
 }.getOrDefault("$value $unit")
 
 fun parseHex(hex: String?, fallback: Color): Color = Tokens.parseColor(hex) ?: fallback

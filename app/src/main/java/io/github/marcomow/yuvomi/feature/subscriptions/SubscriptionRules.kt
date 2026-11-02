@@ -102,10 +102,15 @@ object SubscriptionRules {
     fun cycleLabel(strings: Strings, s: Subscription): String = cycleLabel(strings, s.billingCycle, s.cycleInterval)
 
     /** The unit word of the sentence for the cycle picker ("months" for 2), without the number. */
-    fun cycleUnitWord(strings: Strings, cycle: String, interval: Int): String {
-        val sentence = UNIT_SENTENCE_KEYS[cycle] ?: return cycle
+    fun cycleUnitWord(strings: Strings, cycle: String, interval: Int): String = cycleSentenceParts(strings, cycle, interval).second
+
+    /** `sentenceParts()`: the words before and after the number of the unit's sentence ("Every", "months"). */
+    fun cycleSentenceParts(strings: Strings, cycle: String, interval: Int): Pair<String, String> {
+        val sentence = UNIT_SENTENCE_KEYS[cycle] ?: return "" to cycle
         val full = strings.t(sentence, "count" to interval)
-        return full.replace(interval.toString(), "").replace(Regex("\\s+"), " ").trim()
+        val at = full.indexOf(interval.toString())
+        if (at < 0) return "" to full
+        return full.substring(0, at).trim() to full.substring(at + interval.toString().length).trim()
     }
 
     fun statusLabelKey(s: Subscription): String = when (s.effectiveStatus) {
