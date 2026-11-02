@@ -122,10 +122,14 @@ class CalendarContractTest : ContractTestBase() {
         }
     }
 
-    /** CAL-A23: the server refuses a series that never occurs (#960, #1607), with the reason the app words. */
-    @Test fun `CAL-A23 the server refuses an empty series`() {
+    /**
+     * CAL-A23: the server refuses a series whose UNTIL lies before its start (#960, #1607), with
+     * the reason the app words (server/routes/calendar/crud.js answers this case before it
+     * looks for occurrences).
+     */
+    @Test fun `CAL-A23 the server refuses a series that ends before it starts`() {
         val alex = member("alex")
-        expectHttp(400, "calendar_series_no_occurrence") {
+        expectHttp(400, "calendar_series_ends_before_start") {
             alex.create(form(unique("Bad"), RRule.Parts(freq = "DAILY", until = day.minusDays(2).toString())))
         }
     }
@@ -206,7 +210,8 @@ class CalendarContractTest : ContractTestBase() {
             val after = alex.window().filter { (it.seriesId ?: it.id) == master.id }
             assertEquals(4, after.size)
             assertTrue(after.any { it.title == "Changed" })
-            expectHttp(400, "malformed_recurrence_id") { alex.api.deleteOccurrence(master.id, "not-a-key", following = false) }
+            // A key that names no occurrence of the series (the delete route does not tell a malformed key apart).
+            expectHttp(400, "invalid_recurrence_id") { alex.api.deleteOccurrence(master.id, "not-a-key", following = false) }
         } finally {
             alex.cleanup(master.id)
         }

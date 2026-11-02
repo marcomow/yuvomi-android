@@ -170,12 +170,12 @@ Yuvomi.
 | CAL-A20 | The reads (window, holidays, calendars, members, preferences, tasks, schedule, waste, sync targets) decode against the seeded server. | contract | written |
 | CAL-A21 | Search finds by title; an empty query answers nothing. | contract | written |
 | CAL-A22 | Create, read, edit (omitted fields kept), delete, then 404 `calendar_event_not_found`. | contract | written |
-| CAL-A23 | A series without occurrence is 400 `calendar_series_no_occurrence`. | contract | written |
+| CAL-A23 | A series whose UNTIL lies before its start is 400 `calendar_series_ends_before_start`. | contract | passing (CI) |
 | CAL-A24 | A repeated create with one key is one event. | contract | written |
 | CAL-A25 | `emma` cannot change `alex`'s event: 403 `not_owner`. | contract | written |
 | CAL-A26 | Reset refuses a local event (400) and a missing one (404). | contract | written |
 | CAL-A27 | A local series expands with `series_id`, `recurrence_id` and override rights. | contract | written |
-| CAL-A28 | "Only this" edit with lead times and delete; a malformed key is 400. | contract | written |
+| CAL-A28 | "Only this" edit with lead times and delete; a key that names no occurrence is 400 `invalid_recurrence_id`. | contract | passing (CI) |
 | CAL-A29 | "This and following" splits; deleting following truncates. | contract | written |
 | CAL-A30 | An exception removes one day; a truncated rule ends the series; an exception on a single event is 400. | contract | written |
 | CAL-A31 | Reminders are written, read back and cleared. | contract | written |
