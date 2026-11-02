@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.settings
 
+import io.github.marcomow.yuvomi.feature.shell.BarSlots
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
@@ -190,15 +191,26 @@ fun NavigationSection(ctx: SectionContext) {
     // The phone bar: three slots from the modules switched on for the household.
     val available = all.filter { it.enabled && !it.locked && it.type != "third-party" }.map { it.id } +
         all.filter { it.type == "third-party" && it.enabled }.map { it.orderId }
-    val mobile = ModuleOrder.resolveMobile(prefs.strings("mobile_nav_order"), available)
+    val saved = ModuleOrder.resolveMobile(prefs.strings("mobile_nav_order"), available)
+    // Tags is the app's own module: the slot showing it is kept on the phone (BarSlots.TAGS).
+    val settings = ctx.shell.container.settings
+    val tagsSlot by settings.tagsBarSlot.collectAsState(initial = null)
+    val tagsOffered = ctx.shell.shows(BarSlots.TAGS)
+    val mobile = saved.toMutableList().also { m -> tagsSlot?.takeIf { tagsOffered && it < m.size }?.let { m[it] = BarSlots.TAGS } }
     SettingsGroup(title = t("settings.mobileNavigationTitle"), footer = t("settings.mobileNavigationHint")) {
         mobile.indices.forEach { slot ->
             if (slot > 0) RowDivider()
             val options = available.filter { it == mobile[slot] || it !in mobile }.map { id ->
                 id to (all.firstOrNull { it.id == id || it.orderId == id }?.let { rowLabel(it) } ?: id)
-            }
+            } + listOfNotNull((BarSlots.TAGS to t("android.tags.title")).takeIf { tagsOffered && (mobile[slot] == BarSlots.TAGS || BarSlots.TAGS !in mobile) })
             ChoiceRow(ctx.strings.t("settings.mobileNavigationSlotLabel", "position" to slot + 1), options, mobile[slot], ctx.editable) { id ->
-                val next = mobile.toMutableList().also { it[slot] = id }
+                if (id == BarSlots.TAGS) {
+                    ctx.scope.launch { settings.setTagsBarSlot(slot) }
+                    return@ChoiceRow
+                }
+                if (slot == tagsSlot) ctx.scope.launch { settings.setTagsBarSlot(null) }
+                // The server keeps its own three; the slot under Tags keeps what it had.
+                val next = saved.toMutableList().also { it[slot] = id }
                 ctx.save("settings.mobileNavigationSaved", buildJsonObject { put("mobile_nav_order", JsonArray(next.map(::JsonPrimitive))) })
             }
         }

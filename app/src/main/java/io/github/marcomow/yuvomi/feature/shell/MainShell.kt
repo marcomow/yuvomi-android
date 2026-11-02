@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.shell
 
+import androidx.compose.runtime.collectAsState
 import io.github.marcomow.yuvomi.feature.settings.SettingsRegistry
 import io.github.marcomow.yuvomi.feature.settings.SettingsRoutes
 import androidx.compose.foundation.layout.Box
@@ -150,7 +151,8 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLink: S
 
     // The bar and the rail: Overview, the member's three slots (BarSlots), More.
     val shown = shell.shownModules()
-    val slots = BarSlots.bar(session.preferences, shown)
+    val tagsSlot by container.settings.tagsBarSlot.collectAsState(initial = null)
+    val slots = BarSlots.bar(session.preferences, shown, tagsSlot)
     val kitchenFeatures = Features.all.filter { it.id in BarSlots.KITCHEN_MODULES }
     var lastKitchen by rememberSaveable { mutableStateOf<String?>(null) }
     LaunchedEffect(current) {

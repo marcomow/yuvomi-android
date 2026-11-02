@@ -30,10 +30,20 @@ class BarSlotsTest {
     @Test fun `a kitchen module in the saved order means the kitchen slot`() =
         assertEquals(listOf("kitchen", "tasks", "calendar"), BarSlots.bar(Preferences(mobileNavOrder = listOf("shopping", "tasks")), everything))
 
-    @Test fun `app-only modules and settings never sit in the bar`() {
+    @Test fun `the server's order never puts tags or settings in the bar`() {
         val bar = BarSlots.bar(Preferences(mobileNavOrder = listOf("tags", "settings")), everything)
         assertFalse("tags" in bar || "settings" in bar)
     }
+
+    @Test fun `the phone's tags slot shows Tags there, and the module saved there moves to More`() {
+        val prefs = Preferences(mobileNavOrder = listOf("calendar", "tasks", "shopping"))
+        val bar = BarSlots.bar(prefs, everything, tagsSlot = 1)
+        assertEquals(listOf("calendar", "tags", "kitchen"), bar)
+        assertTrue("tasks" in BarSlots.more(prefs, everything, bar))
+    }
+
+    @Test fun `a tags slot without access to Tags keeps the saved bar`() =
+        assertEquals(listOf("calendar", "tasks", "kitchen"), BarSlots.bar(Preferences(), everything - "tags", tagsSlot = 0))
 
     @Test fun `more lists the rest without hidden modules, settings last`() {
         val prefs = Preferences(hiddenModules = listOf("waste"))

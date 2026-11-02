@@ -13,6 +13,7 @@ import io.github.marcomow.yuvomi.feature.settings.ModuleOrder
  */
 object BarSlots {
     const val KITCHEN = "kitchen"
+    const val TAGS = "tags"
 
     /** The kitchen modules in the order upstream's `getLastKitchenRoute` falls back through. */
     val KITCHEN_MODULES = ModuleOrder.KITCHEN_CHILDREN
@@ -20,10 +21,15 @@ object BarSlots {
     /**
      * The three slot ids for a member who can open [shown] (module ids, kitchen modules
      * individually), following their saved choice, then upstream's defaults, then any module.
-     * App-only modules (Tags) cannot be chosen in upstream's settings and are never in the bar.
+     * Tags is the app's own module: upstream's setting cannot hold it, so the slot that shows it
+     * ([tagsSlot]) is kept on the phone (SettingsStore.tagsBarSlot).
      */
-    fun bar(prefs: Preferences, shown: List<String>): List<String> =
-        ModuleOrder.resolveMobile(prefs.mobileNavOrder, shown.filter { it in UPSTREAM_IDS })
+    fun bar(prefs: Preferences, shown: List<String>, tagsSlot: Int? = null): List<String> {
+        val saved = ModuleOrder.resolveMobile(prefs.mobileNavOrder, shown.filter { it in UPSTREAM_IDS })
+        if (tagsSlot == null || TAGS !in shown) return saved
+        // The phone's own choice: Tags in that slot; the module saved there moves to More.
+        return saved.toMutableList().also { if (tagsSlot < it.size) it[tagsSlot] = TAGS else if (it.size < 3) it += TAGS }
+    }
 
     /**
      * What "More" lists: every module in [shown] that is not in [bar], minus the member's hidden

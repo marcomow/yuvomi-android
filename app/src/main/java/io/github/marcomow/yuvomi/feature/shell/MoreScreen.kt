@@ -1,5 +1,7 @@
 package io.github.marcomow.yuvomi.feature.shell
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.collectAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -37,7 +39,8 @@ fun MoreScreen() {
     val prefs = shell.session.preferences
     val shown = shell.shownModules()
     // Everything not in the bar, in the member's navigation order (BarSlots).
-    val native = BarSlots.more(prefs, shown, BarSlots.bar(prefs, shown)).mapNotNull { id ->
+    val tagsSlot by shell.container.settings.tagsBarSlot.collectAsState(initial = null)
+    val native = BarSlots.more(prefs, shown, BarSlots.bar(prefs, shown, tagsSlot)).mapNotNull { id ->
         val m = ModuleCatalog.get(id) ?: return@mapNotNull null
         val route = if (id == "tasks") "tasks" else Features.all.firstOrNull { it.id == id }?.startRoute ?: return@mapNotNull null
         m to route

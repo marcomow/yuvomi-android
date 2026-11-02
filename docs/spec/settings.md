@@ -121,6 +121,10 @@ Not under `/settings` but only called by settings sheets (other builders may als
 - **SET-R31** Errors roll back the switch and say `errorSentence`. ✅
 - **SET-R32** My navigation: three phone-bar slots (`resolveMobileNavOrder`), saved as
   `mobile_nav_order`. ✅
+  Each slot also offers **Tags**, the app's own module. Upstream's `mobile_nav_order` accepts
+  only its own modules and silently drops `tags`, so the slot showing Tags is kept on the phone
+  (`SettingsStore.tagsBarSlot`). The module saved in that slot stays saved for the web app and
+  moves to More in the app.
 - **SET-R33** Sidebar order: up/down within a group writes the expanded `module_order`
   (`buildOrderPayload`); show/hide writes `hidden_modules` (kitchen children one by one). ✅
 
