@@ -123,7 +123,10 @@ the specs.
 5. **A household of one asks fewer questions.** Upstream hides assignee and visibility pickers when
    the household has a single member. So do we, using `householdSize` from `/auth/me`.
 6. **A 404 or 405 on a known operation disables the feature** and shows a "needs a newer client"
-   state instead of retrying, as upstream's `MODULES.md` advises third-party clients.
+   state instead of retrying, as upstream's `MODULES.md` advises third-party clients. A 404 that
+   carries a `reason` is about a row, not the route ("already deleted"). Some routes (pantry)
+   answer a missing row with a bare 404; their module treats only 405 as "unsupported", and its
+   spec says so.
 
 ## What is deliberately not here
 

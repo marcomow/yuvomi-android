@@ -8,8 +8,9 @@ A native Android client for a self-hosted Yuvomi family planner. It talks only t
 server's documented `/api/v1`, with no cloud of ours in between, and opens the web app in your
 browser for everything it does not do natively yet.
 
-**Status:** the MVP is implemented and tested with unit, Robolectric and end-to-end smoke tests;
-it has not yet been tried by hand on a device. Contract tests against a real upstream server run in
+**Status:** the MVP (sign-in, overview, tasks) has been tried on a phone. Shopping, Meals,
+Recipes, Notes and Pantry are implemented and tested with unit, Robolectric and contract tests,
+but not yet tried by hand. Contract tests against a real upstream server run in
 CI. See the [plan](docs/PLAN.md) for what is next.
 
 ## Install
@@ -20,16 +21,27 @@ Download `yuvomi-android-<version>.apk` from the latest
 pre-releases of a proof of concept; every change to the app merged into `main` publishes a new
 one. How they are made: [RELEASING.md](docs/RELEASING.md).
 
-## MVP
+## What is native
 
 - Sign in with your Yuvomi username and password, plus your second factor if you use one.
 - **Overview:** your own tile arrangement from the web app, today at a glance, tasks you can tick
   off right there.
 - **Tasks:** list, filters, create and edit with every field the web app has, tick off and name
   who did it, recurring tasks, subtasks, checklists and comments.
+- **Shopping:** several lists, quick add with suggestions, instant ticking that works on a weak
+  signal, categories and shops, sending a list, meal plan import, moving checked items to the
+  pantry.
+- **Meals:** the week plan with the household's meal types, meals from recipes, ingredients,
+  a random plan, sending ingredients to a shopping list.
+- **Recipes:** search, pictures, servings scaling, pantry links, planning as a meal, adding to a
+  shopping list, the full editor.
+- **Notes:** the board with pinned notes, colours, categories, checklists you can tick, the
+  editor with formatting.
+- **Pantry:** stock by location with expiry warnings, quick quantity steps, locations, sending
+  what runs low to a shopping list.
 - Everything else opens in your browser.
 
-Not in the MVP: notifications, single sign-on, any other module as a native screen.
+Not native yet: notifications, single sign-on, the other modules (calendar, budget, and more).
 
 ## How it is built
 
@@ -37,8 +49,8 @@ Kotlin, Jetpack Compose and Material 3, dressed in Yuvomi's own colours, which a
 upstream's design tokens, as are all 27 of its languages. Details:
 
 - [Architecture](docs/ARCHITECTURE.md) and the [decision records](docs/adr/)
-- Specs: [sign-in](docs/spec/signin.md), [overview](docs/spec/overview.md),
-  [tasks](docs/spec/tasks.md)
+- [Specs](docs/spec/README.md): sign-in, overview, tasks, shopping, meals, recipes, notes,
+  pantry
 - [Parity with upstream](docs/PARITY.md)
 
 ## Build and test

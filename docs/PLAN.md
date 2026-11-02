@@ -15,8 +15,9 @@ All five milestones were built in one pass (2026-11-01). Status per milestone:
 
 Not done yet, in order of value:
 
-- Run the app on a device or emulator against a real server; so far it is verified by
-  Robolectric tests and an end-to-end smoke test, not by hand.
+- Try Shopping, Meals, Recipes, Notes and Pantry by hand on a phone (ADR 0015); the MVP has been.
+- Drag and drop where the web app has it (shopping and pantry order, meals between days);
+  up and down buttons stand in for now.
 - Convert upstream's module glyphs (`public/nav-icons.js`) to vector drawables in the sync.
 - Apply overview tile options (OVERVIEW-R15) as query parameters.
 - Upgrade to AGP 9 and compile SDK 37 to take the newest AndroidX and OkHttp releases (ADR 0012).

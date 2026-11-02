@@ -166,8 +166,10 @@ class RecipesScreenTest {
         compose.onNodeWithText("Tinned tomatoes").performClick()
         compose.onNodeWithText(strings.t("common.save")).performClick()
         assertEquals("""{"name":"Spaghetti","pantryItemId":6}""", write("PUT /api/v1/recipes/1/ingredient-match"))
-        compose.waitUntil(10_000) { compose.onAllNodesWithText("Pasta shelf").fetchSemanticsNodes().isEmpty() }
-        compose.onNodeWithText("Tinned tomatoes").assertExists()
+        // The dialog closes, then the row names the new pantry item.
+        val matchTitle = strings.t("recipes.ingredientMatchTitle", "name" to "Spaghetti")
+        compose.waitUntil(10_000) { compose.onAllNodesWithText(matchTitle).fetchSemanticsNodes().isEmpty() }
+        compose.waitUntil(10_000) { compose.onAllNodesWithText("Tinned tomatoes", substring = true).fetchSemanticsNodes().isNotEmpty() }
         // The bulk entry offers the one ingredient without a link.
         compose.onNodeWithText(strings.t("recipes.ingredientMatchOpen", "count" to 1)).assertExists()
     }

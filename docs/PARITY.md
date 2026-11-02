@@ -16,13 +16,13 @@ app in the browser, ADR 0006) · **Planned** (a spec is being written).
 | Plan | Tasks, tier 3 (Kanban, manual order, archive, bulk, history, tag and category management, documents upload) | Browser | | 2.83.0 |
 | Plan | Calendar | Overview | | 2.83.0 |
 | Plan | Rewards | Browser | | 2.83.0 |
-| Plan | Notes | Browser | | 2.83.0 |
+| Plan | Notes | Native | [notes](spec/notes.md) | 2.83.0 |
 | Plan | Contacts | Browser | | 2.83.0 |
 | Plan | Schedule | Browser | | 2.83.0 |
-| Household | Meals | Overview | | 2.83.0 |
-| Household | Recipes | Browser | | 2.83.0 |
-| Household | Shopping | Overview | | 2.83.0 |
-| Household | Pantry | Browser | | 2.83.0 |
+| Household | Meals | Native | [meals](spec/meals.md) | 2.83.0 |
+| Household | Recipes | Native (connecting recipe sources stays in Settings, browser) | [recipes](spec/recipes.md) | 2.83.0 |
+| Household | Shopping | Native | [shopping](spec/shopping.md) | 2.83.0 |
+| Household | Pantry | Native | [pantry](spec/pantry.md) | 2.83.0 |
 | Household | Housekeeping | Browser | | 2.83.0 |
 | Household | Waste collection | Browser | | 2.83.0 |
 | Household | Documents | Browser | | 2.83.0 |

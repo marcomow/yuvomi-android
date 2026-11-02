@@ -10,6 +10,11 @@ spec; fix whichever is wrong.
 | [Sign-in and session](signin.md) | Implemented | 2.83.0 |
 | [Overview](overview.md) | Implemented | 2.83.0 |
 | [Tasks](tasks.md) | Implemented (tiers 1 and 2) | 2.83.0 |
+| [Shopping](shopping.md) | Implemented | 2.83.0 |
+| [Meals](meals.md) | Implemented | 2.83.0 |
+| [Recipes](recipes.md) | Implemented | 2.83.0 |
+| [Notes](notes.md) | Implemented | 2.83.0 |
+| [Pantry](pantry.md) | Implemented | 2.83.0 |
 
 Where each acceptance criterion is tested: see the `@Test` names and KDoc in `app/src/test/`,
 which carry the criterion IDs (`SIGNIN-A6`, `TASKS-A17`, ...). Criteria tagged **ui** are covered
