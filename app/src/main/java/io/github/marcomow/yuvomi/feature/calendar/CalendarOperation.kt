@@ -38,5 +38,4 @@ enum class CalendarOperation(override val method: String, override val template:
     REMINDERS_CLEAR("DELETE", "/api/v1/reminders"),
     SCHEDULE_ENTRIES("GET", "/api/v1/schedule/entries"),
     WASTE_OCCURRENCES("GET", "/api/v1/waste/occurrences"),
-    DOCUMENT_PREVIEW("GET", "/api/v1/documents/{id}/preview"),
 }

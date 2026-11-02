@@ -28,4 +28,3 @@ PUT /api/v1/reminders
 DELETE /api/v1/reminders
 GET /api/v1/schedule/entries
 GET /api/v1/waste/occurrences
-GET /api/v1/documents/{id}/preview

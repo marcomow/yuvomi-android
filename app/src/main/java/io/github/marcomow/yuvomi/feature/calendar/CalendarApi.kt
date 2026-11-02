@@ -6,6 +6,7 @@ import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decode
 import io.github.marcomow.yuvomi.core.api.decodeData
+import io.github.marcomow.yuvomi.feature.documents.DocumentsOperation
 import io.github.marcomow.yuvomi.feature.meals.MealsOperation
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonArray
@@ -127,7 +128,7 @@ class CalendarApi(val client: YuvomiClient) {
     }
 
     /** An attachment image through the session (`attachment_preview_url`). */
-    suspend fun preview(documentId: Int): ByteArray = client.bytes(CalendarOperation.DOCUMENT_PREVIEW.path(mapOf("id" to documentId)))
+    suspend fun preview(documentId: Int): ByteArray = client.bytes(DocumentsOperation.DOCUMENT_PREVIEW.path(mapOf("id" to documentId)))
 
     private fun reminderQuery(eventId: Int) = listOf("entity_type" to "event", "entity_id" to eventId.toString())
 
