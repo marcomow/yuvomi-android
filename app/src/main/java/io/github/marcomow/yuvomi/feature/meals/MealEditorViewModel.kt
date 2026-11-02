@@ -90,6 +90,8 @@ class MealEditorViewModel(
     init {
         viewModelScope.launch {
             val s = week.state.first { !it.loading }
+            // The members failed to load with the page: fetch them for the cook picker (`refreshCookPicker()`).
+            if (s.members.isEmpty()) launch { week.reloadMembers() }
             if (mealId != null) {
                 val meal = s.meal(mealId)
                 if (meal == null) {
@@ -272,13 +274,79 @@ class MealEditorViewModel(
         if (f.date != null && until != null && until.isBefore(f.date)) put(Field.UNTIL, "meals.recurrenceUntilBeforeStart")
     }
 
+
+    fun save() {
+        val s = state.value
+        val api = week.api ?: return
+        if (s.saving || !s.ready) return
+        val errors = validate(s)
+        if (errors.isNotEmpty()) {
+            _state.update { it.copy(errors = errors) }
+            return
+        }
+        _state.update { it.copy(saving = true) }
+        viewModelScope.launch {
+            try {
+                val meal = s.meal
+                if (meal == null) {
+                    api.create(MealBodies.create(s.form), createKey)
+                } else if (meal.isRecurring && s.form.scope == "series") {
+                    api.update(meal.id, MealBodies.series(s.form), series = true)
+                } else {
+                    api.update(meal.id, MealBodies.single(s.form))
+                    val sync = MealBodies.ingredientSync(meal, s.form.rows)
+                    sync.delete.forEach { api.deleteIngredient(it) }
+                    sync.update.forEach { row -> api.updateIngredient(row.id!!, row) }
+                    sync.add.forEach { row -> api.addIngredient(meal.id, row, YuvomiClient.newIdempotencyKey()) }
+                }
+                week.reload()
+                _state.update { it.copy(saving = false, done = if (meal == null) Done.CREATED else Done.UPDATED) }
+            } catch (e: ApiProblem) {
+                _state.update { it.copy(saving = false, message = MealsErrors.key(e, mealGoneOn404 = s.meal != null)) }
+            }
+        }
+    }
+
+    /** "Save as recipe": `POST /recipes` with the form's title, notes, link and ingredients. */
+    fun saveAsRecipe() {
+        val s = state.value
+        val api = week.api ?: return
+        if (s.savingRecipe) return
+        if (s.form.title.isBlank()) {
+            _state.update { it.copy(errors = mapOf(Field.TITLE to "common.nameRequired")) }
+            return
+        }
+        _state.update { it.copy(savingRecipe = true) }
+        viewModelScope.launch {
+            try {
+                val f = s.form
+                val created = api.createRecipe(buildJsonObject {
+                    put("title", f.title.trim())
+                    put("notes", MealBodies.nullable(f.notes))
+                    put("recipe_url", MealBodies.nullable(f.recipeUrl))
+                    put("ingredients", MealBodies.ingredientsJson(f.rows))
+                }, recipeKey)
+                week.recipeCreated(created)
+                edit { it.copy(recipeId = created.id) }
+                _state.update { it.copy(savingRecipe = false, message = "recipes.created") }
+            } catch (e: ApiProblem) {
+                _state.update { it.copy(savingRecipe = false, message = MealsErrors.key(e)) }
+            }
+        }
+    }
+
+    /** `canTransfer` of the form: own ingredients that are not on a list yet. */
+    fun hasOpenOwnIngredients(): Boolean = state.value.meal?.ingredients?.any { !it.onShoppingList } == true
+}
+
+/** The request bodies of the meal form (`saveModal()`), apart so they are unit tested. */
+object MealBodies {
     /** The ingredient rows as sent (`collectModalIngredients()`): blank names are dropped. */
-    private fun ingredientsJson(rows: List<IngredientRow>) = JsonArray(rows.filter { it.name.isNotBlank() }.map { it.toJson() })
+    fun ingredientsJson(rows: List<IngredientRow>) = JsonArray(rows.filter { it.name.isNotBlank() }.map { it.toJson() })
 
-    private fun nullable(value: String) = if (value.isBlank()) JsonNull else JsonPrimitive(value.trim())
+    fun nullable(value: String) = if (value.isBlank()) JsonNull else JsonPrimitive(value.trim())
 
-    fun createBody(s: UiState = state.value): JsonObject {
-        val f = s.form
+    fun create(f: MealEditorViewModel.Form): JsonObject {
         return buildJsonObject {
             put("date", f.date.toString())
             put("meal_type", f.mealType)
@@ -294,8 +362,7 @@ class MealEditorViewModel(
     }
 
     /** `PUT /meals/{id}?scope=series`: no date; the cook only when picked here (#1679). */
-    fun seriesBody(s: UiState = state.value): JsonObject {
-        val f = s.form
+    fun series(f: MealEditorViewModel.Form): JsonObject {
         return buildJsonObject {
             put("meal_type", f.mealType)
             put("title", f.title.trim())
@@ -309,8 +376,7 @@ class MealEditorViewModel(
     }
 
     /** `PUT /meals/{id}` for this meal only. */
-    fun singleBody(s: UiState = state.value): JsonObject {
-        val f = s.form
+    fun single(f: MealEditorViewModel.Form): JsonObject {
         return buildJsonObject {
             put("date", f.date.toString())
             put("meal_type", f.mealType)
@@ -340,67 +406,4 @@ class MealEditorViewModel(
             add = kept.filter { it.id == null },
         )
     }
-
-    fun save() {
-        val s = state.value
-        val api = week.api ?: return
-        if (s.saving || !s.ready) return
-        val errors = validate(s)
-        if (errors.isNotEmpty()) {
-            _state.update { it.copy(errors = errors) }
-            return
-        }
-        _state.update { it.copy(saving = true) }
-        viewModelScope.launch {
-            try {
-                val meal = s.meal
-                if (meal == null) {
-                    api.create(createBody(s), createKey)
-                } else if (meal.isRecurring && s.form.scope == "series") {
-                    api.update(meal.id, seriesBody(s), series = true)
-                } else {
-                    api.update(meal.id, singleBody(s))
-                    val sync = ingredientSync(meal, s.form.rows)
-                    sync.delete.forEach { api.deleteIngredient(it) }
-                    sync.update.forEach { row -> api.updateIngredient(row.id!!, row) }
-                    sync.add.forEach { row -> api.addIngredient(meal.id, row, YuvomiClient.newIdempotencyKey()) }
-                }
-                week.reload()
-                _state.update { it.copy(saving = false, done = if (meal == null) Done.CREATED else Done.UPDATED) }
-            } catch (e: ApiProblem) {
-                _state.update { it.copy(saving = false, message = MealsErrors.key(e, mealGoneOn404 = s.meal != null)) }
-            }
-        }
-    }
-
-    /** "Save as recipe": `POST /recipes` with the form's title, notes, link and ingredients. */
-    fun saveAsRecipe() {
-        val s = state.value
-        val api = week.api ?: return
-        if (s.savingRecipe) return
-        if (s.form.title.isBlank()) {
-            _state.update { it.copy(errors = mapOf(Field.TITLE to "common.nameRequired")) }
-            return
-        }
-        _state.update { it.copy(savingRecipe = true) }
-        viewModelScope.launch {
-            try {
-                val f = s.form
-                val created = api.createRecipe(buildJsonObject {
-                    put("title", f.title.trim())
-                    put("notes", nullable(f.notes))
-                    put("recipe_url", nullable(f.recipeUrl))
-                    put("ingredients", ingredientsJson(f.rows))
-                }, recipeKey)
-                week.recipeCreated(created)
-                edit { it.copy(recipeId = created.id) }
-                _state.update { it.copy(savingRecipe = false, message = "recipes.created") }
-            } catch (e: ApiProblem) {
-                _state.update { it.copy(savingRecipe = false, message = MealsErrors.key(e)) }
-            }
-        }
-    }
-
-    /** `canTransfer` of the form: own ingredients that are not on a list yet. */
-    fun hasOpenOwnIngredients(): Boolean = state.value.meal?.ingredients?.any { !it.onShoppingList } == true
 }

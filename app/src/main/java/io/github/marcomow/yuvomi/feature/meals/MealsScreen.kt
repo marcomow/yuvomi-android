@@ -28,14 +28,14 @@ import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EventRepeat
 import androidx.compose.material.icons.outlined.Link
-import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.automirrored.outlined.MenuBook
 import androidx.compose.material.icons.outlined.MoreVert
-import androidx.compose.material.icons.outlined.Notes
+import androidx.compose.material.icons.automirrored.outlined.Notes
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.Repeat
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.ShoppingCart
-import androidx.compose.material.icons.outlined.ViewList
+import androidx.compose.material.icons.automirrored.outlined.ViewList
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DropdownMenu
@@ -412,8 +412,9 @@ private fun MealCard(meal: Meal, s: MealsViewModel.UiState, access: MealsAccess,
                 if (cook != null || count > 0) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(top = 2.dp)) {
                         if (cook != null) {
+                            val named = t("meals.cookNamed", "name" to cook.name)
                             MemberAvatar(cook.name, cook.color, cook.picture, size = 18.dp,
-                                modifier = Modifier.semantics { contentDescription = "" })
+                                modifier = Modifier.semantics { contentDescription = named })
                             Spacer(Modifier.width(6.dp))
                         }
                         if (count > 0) {
@@ -428,7 +429,7 @@ private fun MealCard(meal: Meal, s: MealsViewModel.UiState, access: MealsAccess,
             }
             if (meal.recipeId != null && access.recipes) {
                 IconButton(onClick = { shell.openRecipe(meal.recipeId) }) {
-                    Icon(Icons.Outlined.MenuBook, t("meals.viewRecipeNamed", "title" to meal.title), Modifier.size(20.dp))
+                    Icon(Icons.AutoMirrored.Outlined.MenuBook, t("meals.viewRecipeNamed", "title" to meal.title), Modifier.size(20.dp))
                 }
             } else if (external != null) {
                 IconButton(onClick = { Browser.open(context, external) }) {
@@ -551,10 +552,10 @@ private fun MealReadSheet(
                     MemberAvatar(cook.name, cook.color, cook.picture, size = 24.dp)
                 }
             }
-            ReadRow(Icons.Outlined.ViewList, t("meals.ingredientsLabel"), ingredients)
-            ReadRow(Icons.Outlined.MenuBook, t("meals.savedRecipeLabel"), recipe?.title,
+            ReadRow(Icons.AutoMirrored.Outlined.ViewList, t("meals.ingredientsLabel"), ingredients)
+            ReadRow(Icons.AutoMirrored.Outlined.MenuBook, t("meals.savedRecipeLabel"), recipe?.title,
                 onClick = if (recipe != null && access.recipes) ({ onDismiss(); shell.openRecipe(recipe.id) }) else null)
-            ReadRow(Icons.Outlined.Notes, t("meals.notesLabel"), meal.notes)
+            ReadRow(Icons.AutoMirrored.Outlined.Notes, t("meals.notesLabel"), meal.notes)
             val url = meal.recipeUrl?.trim()
             ReadRow(Icons.Outlined.Link, t("meals.recipeUrlLabel"), url,
                 onClick = externalHref(url)?.let { href -> { Browser.open(context, href) } })

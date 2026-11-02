@@ -95,16 +95,19 @@ fun MealEditorScreen(week: MealsViewModel, vm: MealEditorViewModel, close: () ->
     LaunchedEffect(Unit) {
         if (shell.session.access("meals") != "write") close()
     }
+    // The editor leaves at once; its message outlives it on the app's scope.
     LaunchedEffect(s.gone) {
         if (s.gone) {
-            shell.notify(strings.t("android.meals.gone"))
+            shell.container.scope.launch { shell.notify(strings.t("android.meals.gone")) }
             close()
         }
     }
     LaunchedEffect(s.done) {
         val done = s.done ?: return@LaunchedEffect
+        shell.container.scope.launch {
+            shell.notify(strings.t(if (done == MealEditorViewModel.Done.CREATED) "meals.mealSaved" else "meals.mealUpdated"))
+        }
         close()
-        shell.notify(strings.t(if (done == MealEditorViewModel.Done.CREATED) "meals.mealSaved" else "meals.mealUpdated"))
     }
     LaunchedEffect(s.message) {
         val key = s.message ?: return@LaunchedEffect
