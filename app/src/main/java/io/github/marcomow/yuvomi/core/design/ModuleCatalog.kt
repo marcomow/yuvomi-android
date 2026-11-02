@@ -16,7 +16,6 @@ import androidx.compose.material.icons.outlined.Kitchen
 import androidx.compose.material.icons.outlined.MenuBook
 import androidx.compose.material.icons.outlined.Restaurant
 import androidx.compose.material.icons.outlined.Schedule
-import androidx.compose.material.icons.outlined.Sell
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.material.icons.outlined.StickyNote2
@@ -59,9 +58,6 @@ object ModuleCatalog {
         ModuleInfo("birthdays", "nav.birthdays", "/birthdays", "birthdays", "calendar", Icons.Outlined.Cake),
         ModuleInfo("budget", "nav.budget", "/budget", "budget", "budget", Icons.Outlined.AccountBalanceWallet),
         ModuleInfo("settings", "nav.settings", "/settings", "settings", null, Icons.Outlined.Settings),
-        // App-only: the cross-module Tags view (docs/spec/tags.md). The web app has no such page;
-        // its closest is the task list filtered by a tag.
-        ModuleInfo("tags", "android.tags.title", "/tasks", "tasks", null, Icons.Outlined.Sell),
     )
 
     private val byId = all.associateBy { it.id }

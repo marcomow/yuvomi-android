@@ -242,6 +242,6 @@ private fun ShellNavHost(nav: NavHostController, offline: Boolean) {
             )
         }
         composable(Routes.MORE) { MoreScreen() }
-        Features.all.forEach { it.register(this, nav) }
+        (Features.all + Features.pending).forEach { it.register(this, nav) }
     }
 }

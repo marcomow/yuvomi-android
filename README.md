@@ -39,9 +39,22 @@ one. How they are made: [RELEASING.md](docs/RELEASING.md).
   editor with formatting.
 - **Pantry:** stock by location with expiry warnings, quick quantity steps, locations, sending
   what runs low to a shopping list.
+- **Calendar:** month, week, day and agenda views with tasks, schedule, waste and birthday
+  layers, the full event form with recurrence and reminders, your calendars.
+- **Schedule:** the shift grid per person, shift types, patterns, overrides and extra shifts,
+  statistics, the feed link.
+- **Documents:** folders, search and filters, upload, viewer for images, PDFs and text, open
+  with or share, expiry reminders.
+- **Health:** vitals with charts, medications and doses, fasting, cycle, prevention, labs,
+  activity and nutrition, for you and the people you care for.
+- **Budget:** the month with entries, categories, accounts, transfers, loans, plans and
+  statistics; subscriptions and split expenses.
+- **Settings:** your account and two-factor sign-in, language and region, modules, family and
+  permissions, notification channels, e-mail, backups and API tokens.
 - Everything else opens in your browser.
 
-Not native yet: notifications, single sign-on, the other modules (calendar, budget, and more).
+Not native yet: notifications, single sign-on, Rewards, Birthdays, Contacts, Inventory,
+Housekeeping and Waste (in progress).
 
 ## How it is built
 

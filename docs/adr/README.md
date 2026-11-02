@@ -22,3 +22,4 @@ Template: **Status**, **Context**, **Decision**, **Consequences**, **Alternative
 | 0013 | [APK releases on GitHub](0013-apk-releases.md) | Accepted (amends 0009), trigger and version code superseded by 0014 |
 | 0014 | [Continuous delivery of the APK](0014-continuous-delivery.md) | Accepted (supersedes parts of 0013) |
 | 0015 | [Five more native modules, each in its own package](0015-more-native-modules.md) | Accepted (widens 0010) |
+| 0016 | [Calendar, Schedule, Documents, Health, Budget and Settings native](0016-most-modules-native.md) | Accepted (extends 0015, replaces its rail rule) |

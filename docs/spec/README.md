@@ -15,6 +15,14 @@ spec; fix whichever is wrong.
 | [Recipes](recipes.md) | Implemented | 2.83.0 |
 | [Notes](notes.md) | Implemented | 2.83.0 |
 | [Pantry](pantry.md) | Implemented | 2.83.0 |
+| [Calendar](calendar.md) | Implemented | 2.83.0 |
+| [Schedule](schedule.md) | Implemented | 2.83.0 |
+| [Documents](documents.md) | Implemented | 2.83.0 |
+| [Health](health.md) | Implemented | 2.83.0 |
+| [Budget](budget.md) | Implemented | 2.83.0 |
+| [Subscriptions](subscriptions.md) | Implemented | 2.83.0 |
+| [Split expenses](splitexpenses.md) | Implemented | 2.83.0 |
+| [Settings](settings.md) | Implemented | 2.83.0 |
 
 Where each acceptance criterion is tested: see the `@Test` names and KDoc in `app/src/test/`,
 which carry the criterion IDs (`SIGNIN-A6`, `TASKS-A17`, ...). Criteria tagged **ui** are covered

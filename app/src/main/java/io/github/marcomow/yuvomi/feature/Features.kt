@@ -44,10 +44,18 @@ import io.github.marcomow.yuvomi.feature.waste.WasteOperation
 /** The native modules beyond Overview and Tasks, in bar and "More" order (ADR 0015). */
 object Features {
     val all: List<Feature> = listOf(
-        ShoppingFeature, MealsFeature, TagsFeature, RecipesFeature, NotesFeature, PantryFeature,
-        CalendarFeature, RewardsFeature, ScheduleFeature, HousekeepingFeature, WasteFeature,
-        DocumentsFeature, InventoryFeature, ContactsFeature, BirthdaysFeature, HealthFeature,
-        BudgetFeature, SettingsFeature,
+        ShoppingFeature, MealsFeature, RecipesFeature, NotesFeature, PantryFeature,
+        CalendarFeature, ScheduleFeature, DocumentsFeature, HealthFeature, BudgetFeature, SettingsFeature,
+    )
+
+    /**
+     * Modules whose native screens are still being built. Their routes are registered so links
+     * from finished modules land on a placeholder that offers the web app, but they are not
+     * native yet: "More" lists them as web modules.
+     */
+    val pending: List<Feature> = listOf(
+        RewardsFeature, HousekeepingFeature, WasteFeature, InventoryFeature, ContactsFeature,
+        BirthdaysFeature, TagsFeature,
     )
 
     /** Every upstream operation the app calls; checked against upstream/operations-used*.txt. */
