@@ -1,0 +1,45 @@
+# The upstream operations of docs/spec/budget.md, as `METHOD /api/v1/path` with
+# OpenAPI path templates. Must match the module's operation enum exactly
+# (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/budget
+POST /api/v1/budget
+PUT /api/v1/budget/{id}
+DELETE /api/v1/budget/{id}
+PATCH /api/v1/budget/{id}/confirm
+PUT /api/v1/budget/{id}/series
+DELETE /api/v1/budget/{id}/series
+GET /api/v1/budget/summary
+GET /api/v1/budget/export
+GET /api/v1/budget/meta
+GET /api/v1/budget/categories
+POST /api/v1/budget/categories
+PATCH /api/v1/budget/categories/reorder
+PUT /api/v1/budget/categories/{key}
+DELETE /api/v1/budget/categories/{key}
+POST /api/v1/budget/categories/{categoryKey}/subcategories
+PATCH /api/v1/budget/categories/{key}/subcategories/reorder
+PUT /api/v1/budget/categories/{key}/subcategories/{subKey}
+DELETE /api/v1/budget/categories/{key}/subcategories/{subKey}
+GET /api/v1/budget/accounts
+POST /api/v1/budget/accounts
+PUT /api/v1/budget/accounts/{id}
+DELETE /api/v1/budget/accounts/{id}
+POST /api/v1/budget/transfers
+GET /api/v1/budget/transfers/{id}
+PUT /api/v1/budget/transfers/{id}
+PUT /api/v1/budget/transfers/{id}/series
+GET /api/v1/budget/loans
+POST /api/v1/budget/loans
+POST /api/v1/budget/loans/preview
+PUT /api/v1/budget/loans/{id}
+DELETE /api/v1/budget/loans/{id}
+POST /api/v1/budget/loans/{id}/payments
+DELETE /api/v1/budget/loans/{id}/payments/{paymentId}
+GET /api/v1/budget/plans
+PUT /api/v1/budget/plans/{category}
+DELETE /api/v1/budget/plans/{category}
+GET /api/v1/budget/stats
+GET /api/v1/documents
+POST /api/v1/documents
+GET /api/v1/documents/{id}/preview
+GET /api/v1/documents/{id}/download
