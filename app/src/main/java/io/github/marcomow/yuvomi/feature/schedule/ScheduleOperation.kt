@@ -41,6 +41,5 @@ enum class ScheduleOperation(override val method: String, override val template:
     PREFERENCES("GET", "/api/v1/schedule/preferences"),
 
     // Outside /schedule: the household's holidays sit over the overview's days (`refreshOverview`).
-    // The account directory (`GET /auth/users`) is DocumentsOperation.AUTH_USERS until it moves to core.
-    HOLIDAYS("GET", "/api/v1/calendar/holidays"),
+    // The account directory (`GET /auth/users`) is core `Operation.AUTH_USERS`.
 }

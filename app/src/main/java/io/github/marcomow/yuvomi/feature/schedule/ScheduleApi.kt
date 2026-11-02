@@ -5,7 +5,8 @@ import io.github.marcomow.yuvomi.core.api.Operation
 import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decode
 import io.github.marcomow.yuvomi.core.api.decodeData
-import io.github.marcomow.yuvomi.feature.documents.DocumentsOperation
+import io.github.marcomow.yuvomi.feature.calendar.CalendarOperation
+import java.time.LocalDate
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -18,14 +19,13 @@ import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.buildJsonArray
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
-import java.time.LocalDate
 
 /** docs/spec/schedule.md, "Upstream operations". */
 class ScheduleApi(private val client: YuvomiClient) {
 
     /** `load()`: everything the page reads at once, the pattern days afterwards. */
     suspend fun load(today: LocalDate): ScheduleData = coroutineScope {
-        val users = async { client.call(DocumentsOperation.AUTH_USERS).decodeData(ListSerializer(Account.serializer())) }
+        val users = async { client.call(Operation.AUTH_USERS).decodeData(ListSerializer(Account.serializer())) }
         val types = async { shiftTypes() }
         val fields = async { client.call(ScheduleOperation.CUSTOM_FIELDS).decodeData(ListSerializer(CustomField.serializer())) }
         val patterns = async { client.call(ScheduleOperation.PATTERNS).decodeData(ListSerializer(Pattern.serializer())) }
@@ -67,7 +67,7 @@ class ScheduleApi(private val client: YuvomiClient) {
 
     /** `refreshOverview`'s second call; optional like on the web. */
     suspend fun holidays(from: LocalDate, to: LocalDate): List<Holiday> =
-        client.call(ScheduleOperation.HOLIDAYS, query = listOf("from" to from.toString(), "to" to to.toString()))
+        client.call(CalendarOperation.HOLIDAYS, query = listOf("from" to from.toString(), "to" to to.toString()))
             .decodeData(ListSerializer(Holiday.serializer()))
 
     // ── Shift types and fields ──

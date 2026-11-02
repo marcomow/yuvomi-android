@@ -29,4 +29,3 @@ GET /api/v1/schedule/feed
 POST /api/v1/schedule/feed/regenerate
 DELETE /api/v1/schedule/feed
 GET /api/v1/schedule/preferences
-GET /api/v1/calendar/holidays

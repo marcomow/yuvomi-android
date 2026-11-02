@@ -7,6 +7,7 @@ import io.github.marcomow.yuvomi.core.api.YuvomiClient
 import io.github.marcomow.yuvomi.core.api.decode
 import io.github.marcomow.yuvomi.core.api.decodeData
 import io.github.marcomow.yuvomi.feature.documents.DocumentsOperation
+import io.github.marcomow.yuvomi.feature.schedule.ScheduleOperation
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
@@ -42,7 +43,7 @@ class CalendarApi(val client: YuvomiClient) {
     suspend fun tasks(): JsonElement = client.call(Operation.TASKS_LIST, query = listOf("include_future" to "1"))
 
     suspend fun schedule(from: String, to: String): JsonElement =
-        client.call(CalendarOperation.SCHEDULE_ENTRIES, query = listOf("from" to from, "to" to to))
+        client.call(ScheduleOperation.ENTRIES, query = listOf("from" to from, "to" to to))
 
     suspend fun waste(from: String, to: String): JsonElement =
         client.call(CalendarOperation.WASTE_OCCURRENCES, query = listOf("from" to from, "to" to to))
