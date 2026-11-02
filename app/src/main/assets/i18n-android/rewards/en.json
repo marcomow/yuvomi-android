@@ -1,5 +1,7 @@
 {
   "android": {
-    "rewards": {}
+    "rewards": {
+      "pointsWhole": "Enter a whole number of points, 1 or more."
+    }
   }
 }

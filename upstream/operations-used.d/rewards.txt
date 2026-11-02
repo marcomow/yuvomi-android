@@ -1,0 +1,22 @@
+# The upstream operations of docs/spec/rewards.md, as `METHOD /api/v1/path` with
+# OpenAPI path templates. Must match the module's operation enum exactly
+# (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/rewards/overview
+GET /api/v1/rewards/participants
+PUT /api/v1/rewards/participants/{userId}
+GET /api/v1/rewards/catalog
+POST /api/v1/rewards/catalog
+PATCH /api/v1/rewards/catalog/{id}
+DELETE /api/v1/rewards/catalog/{id}
+GET /api/v1/rewards/ledger
+GET /api/v1/rewards/redemptions
+POST /api/v1/rewards/redemptions
+PATCH /api/v1/rewards/redemptions/{id}
+POST /api/v1/rewards/bonus
+GET /api/v1/rewards/money
+GET /api/v1/rewards/money/ledger
+POST /api/v1/rewards/money/entries
+POST /api/v1/rewards/money/accounts
+DELETE /api/v1/rewards/money/accounts/{userId}
+PUT /api/v1/rewards/money/plans/{userId}
+DELETE /api/v1/rewards/money/plans/{userId}
