@@ -243,7 +243,7 @@ private fun SearchField(filter: BoardFilter, onFilter: (BoardFilter) -> Unit) {
     )
 }
 
-/** NOTES-R5, R6: creators from two on, then the categories in use. A second tap on an active creator clears it. */
+/** NOTES-R4, R5: creators from two on, then the categories in use. A second tap on an active creator clears it. */
 @Composable
 private fun FilterRow(notes: List<Note>, categories: List<NoteCategory>, filter: BoardFilter, onFilter: (BoardFilter) -> Unit) {
     val creators = NotesRules.creators(notes)

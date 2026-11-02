@@ -4,7 +4,7 @@ import java.text.Normalizer
 import java.util.Locale
 
 /**
- * Who may do what to a note (NOTES-R20 to R23), ported from upstream's
+ * Who may do what to a note (NOTES-R27, R28), ported from upstream's
  * `public/utils/note-access.js` and the `mayChange`/`mayCheck` rules of
  * `public/pages/notes.js`.
  */
@@ -34,7 +34,7 @@ data class NoteViewer(
     fun mayChangeLock(note: Note?): Boolean = note == null || isAdmin || own(note)
 }
 
-/** The board's search and filter row (NOTES-R4 to R7). */
+/** The board's search and filter row (NOTES-R3 to R6). */
 data class BoardFilter(val query: String = "", val creator: String = "", val categoryIds: List<Int> = emptyList()) {
     val isFiltered: Boolean get() = query.trim().isNotEmpty() || creator.isNotEmpty() || categoryIds.isNotEmpty()
 }

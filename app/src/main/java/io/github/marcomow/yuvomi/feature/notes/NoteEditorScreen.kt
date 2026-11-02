@@ -22,6 +22,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.FormatListBulleted
@@ -55,6 +56,7 @@ import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
 import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.SuggestionChip
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -85,7 +87,7 @@ import io.github.marcomow.yuvomi.core.i18n.t
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
 import kotlinx.coroutines.launch
 
-/** docs/spec/notes.md, the editor for a new note ([noteId] null) or an existing one (NOTES-R17 to R19, R25). */
+/** docs/spec/notes.md, the editor for a new note ([noteId] null) or an existing one (NOTES-R17 to R22). */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun NoteEditorScreen(noteId: Int?, close: () -> Unit, deleted: () -> Unit) {
@@ -101,6 +103,7 @@ fun NoteEditorScreen(noteId: Int?, close: () -> Unit, deleted: () -> Unit) {
     val f = s.form
     var confirmDiscard by remember { mutableStateOf(false) }
     var detailsOpen by rememberSaveable(s.ready) { mutableStateOf(s.original.detailsOpen) }
+    var reading by rememberSaveable { mutableStateOf(false) }
 
     LaunchedEffect(s.messageKey) {
         s.messageKey?.let {
@@ -136,7 +139,7 @@ fun NoteEditorScreen(noteId: Int?, close: () -> Unit, deleted: () -> Unit) {
                             store.scheduleDelete(note, strings) { m, a -> shell.notify(m, a) }
                         }) { Icon(Icons.Outlined.Delete, t("common.delete")) }
                     }
-                    TextButton(onClick = { vm.save(sendVisibility, sendLock) }, enabled = s.ready && !s.saving && !s.creatingCategory) {
+                    TextButton(onClick = { if (f.content.isBlank()) reading = false; vm.save(sendVisibility, sendLock) }, enabled = s.ready && !s.saving && !s.creatingCategory) {
                         Text(t(if (noteId == null) "common.add" else "common.save"))
                     }
                 },
@@ -157,36 +160,45 @@ fun NoteEditorScreen(noteId: Int?, close: () -> Unit, deleted: () -> Unit) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            OutlinedTextField(
-                value = f.title,
-                onValueChange = { v -> vm.edit { it.copy(title = v) } },
-                placeholder = { Text(t("notes.titleLabel")) },
-                singleLine = true,
-                textStyle = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = strings.t("notes.titleLabel") },
-            )
-            FormatToolbar { format ->
-                vm.format(
-                    format,
-                    MarkdownFormat.Placeholders(
-                        strings.t("markdown.placeholderText"),
-                        strings.t("markdown.placeholderCode"),
-                        strings.t("markdown.placeholderLinkText"),
-                        strings.t("markdown.placeholderUrl"),
-                    ),
+            // Read | Edit (#507): the read tab shows the text as it will look, unsaved changes included.
+            ModeSwitch(reading) { reading = it }
+            if (reading) {
+                ReadTab(f, board.categories, live = note != null && f.content == note.content && viewer.mayCheck(note)) { line, checked ->
+                    scope.launch { vm.check(line, checked)?.let { shell.notify(strings.t(it)) } }
+                }
+            } else {
+                OutlinedTextField(
+                    value = f.title,
+                    onValueChange = { v -> vm.edit { it.copy(title = v) } },
+                    placeholder = { Text(t("notes.titleLabel")) },
+                    singleLine = true,
+                    textStyle = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = strings.t("notes.titleLabel") },
+                )
+                FormatToolbar { format ->
+                    vm.format(
+                        format,
+                        MarkdownFormat.Placeholders(
+                            strings.t("markdown.placeholderText"),
+                            strings.t("markdown.placeholderCode"),
+                            strings.t("markdown.placeholderLinkText"),
+                            strings.t("markdown.placeholderUrl"),
+                        ),
+                    )
+                }
+                OutlinedTextField(
+                    value = s.content,
+                    onValueChange = vm::setContent,
+                    placeholder = { Text(t("notes.contentPlaceholder")) },
+                    supportingText = {
+                        Text(if (s.contentMissing) t("common.contentRequired") else t("notes.contentMarkdownHint"))
+                    },
+                    isError = s.contentMissing,
+                    minLines = 8,
+                    modifier = Modifier.fillMaxWidth().semantics { contentDescription = strings.t("notes.contentLabel") },
                 )
             }
-            OutlinedTextField(
-                value = s.content,
-                onValueChange = vm::setContent,
-                placeholder = { Text(t("notes.contentPlaceholder")) },
-                supportingText = {
-                    Text(if (s.contentMissing) t("common.contentRequired") else t("notes.contentMarkdownHint"))
-                },
-                isError = s.contentMissing,
-                minLines = 8,
-                modifier = Modifier.fillMaxWidth().semantics { contentDescription = strings.t("notes.contentLabel") },
-            )
+            if (reading) return@Column
 
             CategoryEditor(s, board.categories, board.canManageHousehold, vm) {
                 scope.launch { vm.createCategory(board.canManageHousehold)?.let { shell.notify(strings.t(it)) } }
@@ -239,6 +251,42 @@ fun NoteEditorScreen(noteId: Int?, close: () -> Unit, deleted: () -> Unit) {
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ModeSwitch(reading: Boolean, onChange: (Boolean) -> Unit) {
+    val label = t("notes.modeSwitchLabel")
+    val options = listOf(true to "notes.modeRead", false to "notes.modeEdit")
+    SingleChoiceSegmentedButtonRow(Modifier.fillMaxWidth().semantics { contentDescription = label }) {
+        options.forEachIndexed { i, (value, key) ->
+            SegmentedButton(
+                selected = reading == value,
+                onClick = { onChange(value) },
+                shape = SegmentedButtonDefaults.itemShape(i, options.size),
+                label = { Text(t(key)) },
+            )
+        }
+    }
+}
+
+/** The read tab: chosen categories, then the text on the note's colour. */
+@Composable
+private fun ReadTab(f: NoteForm, categories: List<NoteCategory>, live: Boolean, onCheck: (Int, Boolean) -> Unit) {
+    CategoryBadges(f.categoryIds.mapNotNull { id -> categories.firstOrNull { it.id == id } })
+    Surface(
+        shape = RoundedCornerShape(16.dp),
+        color = NoteColors.tint(f.color, MaterialTheme.colorScheme.surfaceContainer),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Column(Modifier.padding(16.dp)) {
+            if (f.content.isBlank()) {
+                Text(t("notes.readEmpty"), color = Yuvomi.colors.textSecondary)
+            } else {
+                NoteMarkdownView(f.content, onCheck = if (live) ({ line, checked, _ -> onCheck(line, checked) }) else null)
+            }
+        }
+    }
+}
+
 private val FORMAT_ICONS: Map<MarkdownFormat.Format, ImageVector> = mapOf(
     MarkdownFormat.Format.BOLD to Icons.Outlined.FormatBold,
     MarkdownFormat.Format.ITALIC to Icons.Outlined.FormatItalic,
@@ -265,7 +313,7 @@ private fun FormatToolbar(onFormat: (MarkdownFormat.Format) -> Unit) {
     }
 }
 
-/** NOTES-R25: chosen categories as chips, a search that suggests and can create. */
+/** NOTES-R22: chosen categories as chips, a search that suggests and can create. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun CategoryEditor(

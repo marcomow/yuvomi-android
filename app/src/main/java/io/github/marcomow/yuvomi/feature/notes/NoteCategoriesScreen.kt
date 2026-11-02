@@ -54,7 +54,7 @@ import io.github.marcomow.yuvomi.feature.shell.LocalShell
 import kotlinx.coroutines.launch
 
 /**
- * docs/spec/notes.md, "Manage categories" (NOTES-R26 to R29): the web app's category manager with
+ * docs/spec/notes.md, "Manage categories" (NOTES-R23 to R26): the web app's category manager with
  * the notes configuration: personal categories always, the household's only for members who
  * may manage them; one add form with the type; rename, move up and down, and delete per row.
  */

@@ -227,7 +227,7 @@ class NotesStore(private val cache: ResponseCache, private val api: NotesApi, pr
         }
     }
 
-    // ── Categories (NOTES-R24 to R29) ──
+    // ── Categories (NOTES-R22 to R26) ──
 
     /** `offerCurrentCategories`: fresh categories; returns false when they could not be read. */
     suspend fun refreshCategories(): Boolean = try {

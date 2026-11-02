@@ -12,7 +12,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-/** docs/spec/notes.md, the editor (NOTES-R17 to R19, R25). */
+/** docs/spec/notes.md, the editor (NOTES-R17 to R22). */
 class NoteEditorViewModel(private val store: NotesStore, val noteId: Int?) : ViewModel() {
 
     enum class Outcome { CREATED, SAVED, GONE }
@@ -76,6 +76,29 @@ class NoteEditorViewModel(private val store: NotesStore, val noteId: Int?) : Vie
 
     fun messageShown() = _state.update { it.copy(messageKey = null) }
 
+    /**
+     * A tick in the editor's read tab (NOTES-R17). Only offered while the text is the saved one,
+     * so the line numbers are the server's (upstream #704); the fresh text replaces both.
+     */
+    suspend fun check(line: Int, checked: Boolean): String? {
+        val id = noteId ?: return null
+        val error = store.check(id, line, checked)
+        val fresh = store.state.value.note(id) ?: return error
+        _state.update { s ->
+            if (s.form.content != s.original.content) {
+                s
+            } else {
+                s.copy(
+                    note = fresh,
+                    form = s.form.copy(content = fresh.content),
+                    original = s.original.copy(content = fresh.content),
+                    content = TextFieldValue(fresh.content, TextRange(fresh.content.length)),
+                )
+            }
+        }
+        return error
+    }
+
     // ── Categories ──
 
     fun setCategoryQuery(query: String) = _state.update { it.copy(categoryQuery = query.take(NotesRules.CATEGORY_NAME_MAX_LENGTH), categoryNameMissing = false) }
@@ -120,7 +143,7 @@ class NoteEditorViewModel(private val store: NotesStore, val noteId: Int?) : Vie
 
     // ── Save ──
 
-    /** NOTES-R18, R19. The text is required; failures keep the editor open, except a note that is gone. */
+    /** NOTES-R19, R20. The text is required; failures keep the editor open, except a note that is gone. */
     fun save(sendVisibility: Boolean, sendLock: Boolean) {
         val s = state.value
         if (s.saving || s.creatingCategory || !s.ready) return
