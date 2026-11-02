@@ -99,7 +99,7 @@ class AppSmokeTest {
         val app = ApplicationProvider.getApplicationContext<YuvomiApp>()
         val container = AppContainer(app, PlainSecretBox())
         val strings = StringsLoader.load(app.assets, "en")
-        runBlocking {
+        compose.offMain {
             container.settings.setLanguage("en")
             container.session.probe("http://localhost:${server.port}")
             container.session.login("alex", "demo1234")

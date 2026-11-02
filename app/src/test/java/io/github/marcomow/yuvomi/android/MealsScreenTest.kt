@@ -105,7 +105,7 @@ class MealsScreenTest {
     private fun start() {
         val app = ApplicationProvider.getApplicationContext<YuvomiApp>()
         val container = AppContainer(app, PlainSecretBox())
-        runBlocking {
+        compose.offMain {
             container.settings.setLanguage("en")
             container.session.probe("http://localhost:${server.port}")
             container.session.login("alex", "demo1234")

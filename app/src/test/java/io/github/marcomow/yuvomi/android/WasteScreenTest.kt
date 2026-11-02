@@ -103,7 +103,7 @@ class WasteScreenTest {
     private fun open(expect: String) {
         val app = ApplicationProvider.getApplicationContext<YuvomiApp>()
         val container = AppContainer(app, PlainSecretBox())
-        runBlocking {
+        compose.offMain {
             container.settings.setLanguage("en")
             container.session.probe("http://localhost:${server.port}")
             container.session.login("alex", "demo1234")
