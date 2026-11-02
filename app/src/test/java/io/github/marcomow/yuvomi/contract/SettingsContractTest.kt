@@ -96,6 +96,7 @@ class SettingsContractTest : ContractTestBase() {
         } catch (e: ApiProblem.Http) {
             assertTrue(e.reason, e.reason in setOf("gravatar_disabled", "no_email", "gravatar_stale", "gravatar_not_found", "gravatar_unreachable"))
         }
+        Unit
     }
 
     /** SET-A22: the whole second-factor flow, on a member made for it. */
