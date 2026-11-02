@@ -1,5 +1,7 @@
 {
   "android": {
-    "schedule": {}
+    "schedule": {
+      "noCalendarApp": "No app on this device subscribes to calendar feeds. Copy the address instead."
+    }
   }
 }
