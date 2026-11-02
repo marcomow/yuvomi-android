@@ -145,9 +145,11 @@ fun ShoppingScreen(requestedList: Int?, highlight: Int? = null) {
     LaunchedEffect(highlight, s.itemsListId) {
         if (highlight != null && s.items.any { it.id == highlight }) {
             val item = s.items.first { it.id == highlight }
-            if (s.checked(item) && !s.tickedOpen) vm.toggleTicked()
             val key = ShoppingLogic.categoryKey(ShoppingLogic.categoryOf(item, s.categories), s.categories)
-            if (key in s.collapsed) vm.toggleCollapsed(key)
+            when {
+                s.checked(item) -> if (!s.tickedOpen) vm.toggleTicked()
+                key in s.collapsed -> vm.toggleCollapsed(key)
+            }
         }
     }
 
@@ -200,7 +202,7 @@ fun ShoppingScreen(requestedList: Int?, highlight: Int? = null) {
                     )
                     s.itemsListId != s.activeListId -> LoadingBox()
                     else -> PullToRefreshBox(isRefreshing = s.refreshing, onRefresh = { vm.refresh(pulled = true) }) {
-                        ItemList(s, vm, rights, canTick = canWrite, listState = listState, onOverlay = { overlay = it })
+                        ItemList(s, vm, rights, canTick = canWrite, listState = listState, highlight = highlight, onOverlay = { overlay = it })
                     }
                 }
                 if (s.pill && canWrite) {
@@ -399,11 +401,34 @@ private fun ItemList(
     rights: Rights,
     canTick: Boolean,
     listState: androidx.compose.foundation.lazy.LazyListState,
+    highlight: Int?,
     onOverlay: (Overlay) -> Unit,
 ) {
     val shell = LocalShell.current
     val strings = LocalStrings.current
     val sections = ShoppingLogic.sections(s.items, s.categories, s::checked, s.held)
+    // The row keys in the order the list shows them, to bring a search hit into view.
+    val keys = buildList {
+        if (s.offline) add("offline")
+        if (s.items.isEmpty()) add("empty")
+        sections.groups.filter { it.items.isNotEmpty() }.forEach { g ->
+            val key = ShoppingLogic.categoryKey(g.category, s.categories)
+            add("h-$key")
+            if (key !in s.collapsed) g.items.forEach { add("i-${it.id}") }
+        }
+        if (sections.ticked.isNotEmpty()) {
+            add("h-ticked")
+            if (s.tickedOpen) sections.ticked.forEach { add("i-${it.id}") }
+        }
+    }
+    var revealed by rememberSaveable(highlight) { mutableStateOf(false) }
+    val target = highlight?.let { keys.indexOf("i-$it") } ?: -1
+    LaunchedEffect(target) {
+        if (!revealed && target >= 0) {
+            revealed = true
+            listState.scrollToItem(target)
+        }
+    }
     LazyColumn(Modifier.fillMaxSize(), state = listState, contentPadding = PaddingValues(bottom = 112.dp)) {
         if (s.offline) {
             item(key = "offline") { OfflineBanner(shell.formats.dateTime(Instant.ofEpochMilli(s.cachedAt!!).atZone(shell.time.zone))) }

@@ -17,11 +17,13 @@ it opens in the browser.
 | Items: grouping, the "Checked off" section, quick add, suggestions, revive, edit, move, delete with undo, tick, reorder, clear checked | R8–R24 |
 | Categories and shops: manage, reorder categories | R25–R27 |
 | Send, meal plan import, pantry transfer | R28–R31 |
-| Live updates, offline, permissions, errors | R32–R38 |
+| Live updates, offline, permissions, errors, links | R32–R39 |
 
-**Not in the web page either** (and so not here): a search field (the page has none; global
-search reaches an item through `?highlight=<id>`, which [ShoppingRoutes.item] mirrors), category
-colours or icons (the shared category manager has colours, the shopping page does not pass any).
+**Not in the web page either** (and so not here): a search field (the page has none; the global
+search reaches an item through `?highlight=<id>`, which `ShoppingRoutes.item(list, id)` mirrors,
+SHOP-R39), category colours or icons (the shared category manager supports colours, the shopping
+page passes none; new categories get the icon `tag` from the server), and an order for shops (the
+server sorts them by name).
 
 ## Upstream references
 
@@ -139,8 +141,9 @@ Error reasons mapped (`friendly-error.js`): `shopping_list_not_found`, `shopping
 - **SHOP-R16** Adding a name that is checked off on this list (case-insensitive) brings that row
   back instead of a second one, with the typed quantity and a hand-picked category in the same
   `PATCH`, and says `shopping.itemBackToast`. (`tickedItemNamed`, `reviveTickedItem`)
-- **SHOP-R17** A new item that is not in sight is announced (`shopping.itemAddedToast`); the app
-  announces every add, since a phone screen rarely shows the target category.
+- **SHOP-R17** A new item is announced (`shopping.itemAddedToast`, name and category). The web
+  app announces it only when the row is out of sight; the app announces every add, because with
+  the keyboard up a phone rarely shows the target category. (`announceAddedOutOfSight`)
 - **SHOP-R18** Edit (bottom sheet): name (required), quantity, category, the list (only with
   more than one list that accepts new items), and under "More details" price, shop (pick or type;
   an unknown name creates the shop), link with "Open link", note; Delete, Cancel, Save. Price is
@@ -210,8 +213,12 @@ Error reasons mapped (`friendly-error.js`): `shopping_list_not_found`, `shopping
   no connection `common.errorOfflineMutation`, else the place's fallback.
 - **SHOP-R37** A "no longer exists" reason (`isGone`) also reloads the page data; a dialog about
   the vanished list or item closes.
-- **SHOP-R38** Creating calls (`POST`) carry one idempotency key per user action, reused when the
-  same dialog is submitted again.
+- **SHOP-R38** Creating calls (`POST`) carry one idempotency key per user action and content,
+  reused when the same action is retried after a failure (upstream answers 409
+  `idempotency_key_reused` to a reused key with another body).
+- **SHOP-R39** `shopping?list=<id>&highlight=<item>` (`ShoppingRoutes.item`) opens the list,
+  unfolds the item's category or the "Checked off" section and scrolls it into view.
+  (`revealHighlightedItem`)
 
 ## Acceptance criteria
 
@@ -223,20 +230,31 @@ Error reasons mapped (`friendly-error.js`): `shopping_list_not_found`, `shopping
 | SHOP-A4 | Given a pantry with "Milk" in the fridge in l then a checked "milk" without unit is preset to the fridge in l; an unknown dairy item goes where most dairy is. | unit | done |
 | SHOP-A5 | Given prices "1,50" (de, EUR), "1.5" (en, EUR), "300" (ja, JPY) then the cents are 150, 150 and 300; "1.200" (de) is refused as grouped, "1.505" (en, EUR) as too precise, "abc" as invalid. | unit | done |
 | SHOP-A6 | Given the live feed has seen versions then an acknowledged own change does not trigger a reload, another change does, and a vanished list does. | unit | done |
-| SHOP-A7 | Given a scripted server, when the member ticks a row then the row shows checked before the answer and the `PATCH` carries `is_checked: 1`; when the answer fails the row is open again. | ui | done |
+| SHOP-A7 | Given a scripted server, when the member ticks a row then the row shows checked before the answer and the `PATCH` carries `is_checked: 1`; when the answer fails the row is open again and `common.errorCheckRolledBack` names it. | ui | done |
 | SHOP-A8 | Given the seeded server as `alex` then lists, items (with `version`, `categories`), categories and versions decode. | contract | done |
 | SHOP-A9 | Given a new list, add, tick, edit (price, shop), move, reorder, clear checked, duplicate, rename and delete it, each answer decodes and reloading shows the change. | contract | done |
 | SHOP-A10 | Given a category is added, renamed, reordered and deleted then items in it move to the first remaining category; adding an existing name is 409 `category_exists`. | contract | done |
 | SHOP-A11 | Given `send` to a member then the answer is a success or 422 with `recipient_no_email` / `smtp_unconfigured`. | contract | done |
 | SHOP-A12 | Given the meal plan has ingredients this week then preview and import agree, and undo removes the added items. | contract | done |
 | SHOP-A13 | Given a checked item moved into the pantry then the pantry has it and undo removes it again. | contract | done |
-| SHOP-A14 | Given `leo` (child) with shopping `read` then the app shows no FAB and no list menu. | ui | done |
-| SHOP-A15 | Given the network fails after one good load then the cached list shows with the offline banner. | ui | done |
+| SHOP-A14 | Given a member with shopping `read` then the app shows no FAB, no list menu and static check marks. | ui | done |
+| SHOP-A15 | Given the network fails after one good load then the cached list shows with the offline banner, ticking stays and the FAB is gone. | ui | done |
+| SHOP-A16 | Given "Bread" is checked when " bread" is added with quantity 2 then one `PATCH` sends `is_checked: 0` and the quantity, no category, and nothing is created. | ui | done |
+| SHOP-A17 | Given an item is deleted when the member taps Undo then no `DELETE` is sent and the row is back; when the window closes the `DELETE` goes out. | ui | done |
+| SHOP-A18 | Given `highlight` names an item in the closed "Checked off" section then the section opens and the item shows. | ui | done |
 
 ## Strings
 
 App-only strings live in `app/src/main/assets/i18n-android/shopping/en.json` under
-`android.shopping`: the read-only refusal sentence (`settings.permReadOnlyBanner` is not in the
-shipped namespaces), the categories manager hint, reorder-mode labels, the "more details"
-toggle, and the quick-add close label. Everything else reuses upstream's `shopping`, `kitchen`,
-`common`, `category`, `pantry`, `calendar`, `meals`, `emptyHint` and `nav` keys.
+`android.shopping`, and both are upstream sentences from a namespace the app does not ship
+(`settings`): `errorReadOnly` (`settings.permReadOnlyBanner`) and `categoriesHint`
+(`settings.shoppingCategoriesHint`). Everything else reuses upstream's `shopping`, `kitchen`,
+`common`, `category`, `modal`, `pantry`, `calendar`, `meals`, `emptyHint`, `offline` and `nav`
+keys.
+
+## Tests
+
+- `feature/shopping/ShoppingLogicTest.kt`: SHOP-A1 to A6, error mapping, category labels.
+- `android/ShoppingScreenTest.kt`: SHOP-A7, A14 to A18 against a scripted server.
+- `contract/ShoppingContractTest.kt`: SHOP-A8 to A13, at least one call of each of the 25
+  operations, against the seeded server in CI.

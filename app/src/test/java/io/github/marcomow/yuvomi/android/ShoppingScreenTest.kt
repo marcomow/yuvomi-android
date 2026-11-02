@@ -36,6 +36,7 @@ import mockwebserver3.MockResponse
 import mockwebserver3.MockWebServer
 import mockwebserver3.RecordedRequest
 import org.junit.After
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -43,6 +44,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
+import org.robolectric.shadows.ShadowLooper
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 
@@ -90,6 +92,9 @@ class ShoppingScreenTest {
                         if (failTicks) MockResponse.Builder().code(500).body("""{"error":"x","code":500}""").headersDelay(400, TimeUnit.MILLISECONDS).build()
                         else json("""{"data":{"id":11,"list_id":1,"name":"Milk","quantity":"2 l","category":"Milchprodukte","is_checked":1,"sort_order":1},
                             "list_change":{"list_id":1,"before":4,"after":5}}""").newBuilder().headersDelay(400, TimeUnit.MILLISECONDS).build()
+                    "PATCH /api/v1/shopping/items/13" -> json("""{"data":{"id":13,"list_id":1,"name":"Bread","quantity":"2","category":"Backwaren","is_checked":0,"sort_order":1},
+                        "list_change":{"list_id":1,"before":4,"after":5}}""")
+                    "DELETE /api/v1/shopping/items/12" -> json("""{"ok":true,"list_change":{"list_id":1,"before":4,"after":5}}""")
                     else -> MockResponse.Builder().code(404).body("""{"error":"Not found"}""").build()
                 }
             }
@@ -111,7 +116,7 @@ class ShoppingScreenTest {
         return container to strings
     }
 
-    private fun show(container: AppContainer, strings: Strings) {
+    private fun show(container: AppContainer, strings: Strings, list: Int? = null, highlight: Int? = null) {
         val state = container.session.state.value as SessionState.SignedIn
         val session = state.session
         val connection = container.session.connection!!
@@ -124,7 +129,7 @@ class ShoppingScreenTest {
                 )
                 CompositionLocalProvider(LocalStrings provides strings, LocalShell provides shell) {
                     Box(Modifier.fillMaxSize()) {
-                        ShoppingScreen(requestedList = null)
+                        ShoppingScreen(requestedList = list, highlight = highlight)
                         SnackbarHost(snackbar, Modifier.align(Alignment.BottomCenter))
                     }
                 }
@@ -150,7 +155,7 @@ class ShoppingScreenTest {
         }
     }
 
-    @Test fun `SHOP-A7 ticking shows at once, writes is_checked, and rolls back when the write fails`() {
+    @Test fun `SHOP-A7 ticking shows at once and writes is_checked`() {
         val (container, strings) = signIn()
         show(container, strings)
         waitForText("Milk")
@@ -205,6 +210,50 @@ class ShoppingScreenTest {
         // Ticking stays offered (it rolls back by itself); adding does not.
         compose.onNodeWithContentDescription(strings.t("shopping.markDoneLabel", "name" to "Milk")).assertExists()
         assertTrue(compose.onAllNodesWithContentDescription(strings.t("shopping.addItemLabel")).fetchSemanticsNodes().isEmpty())
+    }
+
+    @Test fun `a search hit in the closed Checked off section is unfolded`() {
+        val (container, strings) = signIn()
+        show(container, strings, list = 1, highlight = 13)
+        waitForText("Bread")
+        compose.onNodeWithText("Milk").assertExists()
+    }
+
+    private fun until(condition: () -> Boolean) {
+        val end = System.currentTimeMillis() + 10_000
+        while (!condition()) {
+            check(System.currentTimeMillis() < end) { "timed out" }
+            ShadowLooper.idleMainLooper()
+            Thread.sleep(20)
+        }
+    }
+
+    @Test fun `SHOP-R16 adding the name of a checked item brings that row back in one PATCH`() {
+        val (container, _) = signIn()
+        val vm = ShoppingViewModel(container, 1)
+        until { vm.state.value.itemsListId == 1 }
+        assertTrue(runBlocking { vm.add(" bread", "2", "Sonstiges", categoryChosen = false) })
+        val patch = writes.first { it.startsWith("PATCH /api/v1/shopping/items/13") }
+        assertTrue(patch, patch.contains("\"is_checked\":0") && patch.contains("\"quantity\":\"2\"") && !patch.contains("category"))
+        assertTrue(writes.none { it.startsWith("POST /api/v1/shopping/1/items") })
+        assertEquals(false, vm.state.value.items.first { it.id == 13 }.isChecked)
+    }
+
+    @Test fun `SHOP-R20 a delete waits for the undo window, and undo keeps the item`() {
+        val (container, _) = signIn()
+        val vm = ShoppingViewModel(container, 1)
+        until { vm.state.value.itemsListId == 1 }
+        val apples = vm.state.value.items.first { it.id == 12 }
+
+        vm.notifier = { _, _ -> true } // the member taps Undo
+        vm.delete(apples)
+        until { vm.state.value.items.any { it.id == 12 } }
+        assertTrue(writes.none { it.startsWith("DELETE") })
+
+        vm.notifier = { _, _ -> false } // the window closes
+        vm.delete(apples)
+        assertTrue(vm.state.value.items.none { it.id == 12 })
+        until { writes.any { it.startsWith("DELETE /api/v1/shopping/items/12") } }
     }
 
     @Test fun `the FAB opens the quick add with the default category`() {

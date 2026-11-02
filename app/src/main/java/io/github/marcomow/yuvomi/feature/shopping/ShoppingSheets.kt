@@ -46,6 +46,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -332,7 +333,7 @@ private fun ItemEditor(item: ShoppingItem, s: ShoppingViewModel.UiState, vm: Sho
     var name by remember { mutableStateOf(item.name) }
     var qty by remember { mutableStateOf(item.quantity.orEmpty()) }
     var category by remember { mutableStateOf(item.category ?: ShoppingLogic.categoryOf(item, s.categories)) }
-    var listId by remember { mutableStateOf(s.activeListId ?: item.listId ?: 0) }
+    var listId by remember { mutableIntStateOf(s.activeListId ?: item.listId ?: 0) }
     var price by remember { mutableStateOf(item.priceCents?.let { ShoppingLogic.centsToInput(it, s.currency, locale) }.orEmpty()) }
     var store by remember { mutableStateOf(s.stores.firstOrNull { it.id == item.storeId }?.name.orEmpty()) }
     var url by remember { mutableStateOf(item.url.orEmpty()) }
