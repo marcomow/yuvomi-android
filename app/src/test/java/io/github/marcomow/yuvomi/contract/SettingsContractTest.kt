@@ -332,7 +332,16 @@ class SettingsContractTest : ContractTestBase() {
         assertEquals(webdav.bool("enabled"), alex.data(SettingsOperation.WEBDAV_CONFIG_UPDATE, body = buildJsonObject { put("enabled", webdav.bool("enabled")) }).obj().bool("enabled"))
         expectHttp(400) { alex.data(SettingsOperation.WEBDAV_CONFIG_UPDATE, body = buildJsonObject { put("url", "ftp://nope") }) }
         expectHttp(400) { alex.data(SettingsOperation.WEBDAV_TEST, body = buildJsonObject { put("url", "https://webdav.example.invalid/") ; put("username", "x"); put("password", "y") }, idempotencyKey = YuvomiClient.newIdempotencyKey()) }
-        if (!webdav.bool("configured")) expectHttp(500) { alex.data(SettingsOperation.WEBDAV_TRIGGER, idempotencyKey = YuvomiClient.newIdempotencyKey()) }
+        if (!webdav.bool("configured")) {
+            // Unconfigured, upstream's uploadBackup skips the upload and the route still answers
+            // with the local snapshot (server/services/webdav-backup.js); 500 only when no local
+            // backup can be written.
+            try {
+                assertTrue("file" in alex.data(SettingsOperation.WEBDAV_TRIGGER, idempotencyKey = YuvomiClient.newIdempotencyKey()).obj())
+            } catch (e: ApiProblem.Http) {
+                assertEquals(500, e.status)
+            }
+        }
         expectHttp(403) { api("emma").data(SettingsOperation.BACKUP_STATUS) }
     }
 
