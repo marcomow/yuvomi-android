@@ -3,6 +3,8 @@ package io.github.marcomow.yuvomi.core.session
 import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -27,6 +29,8 @@ class SettingsStore(private val context: Context, private val box: SecretBox) {
         val grouping = stringPreferencesKey("taskGrouping")
         val collapsed = stringSetPreferencesKey("taskCollapsed")
         val notices = stringSetPreferencesKey("notices")
+        val autoUpdates = booleanPreferencesKey("autoUpdates")
+        val lastUpdateCheck = longPreferencesKey("lastUpdateCheck")
     }
 
     suspend fun server(): String? = read(Keys.server)
@@ -45,6 +49,13 @@ class SettingsStore(private val context: Context, private val box: SecretBox) {
     suspend fun setLanguage(code: String?) = context.dataStore.edit {
         if (code == null) it.remove(Keys.language) else it[Keys.language] = code
     }
+
+    /** In-app updates (ADR 0018): check GitHub for a newer release automatically. On by default. */
+    val autoUpdates: Flow<Boolean> = context.dataStore.data.map { it[Keys.autoUpdates] ?: true }
+    suspend fun autoUpdatesNow(): Boolean = autoUpdates.first()
+    suspend fun setAutoUpdates(on: Boolean) = context.dataStore.edit { it[Keys.autoUpdates] = on }
+    suspend fun lastUpdateCheck(): Long = context.dataStore.data.first()[Keys.lastUpdateCheck] ?: 0L
+    suspend fun setLastUpdateCheck(at: Long) = context.dataStore.edit { it[Keys.lastUpdateCheck] = at }
 
     suspend fun grouping(): String = read(Keys.grouping) ?: "category"
     suspend fun setGrouping(mode: String) = context.dataStore.edit { it[Keys.grouping] = mode }

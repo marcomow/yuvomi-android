@@ -64,6 +64,26 @@
     "version": {
       "newer": "This server is newer than the version this app was tested with. Some things may not work.",
       "tooOld": "This server runs Yuvomi {{server}}. This app needs {{min}} or newer."
+    },
+    "update": {
+      "title": "App updates",
+      "idle": "Check whether a newer version of this app is out.",
+      "checking": "Checking for updates…",
+      "upToDate": "Version {{version}} is the newest.",
+      "available": "Version {{version}} is available.",
+      "downloading": "Downloading version {{version}}…",
+      "installing": "Android's installer is open. If you closed it, tap Install again.",
+      "needsPermission": "Android needs your permission for this app to install updates. Tap Allow, switch it on, come back and tap Install.",
+      "install": "Install",
+      "check": "Check now",
+      "retry": "Try again",
+      "allow": "Allow",
+      "automatic": "Check automatically",
+      "automaticHint": "Asks GitHub, where this app is published, about twice a day. Nothing about you or your server is sent.",
+      "checkFailed": "Could not reach GitHub to check for updates.",
+      "downloadFailed": "The download did not finish. Try again.",
+      "corrupt": "The download did not match the published file and was deleted. Try again.",
+      "noInstaller": "This device has no app to install the update."
     }
   }
 }

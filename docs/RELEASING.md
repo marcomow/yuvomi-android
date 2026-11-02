@@ -76,3 +76,8 @@ Without the key variables, `assembleRelease` gives `app-release-unsigned.apk`; a
 
 Open the release page on the phone, download the APK, open it, and allow the browser or file
 manager to install apps when Android asks. Android 8.0 or newer.
+
+Later versions install from within the app (ADR 0018): the account sheet shows a newer
+release, downloads it, checks it against the digest GitHub publishes for the asset and opens
+Android's installer. This only works between builds signed with the same release key; an
+install signed with the debug key has to be uninstalled once first.

@@ -4,9 +4,11 @@
 > [Yuvomi](https://github.com/ulsklyc/yuvomi) project and is not endorsed by it. Yuvomi's web app
 > remains the complete product; this repository explores a native Android client next to it.
 
-A native Android client for a self-hosted Yuvomi family planner. It talks only to your own
+A native Android client for a self-hosted Yuvomi family planner. It talks to your own
 server's documented `/api/v1`, with no cloud of ours in between, and opens the web app in your
-browser for everything it does not do natively yet.
+browser for everything it does not do natively yet. The one exception is the update check:
+it asks GitHub about this app's releases, and you can switch that off
+([ADR 0018](docs/adr/0018-in-app-updates.md)).
 
 **Status:** the MVP (sign-in, overview, tasks) has been tried on a phone. Shopping, Meals,
 Recipes, Notes and Pantry are implemented and tested with unit, Robolectric and contract tests,
@@ -20,6 +22,10 @@ Download `yuvomi-android-<version>.apk` from the latest
 (Android 8.0 or newer; allow installing from your browser when asked). Releases are
 pre-releases of a proof of concept; every change to the app merged into `main` publishes a new
 one. How they are made: [RELEASING.md](docs/RELEASING.md).
+
+After that, the app updates itself: open your account (the avatar at the top right), tap
+**Install** when a newer version is shown, and allow the app to install updates the first time
+Android asks. It checks on its own about twice a day unless you switch "Check automatically" off.
 
 ## What is native
 

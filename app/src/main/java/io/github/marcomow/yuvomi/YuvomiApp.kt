@@ -12,6 +12,7 @@ import io.github.marcomow.yuvomi.core.session.KeystoreSecretBox
 import io.github.marcomow.yuvomi.core.session.SecretBox
 import io.github.marcomow.yuvomi.core.session.SessionManager
 import io.github.marcomow.yuvomi.core.session.SettingsStore
+import io.github.marcomow.yuvomi.core.update.Updater
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,6 +31,7 @@ class AppContainer(app: Application, box: SecretBox = KeystoreSecretBox()) {
     val session = SessionManager(settings, cache, scope)
     val tokens: Tokens = Tokens.load(app.assets)
     val avatars = AvatarLoader { session.connection?.client }
+    val updater = Updater(app, settings)
 
     /** SIGNIN-R17: the chosen language, or the device's mapped to an upstream locale. */
     val strings: StateFlow<Strings?> = settings.language

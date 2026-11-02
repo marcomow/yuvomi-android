@@ -33,6 +33,9 @@ android {
         versionName = releaseVersionName
         buildConfigField("String", "UPSTREAM_PIN", "\"$upstreamPin\"")
         buildConfigField("String", "UPSTREAM_MIN", "\"$upstreamMin\"")
+        // In-app updates (ADR 0018): where the release workflow publishes the APK.
+        buildConfigField("String", "UPDATE_REPO", "\"marcomow/yuvomi-android\"")
+        buildConfigField("boolean", "UPDATES_ENABLED", "false")
     }
 
     signingConfigs {
@@ -48,6 +51,8 @@ android {
 
     buildTypes {
         release {
+            // Only a release build can install a release over itself (same signing key).
+            buildConfigField("boolean", "UPDATES_ENABLED", "true")
             signingConfig = when {
                 releaseKeystore != null -> signingConfigs.getByName("release")
                 debugSignRelease -> signingConfigs.getByName("debug")

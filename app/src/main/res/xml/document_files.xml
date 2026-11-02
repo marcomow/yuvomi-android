@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Files the Documents module hands to other apps ("Open with", "Share"); see docs/spec/documents.md. -->
+<!-- Files the app hands to other apps: Documents' "Open with" and "Share" (docs/spec/documents.md), and update APKs. -->
 <paths>
     <cache-path name="documents" path="documents-open/" />
+    <!-- In-app updates: the downloaded APK, for the package installer (ADR 0018). -->
+    <cache-path name="updates" path="updates/" />
 </paths>

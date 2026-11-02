@@ -106,6 +106,16 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLinkTas
         )
     }
 
+    // In-app updates (ADR 0018): the automatic check, at most twice a day; each new version is
+    // announced once, with an Install action.
+    LaunchedEffect(Unit) {
+        val update = container.updater.checkIfDue() ?: return@LaunchedEffect
+        if (!container.settings.firstTime("update-${update.version}")) return@LaunchedEffect
+        if (shell.notify(strings.t("android.update.available", "version" to update.version), strings.t("android.update.install"), long = true)) {
+            container.updater.install(update)
+        }
+    }
+
     // Foreground after more than 5 minutes: re-read the member and household (OVERVIEW-R14).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
         val now = System.currentTimeMillis()
