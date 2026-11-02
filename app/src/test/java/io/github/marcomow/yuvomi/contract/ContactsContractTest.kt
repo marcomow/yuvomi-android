@@ -53,7 +53,7 @@ class ContactsContractTest : ContractTestBase() {
     @Test fun `CONT-A1 the seeded contacts, categories and tones decode`() = runBlocking {
         val (_, api) = alex()
         val categories = ContactsApi.decodeCategories(api.categories())
-        assertTrue(categories.any { it.key == "doctor" && it.labelKey == "contacts.catDoctor" })
+        assertTrue(categories.any { it.key == "doctor" && it.labelKey == "contacts.categoryDoctor" })
         assertTrue(categories.any { it.key == "family" && it.labelKey == null && !it.name.isNullOrEmpty() })
         val contacts = ContactsApi.decodeContacts(api.list())
         assertTrue(contacts.size >= 12)
@@ -135,7 +135,7 @@ class ContactsContractTest : ContractTestBase() {
             // A seeded category keeps its translation when only its colour changes.
             val doctor = before.first { it.key == "doctor" }
             val recolored = api.recolorCategory("doctor", doctor.color ?: "var(--color-success)")
-            assertEquals("contacts.catDoctor", recolored.labelKey)
+            assertEquals("contacts.categoryDoctor", recolored.labelKey)
             if (doctor.color == null) api.recolorCategory("doctor", null)
 
             val order = listOf(cat.key) + before.map { it.key }

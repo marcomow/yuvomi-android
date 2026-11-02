@@ -27,9 +27,9 @@ class ContactsLogicTest {
     private val collator = Collator.getInstance(Locale.ENGLISH)
 
     private val categories = listOf(
-        ContactCategory("doctor", labelKey = "contacts.catDoctor", sortOrder = 0, color = "var(--color-success)"),
+        ContactCategory("doctor", labelKey = "contacts.categoryDoctor", sortOrder = 0, color = "var(--color-success)"),
         ContactCategory("family", name = "Family", sortOrder = 1),
-        ContactCategory("misc", labelKey = "contacts.catMisc", sortOrder = 2),
+        ContactCategory("misc", labelKey = "contacts.categoryOther", sortOrder = 2),
     )
 
     private fun c(id: Int, name: String, category: String = "misc", last: String? = null, phone: String? = null, email: String? = null, member: Int? = null) =

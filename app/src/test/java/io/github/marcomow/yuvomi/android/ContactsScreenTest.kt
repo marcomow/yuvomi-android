@@ -66,9 +66,9 @@ class ContactsScreenTest {
         {"id":3,"name":"Alex Johnson","category":"misc","family_user_id":1,"family_avatar_color":"#5b8def"}]}"""
 
     private val categories = """{"data":[
-        {"key":"doctor","name":null,"label_key":"contacts.catDoctor","icon":"stethoscope","sort_order":0,"color":"var(--color-success)"},
-        {"key":"craftsman","name":null,"label_key":"contacts.catCraftsman","icon":"wrench","sort_order":1,"color":null},
-        {"key":"misc","name":null,"label_key":"contacts.catMisc","icon":"tag","sort_order":2,"color":null}]}"""
+        {"key":"doctor","name":null,"label_key":"contacts.categoryDoctor","icon":"stethoscope","sort_order":0,"color":"var(--color-success)"},
+        {"key":"craftsman","name":null,"label_key":"contacts.categoryCraftsman","icon":"wrench","sort_order":1,"color":null},
+        {"key":"misc","name":null,"label_key":"contacts.categoryOther","icon":"tag","sort_order":2,"color":null}]}"""
 
     private val full = """{"data":{"id":1,"name":"Dr. Hans Weber","category":"doctor","phone":"+49 30 1234","email":"weber@praxis.de",
         "address":"Main St 1, Berlin","birthday":"1970-04-02","birthday_year_unknown":0,"notes":"Mon-Fri",
@@ -147,12 +147,12 @@ class ContactsScreenTest {
     /** CONT-A10. */
     @Test fun `the list groups by category, searches, and opens the read view`() {
         openContacts()
-        compose.onNodeWithText(strings.t("contacts.catDoctor").uppercase()).assertExists()
-        compose.onNodeWithText(strings.t("contacts.catCraftsman").uppercase()).assertExists()
+        compose.onNodeWithText(strings.t("contacts.categoryDoctor").uppercase()).assertExists()
+        compose.onNodeWithText(strings.t("contacts.categoryCraftsman").uppercase()).assertExists()
         compose.onNodeWithContentDescription(strings.t("contacts.callNamed", "name" to "Plumber Max")).assertExists()
         // Chips: "All" and the three categories in use.
         compose.onNodeWithText(strings.t("contacts.filterAll")).assertExists()
-        compose.onAllNodesWithText(strings.t("contacts.catCraftsman")).onFirst().performClick()
+        compose.onAllNodesWithText(strings.t("contacts.categoryCraftsman")).onFirst().performClick()
         compose.waitUntil(5_000) { compose.onAllNodesWithText("Dr. Hans Weber").fetchSemanticsNodes().isEmpty() }
         compose.onNodeWithText(strings.t("contacts.filterAll")).performClick()
         compose.onNodeWithText(strings.t("contacts.searchPlaceholder")).performTextInput("praxis")
