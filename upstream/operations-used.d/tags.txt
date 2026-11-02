@@ -1,0 +1,6 @@
+# The upstream operations of docs/spec/tags.md, as `METHOD /api/v1/path` with
+# OpenAPI path templates. Must match the module's operation enum exactly
+# (ContractFilesTest); the weekly sync report checks every line.
+GET /api/v1/tasks/tags
+PUT /api/v1/tasks/tags/{tag}
+DELETE /api/v1/tasks/tags/{tag}

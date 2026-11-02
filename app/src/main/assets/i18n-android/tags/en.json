@@ -1,7 +1,21 @@
 {
   "android": {
     "tags": {
-      "title": "Tags"
+      "title": "Tags",
+      "search": "Search tags",
+      "find": "Show everything tagged #{{tag}}",
+      "open": "Show everything tagged #{{tag}}",
+      "emptyTitle": "No tags yet",
+      "emptyBody": "Tags on tasks and shopping items, and #hashtags in notes, events, recipes and everything else, gather here.",
+      "noMatch": "No tag matches.",
+      "noItems": "Nothing carries #{{tag}} right now.",
+      "itemCount": "{{count}} items",
+      "itemCount_one": "{{count}} item",
+      "notLoaded": "Not loaded: {{modules}}. Showing what they had last time.",
+      "loadFailed": "The tags could not be read.",
+      "taskOnly": "Only the tags of tasks change. #hashtags written in texts stay as they are.",
+      "taskTagGone": "No task you can see carries this tag any more.",
+      "nameInvalid": "Enter a name for the tag."
     }
   }
 }
