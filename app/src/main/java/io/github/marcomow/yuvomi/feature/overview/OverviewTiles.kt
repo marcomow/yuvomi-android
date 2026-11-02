@@ -46,11 +46,13 @@ import io.github.marcomow.yuvomi.core.design.ModuleCatalog
 import io.github.marcomow.yuvomi.core.design.Tokens
 import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.t
-import io.github.marcomow.yuvomi.feature.Features
-import io.github.marcomow.yuvomi.feature.meals.MealsRoutes
-import io.github.marcomow.yuvomi.feature.shopping.ShoppingRoutes
 import io.github.marcomow.yuvomi.core.time.HouseholdTime
+import io.github.marcomow.yuvomi.feature.Features
+import io.github.marcomow.yuvomi.feature.birthdays.BirthdaysRoutes
+import io.github.marcomow.yuvomi.feature.calendar.CalendarRoutes
+import io.github.marcomow.yuvomi.feature.meals.MealsRoutes
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
+import io.github.marcomow.yuvomi.feature.shopping.ShoppingRoutes
 import java.time.LocalDate
 
 private const val GLANCE_ROWS = 5
@@ -77,7 +79,7 @@ fun TodayGlance(
             shown.forEach { row ->
                 when (row) {
                     is GlanceRow.Event -> EventLine(row.event, row.start?.let { shell.formats.time(it) }, row.running) {
-                        shell.openWeb("/calendar?open=${row.event.id}")
+                        shell.navigate(row.event.id?.let(CalendarRoutes::event) ?: CalendarRoutes.START)
                     }
                     is GlanceRow.TaskRow -> TaskLine(row.task, readOnly, openTask, tick, today)
                     is GlanceRow.Meal -> SimpleLine(
@@ -141,7 +143,7 @@ fun TileView(
                         )
                         events.forEach { (event, start) ->
                             EventLine(event, if (event.allDay) null else start?.let { shell.formats.time(it) }, false) {
-                                shell.openWeb("/calendar?open=${event.id}")
+                                shell.navigate(event.id?.let(CalendarRoutes::event) ?: CalendarRoutes.START)
                             }
                         }
                     }
@@ -176,7 +178,7 @@ fun TileView(
                             else -> t("dashboard.daysLeft", "count" to days)
                         }
                         val age = b.nextAge?.let { " · $it" } ?: ""
-                        ListLine(b.name, whenText + age) { shell.openWeb("/birthdays") }
+                        ListLine(b.name, whenText + age) { shell.navigate(BirthdaysRoutes.START) }
                     }
                     if (tile.total > tile.birthdays.size) {
                         EmptyLine(t("dashboard.birthdaysMore", "count" to tile.total - tile.birthdays.size))

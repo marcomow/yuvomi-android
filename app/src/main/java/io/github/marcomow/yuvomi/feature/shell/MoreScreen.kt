@@ -47,7 +47,7 @@ fun MoreScreen() {
                     modifier = Modifier.clickable { shell.navigate(f.startRoute) },
                 )
             }
-            item(key = "web-header") {
+            if (modules.isNotEmpty()) item(key = "web-header") {
                 Text(
                     t("android.more.hint"),
                     style = MaterialTheme.typography.bodyMedium,

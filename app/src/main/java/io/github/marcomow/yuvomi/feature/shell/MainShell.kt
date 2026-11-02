@@ -127,16 +127,15 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLinkTas
     val tasks = Destination(Routes.TASKS, listOf("tasks", "task/", "editor"), "nav.tasks", Icons.Outlined.CheckCircle)
         .takeIf { session.access("tasks") != "none" }
     val more = Destination(Routes.MORE, listOf("more"), "nav.more", Icons.Outlined.Apps)
-    // The bar holds Overview, Tasks, the BAR modules and More; the rail on wide screens has room for all.
+    // The bar and the rail hold Overview, Tasks, the BAR modules and More; "More" lists the rest.
     val barDestinations = listOfNotNull(overview, tasks) +
         Features.all.filter { it.placement == Placement.BAR }.mapNotNull(::feature) + more
-    val railDestinations = listOfNotNull(overview, tasks) + Features.all.mapNotNull(::feature) + more
 
     CompositionLocalProvider(LocalShell provides shell) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val wide = maxWidth >= 600.dp
             val current = nav.currentBackStackEntryAsState().value?.destination?.route
-            val destinations = if (wide) railDestinations else barDestinations
+            val destinations = barDestinations
             val selected = destinations.firstOrNull { d -> d.prefixes.any { current?.startsWith(it) == true } }?.route
                 ?: Routes.MORE.takeIf { current != null && current != Routes.OVERVIEW }
             val go = { d: Destination ->

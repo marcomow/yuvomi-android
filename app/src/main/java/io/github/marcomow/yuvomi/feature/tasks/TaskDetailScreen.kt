@@ -1,7 +1,6 @@
 package io.github.marcomow.yuvomi.feature.tasks
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
@@ -52,12 +52,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -73,12 +73,13 @@ import io.github.marcomow.yuvomi.core.design.Yuvomi
 import io.github.marcomow.yuvomi.core.i18n.LocalStrings
 import io.github.marcomow.yuvomi.core.i18n.t
 import io.github.marcomow.yuvomi.core.time.HouseholdTime
+import io.github.marcomow.yuvomi.feature.documents.DocumentsRoutes
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
-import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.ZonedDateTime
+import kotlinx.coroutines.launch
 
 /** docs/spec/tasks.md, TASKS-R25 and tier 2. */
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -299,7 +300,7 @@ fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, addSubt
                         Column {
                             docs.forEach { doc ->
                                 Row(
-                                    Modifier.fillMaxWidth().clickable { shell.openWeb("/documents?open=${doc.id}") }.padding(16.dp),
+                                    Modifier.fillMaxWidth().clickable { shell.navigate(DocumentsRoutes.document(doc.id)) }.padding(16.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Icon(Icons.Outlined.Description, null, tint = Yuvomi.colors.module("documents"))
