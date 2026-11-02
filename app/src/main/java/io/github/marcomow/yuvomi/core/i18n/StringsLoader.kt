@@ -15,7 +15,8 @@ object StringsLoader {
         fun read(path: String): Map<String, String> =
             runCatching { assets.open(path).bufferedReader().use { Strings.flatten(it.readText()) } }.getOrDefault(emptyMap())
 
-        val moduleDirs = runCatching { assets.list("i18n-android")?.filterNot { it.endsWith(".json") } }.getOrNull().orEmpty().sorted()
+        // Folder names on a device; some asset managers (Robolectric) list `dir/file` paths instead.
+        val moduleDirs = runCatching { assets.list("i18n-android")?.map { it.substringBefore('/') }?.distinct()?.filterNot { it.endsWith(".json") } }.getOrNull().orEmpty().sorted()
         fun android(locale: String): Map<String, String> =
             moduleDirs.fold(read("i18n-android/$locale.json")) { acc, dir -> acc + read("i18n-android/$dir/$locale.json") }
 
