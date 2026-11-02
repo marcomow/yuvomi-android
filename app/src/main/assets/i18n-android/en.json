@@ -83,7 +83,12 @@
       "checkFailed": "Could not reach GitHub to check for updates.",
       "downloadFailed": "The download did not finish. Try again.",
       "corrupt": "The download did not match the published file and was deleted. Try again.",
-      "noInstaller": "This device has no app to install the update."
+      "noInstaller": "This device has no app to install the update.",
+      "description": "Install new versions of this app, and check for them automatically.",
+      "installed": "Installed version {{version}}",
+      "bannerOpen": "Show app updates",
+      "bannerDismiss": "Hide until the next version",
+      "openSettings": "Open"
     }
   }
 }

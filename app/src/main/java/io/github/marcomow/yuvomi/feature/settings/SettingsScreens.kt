@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.SystemUpdate
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Api
 import androidx.compose.material.icons.outlined.Backup
@@ -72,7 +73,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 
 /** The viewer as the registry needs them. */
-internal fun ShellContext.viewer() = SettingsRegistry.Viewer(session.isAdmin) { session.access(it) }
+internal fun ShellContext.viewer() = SettingsRegistry.Viewer(session.isAdmin, appUpdates = container.updater.enabled) { session.access(it) }
 
 internal fun leafIcon(leaf: SettingsRegistry.Leaf): ImageVector = leaf.module?.let { ModuleCatalog.get(it)?.icon } ?: when (leaf.id) {
     "personal-account" -> Icons.Outlined.AccountCircle
@@ -80,6 +81,7 @@ internal fun leafIcon(leaf: SettingsRegistry.Leaf): ImageVector = leaf.module?.l
     "personal-device" -> Icons.Outlined.Smartphone
     "personal-notifications" -> Icons.Outlined.Notifications
     "personal-weather" -> Icons.Outlined.Cloud
+    SettingsRegistry.APP_UPDATES -> Icons.Outlined.SystemUpdate
     "admin-family" -> Icons.Outlined.Group
     "admin-permissions" -> Icons.Outlined.Security
     "admin-displays" -> Icons.Outlined.TabletAndroid

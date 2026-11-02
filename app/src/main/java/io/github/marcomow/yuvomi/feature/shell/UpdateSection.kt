@@ -6,8 +6,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
 import androidx.compose.material.icons.outlined.SystemUpdate
+import androidx.compose.foundation.clickable
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -90,4 +93,72 @@ private fun statusText(state: State): String = when (state) {
     is State.NeedsPermission -> t("android.update.needsPermission")
     is State.Installing -> t("android.update.installing")
     is State.Failed -> t(state.messageKey)
+}
+
+/** The update [state] carries, while it still needs the member (available, downloading, waiting for them). */
+internal fun pendingUpdate(state: State): io.github.marcomow.yuvomi.core.update.Releases.Update? = when (state) {
+    is State.Available -> state.update
+    is State.Downloading -> state.update
+    is State.NeedsPermission -> state.update
+    is State.Failed -> state.update
+    else -> null
+}
+
+/**
+ * The banner above every screen while a newer version waits (ADR 0018). Tapping it opens
+ * Settings, App updates; Install starts the download right away; the cross hides it until the
+ * next version.
+ */
+@Composable
+fun UpdateBanner(updater: Updater, openSettings: () -> Unit) {
+    if (!updater.enabled) return
+    val state by updater.state.collectAsState()
+    val dismissed by updater.dismissed.collectAsState(initial = null)
+    val update = pendingUpdate(state) ?: return
+    if (dismissed == update.version && state is State.Available) return
+    val scope = rememberCoroutineScope()
+    val openLabel = t("android.update.bannerOpen")
+    androidx.compose.material3.Surface(
+        color = androidx.compose.material3.MaterialTheme.colorScheme.primaryContainer,
+        contentColor = androidx.compose.material3.MaterialTheme.colorScheme.onPrimaryContainer,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClickLabel = openLabel, onClick = openSettings),
+    ) {
+        Row(Modifier.statusBarsPadding().padding(start = 16.dp, end = 4.dp, top = 6.dp, bottom = 6.dp), verticalAlignment = androidx.compose.ui.Alignment.CenterVertically) {
+            Icon(Icons.Outlined.SystemUpdate, null, Modifier.size(20.dp))
+            Text(
+                statusText(state),
+                style = androidx.compose.material3.MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
+            )
+            when (state) {
+                is State.Downloading -> CircularProgressIndicator(Modifier.size(20.dp).padding(end = 8.dp), strokeWidth = 2.dp)
+                is State.NeedsPermission -> TextButton(onClick = updater::allowInstalls) { Text(t("android.update.allow")) }
+                else -> TextButton(onClick = { scope.launch { updater.install(update) } }) { Text(t("android.update.install")) }
+            }
+            if (state is State.Available) {
+                androidx.compose.material3.IconButton(onClick = { scope.launch { updater.dismiss(update.version) } }) {
+                    Icon(Icons.Outlined.Close, contentDescription = t("android.update.bannerDismiss"))
+                }
+            }
+        }
+    }
+}
+
+/** The account sheet's way to App updates: its status in one line, and a dot while an update waits. */
+@Composable
+fun UpdateLink(updater: Updater, open: () -> Unit) {
+    if (!updater.enabled) return
+    val state by updater.state.collectAsState()
+    ListItem(
+        headlineContent = { Text(t("android.update.title")) },
+        supportingContent = { Text(statusText(state), color = if (pendingUpdate(state) != null) androidx.compose.material3.MaterialTheme.colorScheme.primary else Yuvomi.colors.textSecondary) },
+        leadingContent = {
+            androidx.compose.material3.BadgedBox(badge = { if (pendingUpdate(state) != null) androidx.compose.material3.Badge() }) {
+                Icon(Icons.Outlined.SystemUpdate, null)
+            }
+        },
+        modifier = Modifier.clickable(onClick = open),
+    )
 }

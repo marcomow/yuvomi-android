@@ -23,9 +23,10 @@ Download `yuvomi-android-<version>.apk` from the latest
 pre-releases of a proof of concept; every change to the app merged into `main` publishes a new
 one. How they are made: [RELEASING.md](docs/RELEASING.md).
 
-After that, the app updates itself: open your account (the avatar at the top right), tap
-**Install** when a newer version is shown, and allow the app to install updates the first time
-Android asks. It checks on its own about twice a day unless you switch "Check automatically" off.
+After that, the app updates itself. When a newer version is out, a banner shows at the top of
+the app: tap **Install**, and allow the app to install updates the first time Android asks. The
+same controls are in Settings, **App updates**, also reachable from your account (the avatar at
+the top right). It checks on its own about twice a day unless you switch "Check automatically" off.
 
 ## Widgets
 

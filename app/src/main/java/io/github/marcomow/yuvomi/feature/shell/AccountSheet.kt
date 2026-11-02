@@ -76,7 +76,10 @@ fun AccountSheet(onDismiss: () -> Unit) {
                 leadingContent = { Icon(Icons.Outlined.OpenInBrowser, null) },
                 modifier = Modifier.clickable { shell.openWeb("/") },
             )
-            UpdateSection(shell.container.updater)
+            UpdateLink(shell.container.updater) {
+                onDismiss()
+                shell.navigate(io.github.marcomow.yuvomi.feature.settings.SettingsRoutes.leaf(io.github.marcomow.yuvomi.feature.settings.SettingsRegistry.APP_UPDATES))
+            }
             ListItem(
                 headlineContent = { Text(t("android.account.signOut")) },
                 leadingContent = { Icon(Icons.AutoMirrored.Outlined.Logout, null, tint = Yuvomi.colors.danger) },

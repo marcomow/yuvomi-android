@@ -19,6 +19,8 @@ object SettingsRegistry {
         /** A module sheet follows that module's access (`sheetModuleAccessible`). */
         val module: String? = null,
         val placementEnd: Boolean = false,
+        /** Shown only where the app has it (app updates in a release build); never opened in the browser. */
+        val appOnly: Boolean = false,
     )
 
     /** A section of a sheet: "for me" ([MINE]) or "for the household" ([HOUSEHOLD]). */
@@ -31,6 +33,7 @@ object SettingsRegistry {
         val adminOnly: Boolean,
     )
 
+    const val APP_UPDATES = "app-updates"
     const val MINE = "mine"
     const val HOUSEHOLD = "household"
 
@@ -46,6 +49,8 @@ object SettingsRegistry {
         Leaf("personal-device", "personal", "/settings/personal/device", "settings.pageDevice", "settings.pageDeviceDescription"),
         Leaf("personal-notifications", "personal", "/settings/personal/notifications", "settings.pageNotifications", "settings.pageNotificationsDescription"),
         Leaf("personal-weather", "personal", "/settings/personal/weather", "settings.pageWeather", "settings.pageWeatherDescription"),
+        // App-only (ADR 0018): this app's own updates. Not in upstream's registry; no web page.
+        Leaf(APP_UPDATES, "personal", "", "android.update.title", "android.update.description", appOnly = true),
         Leaf("admin-family", "admin", "/settings/admin/family", "settings.pageFamilyRoles", "settings.pageFamilyRolesDescription"),
         Leaf("admin-permissions", "admin", "/settings/admin/permissions", "settings.pagePermissions", "settings.pagePermissionsDescription"),
         Leaf("admin-displays", "admin", "/settings/admin/displays", "settings.pageDisplays", "settings.pageDisplaysDescription"),
@@ -80,6 +85,7 @@ object SettingsRegistry {
         Section("device-display", "personal-device", MINE, "settings.sectionDeviceDisplay", "settings.wallModeHint", false),
         Section("personal-notifications", "personal-notifications", MINE, "settings.pageNotifications", "settings.pageNotificationsDescription", false),
         Section("personal-weather", "personal-weather", MINE, "settings.pageWeather", "settings.pageWeatherDescription", false),
+        Section(APP_UPDATES, APP_UPDATES, MINE, "android.update.title", "android.update.description", false),
         Section("admin-family", "admin-family", HOUSEHOLD, "settings.pageFamilyRoles", "settings.pageFamilyRolesDescription", true),
         Section("admin-permissions", "admin-permissions", HOUSEHOLD, "settings.pagePermissions", "settings.pagePermissionsDescription", true),
         Section("admin-displays", "admin-displays", HOUSEHOLD, "settings.pageDisplays", "settings.pageDisplaysDescription", true),
@@ -125,7 +131,7 @@ object SettingsRegistry {
     fun leaf(id: String): Leaf? = leafById[id]
 
     /** The viewer's role and module access, as the shell knows them. */
-    data class Viewer(val isAdmin: Boolean, val moduleAccess: (String) -> String)
+    data class Viewer(val isAdmin: Boolean, val appUpdates: Boolean = false, val moduleAccess: (String) -> String)
 
     /** `sectionVisible`: admin-only sections are for admins. */
     fun sectionVisible(section: Section, viewer: Viewer): Boolean = !section.adminOnly || viewer.isAdmin
@@ -147,7 +153,8 @@ object SettingsRegistry {
         return viewer.moduleAccess(key) != "none"
     }
 
-    fun leafVisible(leaf: Leaf, viewer: Viewer): Boolean = moduleAccessible(leaf, viewer) && sectionsOf(leaf, viewer).isNotEmpty()
+    fun leafVisible(leaf: Leaf, viewer: Viewer): Boolean =
+        (!leaf.appOnly || (leaf.id == APP_UPDATES && viewer.appUpdates)) && moduleAccessible(leaf, viewer) && sectionsOf(leaf, viewer).isNotEmpty()
 
     /**
      * `settingsSheetsForDomain`: general sheets first, then the module sheets in the

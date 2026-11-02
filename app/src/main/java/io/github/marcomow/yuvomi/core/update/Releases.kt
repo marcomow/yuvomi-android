@@ -29,7 +29,15 @@ object Releases {
     )
 
     /** An APK newer than the installed version. */
+    @Serializable
     data class Update(val version: String, val apkUrl: String, val size: Long, val sha256: String?, val page: String?)
+
+    /** Whether [update] is still newer than [installed] (a saved update after the app was updated by hand is not). */
+    fun isNewer(update: Update, installed: String): Boolean {
+        val v = Version.parse(update.version) ?: return false
+        val current = Version.parse(installed) ?: return false
+        return v > current
+    }
 
     private val json = Json { ignoreUnknownKeys = true }
 

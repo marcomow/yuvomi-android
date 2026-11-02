@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.core.update
 
+import io.github.marcomow.yuvomi.core.api.ApiJson
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -71,9 +72,26 @@ class Updater(
     /** The automatic check: at most every [INTERVAL_MS], and only while the member wants it. */
     suspend fun checkIfDue(): Releases.Update? {
         if (!enabled || !settings.autoUpdatesNow()) return null
-        if (now() - settings.lastUpdateCheck() < INTERVAL_MS) return (state.value as? State.Available)?.update
+        if (now() - settings.lastUpdateCheck() < INTERVAL_MS) return restore()
         return check()
     }
+
+    /**
+     * Between checks, the update the last one found (ADR 0018): a restarted app still offers it
+     * without asking GitHub again. Dropped once the installed version has caught up.
+     */
+    private suspend fun restore(): Releases.Update? {
+        (state.value as? State.Available)?.let { return it.update }
+        if (state.value != State.Idle) return null
+        val saved = settings.knownUpdate()?.let { runCatching { ApiJson.decodeFromString(Releases.Update.serializer(), it) }.getOrNull() }
+        if (saved == null || !Releases.isNewer(saved, installed)) return null
+        _state.value = State.Available(saved)
+        return saved
+    }
+
+    /** The banner (ADR 0018): the member closed it for [version]. */
+    val dismissed: Flow<String?> = settings.dismissedUpdate
+    suspend fun dismiss(version: String) = settings.setDismissedUpdate(version)
 
     /** Asks GitHub now; the result is also in [state]. Network failures leave a [State.Failed]. */
     suspend fun check(): Releases.Update? = lock.withLock {
@@ -82,6 +100,7 @@ class Updater(
         val result = runCatching { fetch() }
         settings.setLastUpdateCheck(now())
         val update = result.getOrNull()
+        if (result.isSuccess) settings.setKnownUpdate(update?.let { ApiJson.encodeToString(Releases.Update.serializer(), it) })
         _state.value = when {
             result.isFailure -> State.Failed("android.update.checkFailed", null)
             update == null -> State.UpToDate(installed)

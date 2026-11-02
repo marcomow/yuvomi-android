@@ -197,4 +197,11 @@ class SettingsLogicTest {
         assertEquals("52.5200", WeatherRules.coord(52.52))
         assertEquals("Mitte, Berlin, Germany", WeatherRules.placeMeta(obj("""{"admin2":"Mitte","admin1":"Berlin","country":"Germany"}""")))
     }
+
+    @Test fun `app updates is an app-only sheet, shown only in builds that can update`() {
+        val member = SettingsRegistry.Viewer(isAdmin = false) { "write" }
+        val release = SettingsRegistry.Viewer(isAdmin = false, appUpdates = true) { "write" }
+        assertFalse(SettingsRegistry.leavesOf("personal", member).any { it.id == SettingsRegistry.APP_UPDATES })
+        assertTrue(SettingsRegistry.leavesOf("personal", release).any { it.id == SettingsRegistry.APP_UPDATES })
+    }
 }

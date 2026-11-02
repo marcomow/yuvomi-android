@@ -31,6 +31,8 @@ class SettingsStore(private val context: Context, private val box: SecretBox) {
         val notices = stringSetPreferencesKey("notices")
         val autoUpdates = booleanPreferencesKey("autoUpdates")
         val lastUpdateCheck = longPreferencesKey("lastUpdateCheck")
+        val knownUpdate = stringPreferencesKey("knownUpdate")
+        val dismissedUpdate = stringPreferencesKey("dismissedUpdate")
     }
 
     suspend fun server(): String? = read(Keys.server)
@@ -56,6 +58,14 @@ class SettingsStore(private val context: Context, private val box: SecretBox) {
     suspend fun setAutoUpdates(on: Boolean) = context.dataStore.edit { it[Keys.autoUpdates] = on }
     suspend fun lastUpdateCheck(): Long = context.dataStore.data.first()[Keys.lastUpdateCheck] ?: 0L
     suspend fun setLastUpdateCheck(at: Long) = context.dataStore.edit { it[Keys.lastUpdateCheck] = at }
+
+    /** The newest update the last check found (JSON of `Releases.Update`), so the banner survives a restart. */
+    suspend fun knownUpdate(): String? = read(Keys.knownUpdate)
+    suspend fun setKnownUpdate(json: String?) = context.dataStore.edit { if (json == null) it.remove(Keys.knownUpdate) else it[Keys.knownUpdate] = json }
+
+    /** The version whose banner the member closed; the next version shows it again. */
+    val dismissedUpdate: Flow<String?> = context.dataStore.data.map { it[Keys.dismissedUpdate] }
+    suspend fun setDismissedUpdate(version: String) = context.dataStore.edit { it[Keys.dismissedUpdate] = version }
 
     suspend fun grouping(): String = read(Keys.grouping) ?: "category"
     suspend fun setGrouping(mode: String) = context.dataStore.edit { it[Keys.grouping] = mode }

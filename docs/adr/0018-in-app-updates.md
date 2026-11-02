@@ -23,9 +23,14 @@ asked to install updates from within the app.
   with `ACTION_VIEW` through the app's `FileProvider`. The app declares
   `REQUEST_INSTALL_PACKAGES`; until the member allows "install unknown apps" for it, the app
   says so and opens that setting. Old downloads are removed on the next check.
-- **When.** "Check now" and "Install" sit in the account sheet. "Check automatically" (on by
-  default) checks at most every 12 hours when the shell opens and announces each new version
-  once, with an Install action.
+- **When.** "Check now", "Install" and "Check automatically" sit in their own settings sheet,
+  Settings, Account, **App updates**. It is app-only, not in upstream's registry, and shown only
+  in builds that can update. The account sheet links to it with its status and a dot while an
+  update waits. "Check automatically" is on by default and checks at most every 12 hours when
+  the shell opens. A waiting version shows as a banner above every screen. Tapping the banner
+  opens App updates, Install starts at once, and the cross hides the banner until the next
+  version. The last update found is saved, so the banner survives a restart without asking
+  GitHub again. It is dropped once that version is installed.
 - **Privacy.** This is the only traffic that does not go to the household's server. It uses
   its own HTTP client without the session's cookies and sends nothing about the member or the
   server (GitHub sees the device's IP address and a `yuvomi-android/<version>` user agent).

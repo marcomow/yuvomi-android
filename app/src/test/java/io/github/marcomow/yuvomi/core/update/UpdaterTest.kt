@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import io.github.marcomow.yuvomi.core.session.PlainSecretBox
 import io.github.marcomow.yuvomi.core.session.SettingsStore
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import mockwebserver3.Dispatcher
 import mockwebserver3.MockResponse
@@ -85,6 +86,26 @@ class UpdaterTest {
         u.setAutomatic(false)
         assertEquals(null, u.checkIfDue())
         assertEquals(before, server.requestCount)
+    }
+
+    @Test fun `a restarted app still offers the update the last check found, until it is installed`() = runBlocking {
+        now = 20_000_000_000_000L
+        updater().apply { setAutomatic(true) }.check()
+        val asked = server.requestCount
+        // A new process within twelve hours: no request, the saved update is offered again.
+        now += 60_000
+        val restarted = updater()
+        assertEquals("0.2.0", restarted.checkIfDue()?.version)
+        assertTrue(restarted.state.value is Updater.State.Available)
+        assertEquals(asked, server.requestCount)
+        // Once 0.2.0 is installed, the saved update is no longer offered.
+        assertEquals(null, updater(installed = "0.2.0").checkIfDue())
+    }
+
+    @Test fun `closing the banner hides it for that version only`() = runBlocking {
+        val u = updater()
+        u.dismiss("0.2.0")
+        assertEquals("0.2.0", u.dismissed.first())
     }
 
     @Test fun `a debug build never asks`() = runBlocking {

@@ -1,5 +1,7 @@
 package io.github.marcomow.yuvomi.feature.shell
 
+import io.github.marcomow.yuvomi.feature.settings.SettingsRegistry
+import io.github.marcomow.yuvomi.feature.settings.SettingsRoutes
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -106,15 +108,9 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLink: S
         )
     }
 
-    // In-app updates (ADR 0018): the automatic check, at most twice a day; each new version is
-    // announced once, with an Install action.
-    LaunchedEffect(Unit) {
-        val update = container.updater.checkIfDue() ?: return@LaunchedEffect
-        if (!container.settings.firstTime("update-${update.version}")) return@LaunchedEffect
-        if (shell.notify(strings.t("android.update.available", "version" to update.version), strings.t("android.update.install"), long = true)) {
-            container.updater.install(update)
-        }
-    }
+    // In-app updates (ADR 0018): the automatic check, at most twice a day; a waiting version
+    // shows as the banner above every screen (UpdateBanner).
+    LaunchedEffect(Unit) { container.updater.checkIfDue() }
 
     // Foreground after more than 5 minutes: re-read the member and household (OVERVIEW-R14).
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) {
@@ -204,6 +200,7 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLink: S
                         }
                     }
                     Column(Modifier.weight(1f)) {
+                        UpdateBanner(container.updater) { nav.navigate(SettingsRoutes.leaf(SettingsRegistry.APP_UPDATES)) }
                         if (session.showNewerNotice) NewerServerNotice { container.session.dismissNewerNotice() }
                         Box(Modifier.weight(1f)) { ShellNavHost(nav, state.offline) }
                     }

@@ -31,6 +31,7 @@ fun SectionContent(ctx: SectionContext, openLeaf: (String) -> Unit) {
         "admin-system" -> SystemSection(ctx)
         "admin-api" -> ApiTokensSection(ctx)
         "personal-weather" -> PersonalWeatherSection(ctx, openLeaf)
+        SettingsRegistry.APP_UPDATES -> io.github.marcomow.yuvomi.feature.shell.UpdateSection(ctx.shell.container.updater)
         else -> WebSectionCard(ctx.section, ctx.shell.openWeb)
     }
 }
@@ -41,5 +42,5 @@ val NATIVE_SECTIONS: Set<String> = setOf(
     "options-tasks", "options-schedule", "modules-countdowns", "modules-rewards", "personal-tasks",
     "personal-calendar", "personal-health", "modules-active", "modules-navigation", "admin-family",
     "admin-permissions", "personal-notifications", "admin-email", "admin-backup", "admin-system", "admin-api",
-    "personal-weather",
+    "personal-weather", SettingsRegistry.APP_UPDATES,
 )
