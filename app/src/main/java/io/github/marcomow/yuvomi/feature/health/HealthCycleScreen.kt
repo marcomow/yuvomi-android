@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.OpenInNew
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExtendedFloatingActionButton
@@ -54,7 +55,11 @@ fun HealthCycleScreen(vm: CycleViewModel, back: () -> Unit) {
         title = t("health.tabs.cycle"),
         back = back,
         banner = false,
-        actions = { if (canEdit) IconButton(onClick = { settingsOpen = true }) { Icon(Icons.Outlined.Settings, t("health.cycle.settings.open")) } },
+        actions = {
+            // The calendar, the trend charts, CSV import and the calendar feed stay in the web app.
+            IconButton(onClick = { shell.openWeb("/health/cycle") }) { Icon(Icons.AutoMirrored.Outlined.OpenInNew, t("android.browser.open")) }
+            if (canEdit) IconButton(onClick = { settingsOpen = true }) { Icon(Icons.Outlined.Settings, t("health.cycle.settings.open")) }
+        },
         fab = {
             if (canEdit) ExtendedFloatingActionButton(onClick = { day = today }, icon = { Icon(Icons.Outlined.Add, null) }, text = { Text(t("health.cycle.today.logDay")) })
         },

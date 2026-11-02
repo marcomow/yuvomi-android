@@ -99,7 +99,11 @@ fun HealthFastingScreen(vm: FastingViewModel, back: () -> Unit) {
                             Text(t("health.fasting.targetAt", "date" to shell.formats.dateTime(anchorAt.plusMinutes(goal.toLong()))), style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
                             ProgressBar((seconds / (goal * 60.0)).toFloat(), Yuvomi.colors.module("health"))
                         }
-                        if (canWrite) Button(onClick = { vm.finish(active) }) { Text(t("health.fasting.finish")) }
+                        if (canWrite) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            // "I started earlier" (`editStart`): the running fast's start in household time.
+                            TextButton(onClick = { edit = active }) { Text(t("health.fasting.editStart")) }
+                            Button(onClick = { vm.finish(active) }) { Text(t("health.fasting.finish")) }
+                        }
                     }
                 }
             }
@@ -207,6 +211,6 @@ private fun FastEditor(vm: FastingViewModel, fast: Fast, close: () -> Unit) {
             if (rating != null) TextButton(onClick = { rating = null }) { Text(t("health.fasting.clearRating")) }
         }
         TextInput(t("health.fasting.note"), note, lines = 2) { note = it }
-        DeleteButton { close(); vm.delete(fast) }
+        if (fast.endAt != null) DeleteButton { close(); vm.delete(fast) }
     }
 }

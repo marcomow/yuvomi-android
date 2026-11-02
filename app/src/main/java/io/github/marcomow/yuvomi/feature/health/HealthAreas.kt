@@ -613,8 +613,8 @@ class NutritionViewModel(container: AppContainer, hub: HealthHub, host: HealthHo
     HealthAreaViewModel<NutritionData>(container, hub, host, NutritionData.serializer(), "nutrition") {
 
     override suspend fun fetch(api: HealthApi, personId: Int): NutritionData = coroutineScope {
-        // The entries of the last 30 days; the summary is today's balance and target.
-        val entries = async { api.nutritionEntries(personId, host.today().minusDays(29).toString()) }
+        // All entries, as the web page reads them; the summary is the household's today with its target.
+        val entries = async { api.nutritionEntries(personId, null) }
         val summary = async { api.nutritionSummary(personId) }
         NutritionData(entries.await(), summary.await())
     }

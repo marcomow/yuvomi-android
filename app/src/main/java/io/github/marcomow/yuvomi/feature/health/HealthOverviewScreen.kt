@@ -15,6 +15,7 @@ import androidx.compose.material.icons.automirrored.outlined.DirectionsRun
 import androidx.compose.material.icons.outlined.Add
 import androidx.compose.material.icons.outlined.Biotech
 import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.ChevronRight
 import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.LocalFireDepartment
@@ -81,6 +82,10 @@ fun HealthOverviewScreen(vm: OverviewViewModel, open: (String) -> Unit) {
         title = t("nav.health"),
         back = null,
         personLabel = t("health.overview.personsLabel"),
+        actions = {
+            // The CSV export (`healthToolsHtml`) is a browser download: it stays in the web app.
+            IconButton(onClick = { shell.openWeb("/health") }) { Icon(Icons.Outlined.Download, t("health.export.title")) }
+        },
         fab = {
             // `overviewCaptureItems`: the FAB opens a menu of what can be recorded here.
             if (canEdit) {
