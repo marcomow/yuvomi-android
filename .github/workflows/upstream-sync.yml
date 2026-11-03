@@ -1,12 +1,11 @@
-# Weekly check for a new upstream Yuvomi release. When there is one, re-runs
+# The mechanical sync to a new upstream Yuvomi release, by hand: re-runs
 # upstream/sync.sh against it and opens (or updates) a pull request with the
 # regenerated snapshots and a report of what changed for this app.
-# See docs/UPSTREAM-SYNC.md.
+# No schedule: the weekly port (a scheduled Claude Code session) syncs and ports
+# in one PR. See docs/UPSTREAM-SYNC.md.
 name: Upstream sync
 
 on:
-  schedule:
-    - cron: '17 5 * * 1'   # Mondays 05:17 UTC
   workflow_dispatch:
     inputs:
       version:

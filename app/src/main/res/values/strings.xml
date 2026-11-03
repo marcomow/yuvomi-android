@@ -4,5 +4,7 @@
     <string name="app_name">Yuvomi</string>
     <!-- The widget picker's descriptions (docs/spec/widgets.md, WIDGETS-R7). -->
     <string name="widget_tasks_description">Your open tasks, overdue and due today first</string>
+    <!-- The share sheet's entry (LINKS-R2). -->
+    <string name="share_open_label">Open in Yuvomi</string>
     <string name="widget_shopping_description">The open items of your shopping list</string>
 </resources>

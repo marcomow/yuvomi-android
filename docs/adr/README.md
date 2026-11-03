@@ -28,3 +28,4 @@ Template: **Status**, **Context**, **Decision**, **Consequences**, **Alternative
 | 0019 | [Upstream's shared error sentences, generated](0019-shared-error-sentences.md) | Accepted (refines rule 4) |
 | 0020 | [Home-screen widgets with Glance](0020-home-screen-widgets.md) | Accepted |
 | 0021 | [Reminders as phone notifications](0021-reminders-on-the-phone.md) | Accepted |
+| 0022 | [Links to the member's server without the server in the app](0022-own-server-links.md) | Accepted |

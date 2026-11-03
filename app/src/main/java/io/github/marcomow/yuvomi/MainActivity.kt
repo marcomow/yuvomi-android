@@ -8,6 +8,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.mutableStateOf
 import io.github.marcomow.yuvomi.feature.shell.AppLinks
 import io.github.marcomow.yuvomi.feature.shell.Routes
+import io.github.marcomow.yuvomi.feature.shell.ServerLinks
+import io.github.marcomow.yuvomi.feature.shell.ServerLinks.SHARED
 import io.github.marcomow.yuvomi.feature.shell.YuvomiRoot
 import io.github.marcomow.yuvomi.feature.widgets.Widgets
 
@@ -35,6 +37,10 @@ class MainActivity : ComponentActivity() {
 
     private fun routeOf(intent: Intent?): String? {
         if (intent == null) return null
+        // Share → Yuvomi (LINKS-R2): the shell maps the address against the signed-in server.
+        if (intent.action == Intent.ACTION_SEND) {
+            return ServerLinks.firstUrl(intent.getStringExtra(Intent.EXTRA_TEXT))?.let { SHARED + it }
+        }
         intent.getStringExtra(AppLinks.EXTRA_ROUTE)?.let { return AppLinks.allowed(it) }
         val data = intent.data ?: return null
         if (data.scheme != "yuvomi-android" || data.host != "tasks") return null

@@ -133,9 +133,14 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLink: S
 
     // A task link (TASKS-R27) or a widget's row (WIDGETS-R2, R3).
     LaunchedEffect(deepLink) {
-        if (deepLink != null) {
+        if (deepLink == null) return@LaunchedEffect
+        onDeepLinkHandled()
+        if (deepLink.startsWith(ServerLinks.SHARED)) {
+            // LINKS-R2: a shared address opens its screen when it is this server's.
+            val route = ServerLinks.route(deepLink.removePrefix(ServerLinks.SHARED), session.server)
+            if (route != null) nav.navigate(route) else shell.notify(strings.t("android.links.notYours"))
+        } else {
             nav.navigate(deepLink)
-            onDeepLinkHandled()
         }
     }
 
@@ -169,7 +174,18 @@ fun MainShell(container: AppContainer, state: SessionState.SignedIn, deepLink: S
     }
     val barDestinations = listOf(overview) + slots.mapNotNull(::slot) + more
 
-    CompositionLocalProvider(LocalShell provides shell) {
+    // LINKS-R1: a link to this server anywhere in the app (notes, task text, an item's link)
+    // opens its native screen; every other link goes to the browser as before.
+    val browserLinks = androidx.compose.ui.platform.LocalUriHandler.current
+    val links = remember(session.server, browserLinks) {
+        object : androidx.compose.ui.platform.UriHandler {
+            override fun openUri(uri: String) {
+                val route = ServerLinks.route(uri, session.server)
+                if (route != null) nav.navigate(route) else browserLinks.openUri(uri)
+            }
+        }
+    }
+    CompositionLocalProvider(LocalShell provides shell, androidx.compose.ui.platform.LocalUriHandler provides links) {
         BoxWithConstraints(Modifier.fillMaxSize()) {
             val wide = maxWidth >= 600.dp
             val destinations = barDestinations

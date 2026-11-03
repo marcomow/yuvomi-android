@@ -14,6 +14,35 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # The unit tests in three parallel shards (-PtestShard, app/build.gradle.kts), so the slow
+  # Robolectric screen tests do not run one after the other in a single job.
+  test:
+    name: test (${{ matrix.shard }}/3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@v4
+      - name: Unit, Robolectric and contract-file tests
+        # A hung test prints the test workers' stacks after 8 minutes and fails at 20
+        # (app/build.gradle.kts), well before the job's own limit, so the reports are kept.
+        env:
+          WATCHDOG_AFTER: '480'
+        run: .github/scripts/test-watchdog.sh ./gradlew --no-daemon testDebugUnitTest -PtestShard=${{ matrix.shard }}/3
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: test-reports-${{ matrix.shard }}
+          path: app/build/reports
+
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -24,10 +53,6 @@ jobs:
           distribution: temurin
           java-version: '21'
       - uses: gradle/actions/setup-gradle@v4
-      - name: Unit, Robolectric and contract-file tests
-        # A hung test prints the test workers' stacks after 12 minutes and fails at 20
-        # (app/build.gradle.kts), well before the job's own limit, so the reports are kept.
-        run: .github/scripts/test-watchdog.sh ./gradlew --no-daemon testDebugUnitTest
       - name: Lint
         run: ./gradlew --no-daemon lintDebug
       - name: Debug APK
@@ -40,7 +65,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: test-reports
+          name: lint-reports
           path: app/build/reports
 
   contract:

@@ -96,6 +96,9 @@
       "blocked": "Android does not let Yuvomi show notifications.",
       "allow": "Allow",
       "unsupported": "Your Yuvomi server does not offer this yet. It needs version 2.84.0 or newer."
+    },
+    "links": {
+      "notYours": "That link is not to your Yuvomi server, or the app has no screen for it."
     }
   }
 }

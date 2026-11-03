@@ -15,7 +15,8 @@ object AppLinks {
     const val EXTRA_ROUTE = "io.github.marcomow.yuvomi.route"
 
     private val PATTERNS = listOf(
-        Regex("tasks"), Regex("task/[0-9]+"),
+        Regex("overview"), Regex("tasks"), Regex("task/[0-9]+"),
+        Regex("notes/[0-9]+"), Regex("recipes/[0-9]+"),
         Regex("shopping\\?list=[0-9]+"),
         Regex("calendar\\?open=[0-9]+"),
         Regex("documents\\?open=[0-9]+"),

@@ -32,6 +32,12 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="yuvomi-android" android:host="tasks" />
             </intent-filter>
+            <!-- Share → Yuvomi: a link to the member's own server opens its screen (docs/spec/links.md). -->
+            <intent-filter android:label="@string/share_open_label">
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
+            </intent-filter>
         </activity>
         <!-- Reminders on the phone (docs/spec/reminders.md). -->
         <receiver android:name=".feature.reminders.ReminderAlarmReceiver" android:exported="false" />

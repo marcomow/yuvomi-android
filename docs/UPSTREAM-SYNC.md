@@ -28,7 +28,8 @@ So the app reads only what the OpenAPI document or upstream's SPEC describes, an
 | OpenAPI snapshot | `upstream/openapi.json` | Built from upstream source with upstream's own `buildOpenApiSpec()`. Diffed in review, never used for code generation. |
 | Strings | `app/src/main/assets/i18n/<locale>.json` | Upstream's 27 locales, shipped namespaces only. |
 | Colours | `app/src/main/assets/tokens.json` | Public colour tokens from upstream's `tokens.css`, resolved, light and dark. |
-| Weekly job | `.github/workflows/upstream-sync.yml` | Mondays 05:17 UTC: if upstream has a newer release, runs the sync and opens a draft PR. |
+| Weekly port | A scheduled Claude Code session, Tuesdays | If upstream has a newer release, syncs, ports what changed natively, and opens one draft PR ([The weekly port](#the-weekly-port-claude-code)). |
+| Sync job | `.github/workflows/upstream-sync.yml` | By hand only: the mechanical sync as a draft PR. |
 | Contract tests | `app/src/test/java/.../contract/UpstreamContractTest.kt`, job `contract` in `.github/workflows/android.yml` | The API client against a real upstream server in Docker. Skipped unless `YUVOMI_CONTRACT_URL` is set. |
 | Runtime gate | `core/session/VersionGate.kt`, `UPSTREAM_MIN` in `app/build.gradle.kts` | Compares the server's version with the supported range. |
 | Parity tracker | [`PARITY.md`](PARITY.md) | Which upstream modules are native, read-only, or in the browser. |
@@ -36,9 +37,53 @@ So the app reads only what the OpenAPI document or upstream's SPEC describes, an
 Requirements to run the sync locally: `git`, Node 22 or newer, Python 3. The sync never starts
 upstream's server and never runs `npm install`; the OpenAPI builder uses Node built-ins only.
 
-## The weekly sync PR
+## The weekly port (Claude Code)
 
-The job opens a draft PR named `Upstream sync: <old> → <new>`, labelled `upstream-sync`, plus
+A scheduled Claude Code session runs every Tuesday. When upstream has a release newer than
+`upstream/VERSION`, it brings the whole release in as one draft PR: the sync **and** a native
+port of what changed for the modules the app already has. The owner reviews it and merges it,
+or says no. The session never merges by itself. With nothing new, it ends without a PR.
+
+### Porting a release
+
+The steps the session follows. A person porting by hand follows the same steps.
+
+1. **Is there anything?** Compare `upstream/VERSION` with upstream's latest release
+   (`git ls-remote --tags https://github.com/ulsklyc/yuvomi`, the highest `vX.Y.Z`). If they
+   are equal, or an open PR titled `Upstream <version>` already exists, stop.
+2. **Sync.** Run `./upstream/sync.sh <version>`. It moves the pin and regenerates the OpenAPI
+   snapshot, the strings, the colour tokens and `FriendlyErrorTable.kt`. Read
+   `upstream/.sync-report.md`, and read the CHANGELOG entries of every release in the range
+   from the upstream checkout.
+3. **Sort each CHANGELOG entry into one of four kinds:**
+   - **Behaviour of a native module.** Port it. Read upstream's server route and its
+     `public/` page, follow the module's spec in `docs/spec/<module>.md`, and add numbered
+     rules (never renumber). Use upstream's i18n keys only, and put Android-only text under
+     `android.<module>.*` in `assets/i18n-android/`.
+   - **An operation the app uses changed shape.** Update the model and the spec. A **missing**
+     operation must be fixed before the PR is ready. A **deprecated** one gets an issue with its
+     90-day deadline.
+   - **New API for native clients.** Port it when it serves an existing feature; otherwise list
+     it under "Not ported" in the PR with a one-line reason.
+   - **Server-only, website, installer or browser-only.** List it under "Not ported".
+4. **Operations.** Every new call is an entry in its module's `ApiOperation` enum and a line in
+   `upstream/operations-used.d/<module>.txt` (ContractFilesTest).
+5. **Server range.** Keep `upstreamMin` in `app/build.gradle.kts` unless a ported change cannot
+   work against the old minimum. In that case, gate the feature on the server version, as
+   Documents' "About" does, and say so in the PR.
+6. **Docs.** Change the pinned version where documents describe it (spec headers,
+   `docs/spec/README.md`, `PARITY.md`, `README.md`, `ARCHITECTURE.md`). Historical mentions
+   stay as they are.
+7. **Check.** Run `./gradlew testDebugUnitTest lintDebug`. Never skip, disable or loosen a test
+   to get green. CI also runs the contract tests against the new version's Docker image.
+8. **PR.** Open one draft PR titled `Upstream <old> → <new>` with sections Ported, Not ported
+   and Tests, and with the sync report attached. Tell the owner it is ready.
+
+## The weekly sync PR (by hand only)
+
+`.github/workflows/upstream-sync.yml` still does the mechanical sync alone when run by hand
+(Actions → Upstream sync → Run workflow). Its schedule is off, because the weekly port above
+covers it. The job opens a draft PR named `Upstream sync: <old> → <new>`, labelled `upstream-sync`, plus
 `breaking` when an operation the app uses disappeared or was marked deprecated. Its body is the
 report from `upstream/scripts/report.py`:
 

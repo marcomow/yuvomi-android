@@ -102,6 +102,26 @@ android {
                     if (seconds >= 30L) println("Slow test (${seconds}s): $name")
                 }
             })
+            // CI splits the unit tests over parallel jobs: -PtestShard=<index>/<count> (1-based)
+            // runs every count-th test class of the sorted list, so the slow Robolectric screen
+            // tests spread evenly over the shards. Without the property, everything runs.
+            providers.gradleProperty("testShard").orNull?.let { spec ->
+                val (index, count) = spec.split("/").map(String::toInt)
+                val root = file("src/test/java")
+                // Every top-level class of every test file (a file may hold several), by name.
+                val topLevel = Regex("""^(?:internal |private )?(?:abstract |open )?class (\w+)""", RegexOption.MULTILINE)
+                val classes = fileTree(root) { include("**/*.kt") }.files.flatMap { f ->
+                    val text = f.readText()
+                    if ("@Test" !in text) return@flatMap emptyList<String>()
+                    val pkg = Regex("""^package ([\w.]+)""", RegexOption.MULTILINE).find(text)?.groupValues?.get(1)
+                    topLevel.findAll(text).map { m -> listOfNotNull(pkg, m.groupValues[1]).joinToString(".") }.toList()
+                }.sorted()
+                val mine = classes.filterIndexed { i, _ -> i % count == index - 1 }
+                it.filter {
+                    mine.forEach { c -> includeTestsMatching(c) }
+                    isFailOnNoMatchingTests = false
+                }
+            }
             it.systemProperty("yuvomi.upstreamDir", rootProject.file("upstream").absolutePath)
             it.systemProperty("yuvomi.assetsDir", file("src/main/assets").absolutePath)
             it.systemProperty("yuvomi.sourceDir", file("src/main/java").absolutePath)
