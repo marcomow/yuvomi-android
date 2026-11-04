@@ -128,7 +128,7 @@ class TagsScreensTest {
         compose.onNode(hasText(notLoaded, substring = true) and hasText(strings.t("nav.pantry"), substring = true)).assertExists()
         // Every task status, later starts included.
         val tasksRead = reads.first { it.startsWith("GET /api/v1/tasks?") }
-        assertTrue(tasksRead, tasksRead.contains("status=open") && tasksRead.contains("status=done") && tasksRead.contains("include_future=1"))
+        assertTrue(tasksRead, tasksRead.contains("status=open") && tasksRead.contains("status=done") && tasksRead.contains("include_future=1") && tasksRead.contains("archived=1"))
 
         compose.onNode(hasSetTextAction()).performTextInput("comp")
         compose.waitUntil(10_000) { compose.onAllNodesWithText("#garden").fetchSemanticsNodes().isEmpty() }
@@ -140,7 +140,12 @@ class TagsScreensTest {
         // The note's other tag, as a chip.
         compose.onNodeWithContentDescription(strings.t("android.tags.open", "tag" to "garden")).performClick()
         compose.waitUntil(10_000) { compose.onAllNodesWithText("Plant tomatoes").fetchSemanticsNodes().isNotEmpty() }
-        listOf("Fix fence #garden", "Seeds", "Soil").forEach { compose.onNodeWithText(it).assertExists() }
+        listOf("Seeds", "Soil").forEach { compose.onNodeWithText(it).assertExists() }
+        // TAGS-R14: the done task is hidden and counted, until completed items are shown.
+        compose.onAllNodesWithText("Fix fence #garden").fetchSemanticsNodes().let { assertTrue(it.isEmpty()) }
+        compose.onNodeWithText(strings.t("android.tags.doneHidden", "count" to 1)).assertExists()
+        compose.onNodeWithText(strings.t("android.tags.showDone")).performClick()
+        compose.waitUntil(10_000) { compose.onAllNodesWithText("Fix fence #garden").fetchSemanticsNodes().isNotEmpty() }
 
         // A task opens the task.
         compose.onNodeWithText("Plant tomatoes").performClick()
