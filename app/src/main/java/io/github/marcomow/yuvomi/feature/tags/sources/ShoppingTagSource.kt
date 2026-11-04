@@ -39,7 +39,7 @@ object ShoppingTagSource : TagSource {
                 val tags = TagIndex.union(item.tags, Hashtags.extract(item.name, item.notes))
                 if (tags.isEmpty()) continue
                 val subtitle = listOfNotNull(list.name, item.quantity?.takeIf { it.isNotBlank() }).joinToString(" · ")
-                add(TaggedItem(moduleId, "item:${item.id}", item.name, subtitle, tags, ShoppingRoutes.item(list.id, item.id)))
+                add(TaggedItem(moduleId, "item:${item.id}", item.name, subtitle, tags, ShoppingRoutes.item(list.id, item.id), done = item.isChecked))
             }
         }
     }

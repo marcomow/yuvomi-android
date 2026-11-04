@@ -82,6 +82,8 @@ class TasksApi(private val client: YuvomiClient) {
         val categories: List<String> = emptyList(),
         val tags: List<String> = emptyList(),
         val includeFuture: Boolean = false,
+        /** `archived=1`: archived tasks too (default: left out). */
+        val includeArchived: Boolean = false,
     ) {
         fun query(): List<Pair<String, String>> = buildList {
             statuses.forEach { add("status" to it) }
@@ -90,6 +92,7 @@ class TasksApi(private val client: YuvomiClient) {
             categories.forEach { add("category" to it) }
             tags.forEach { add("tag" to it) }
             if (includeFuture) add("include_future" to "1")
+            if (includeArchived) add("archived" to "1")
         }
 
         val activeCount: Int

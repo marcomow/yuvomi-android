@@ -26,6 +26,19 @@ class NotesRulesTest {
         Note(3, "Emma's school", "Class 3b", pinned = true, createdBy = 2, creatorName = "Linda"),
     )
 
+    /** NOTES-R31: archived notes leave the board until the Archive category is chosen. */
+    @Test fun `archived notes are off the board unless the Archive category is selected`() {
+        val archive = NoteCategory(9, "archive", NoteCategory.SCOPE_PERSONAL, ownerUserId = 1)
+        val withArchived = notes + Note(4, "Old", "x", categories = listOf(home, archive))
+        assertEquals(listOf(1, 2, 3), NotesRules.visible(withArchived, BoardFilter(), archiveId = 9).map { it.id })
+        assertEquals(listOf(4), NotesRules.visible(withArchived, BoardFilter(categoryIds = listOf(9)), archiveId = 9).map { it.id })
+        // The household's Archive wins over a personal one; names match in any case and spelling.
+        val shared = NoteCategory(10, "Archive", NoteCategory.SCOPE_HOUSEHOLD)
+        assertEquals(10, NotesRules.archiveCategory(listOf(archive, shared, home), setOf("Archiv", "Archive"))?.id)
+        assertNull(NotesRules.archiveCategory(listOf(home, school), setOf("Archive")))
+        assertTrue(NotesRules.isArchived(withArchived.last(), 9))
+    }
+
     /** NOTES-A3. */
     @Test fun `search matches title or text, case-insensitively, after the creator and categories`() {
         assertEquals(listOf(2), NotesRules.visible(notes, BoardFilter(query = "  MILK ")).map { it.id })

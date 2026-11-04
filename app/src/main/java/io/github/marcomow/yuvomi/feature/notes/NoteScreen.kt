@@ -1,5 +1,7 @@
 package io.github.marcomow.yuvomi.feature.notes
 
+import androidx.compose.material.icons.outlined.Unarchive
+import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -85,6 +87,20 @@ fun NoteScreen(noteId: Int, back: () -> Unit, edit: (Int) -> Unit) {
                                     text = { Text(t(if (note.pinned) "notes.unpinAction" else "notes.pinAction")) },
                                     leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
                                     onClick = { menu = false; scope.launch { report(store.togglePin(note)) } },
+                                )
+                                // NOTES-R31: archive or restore through the Archive category.
+                                val archived = NotesRules.isArchived(note, store.archiveCategory(strings)?.id)
+                                DropdownMenuItem(
+                                    text = { Text(t(if (archived) "android.notes.restore" else "android.notes.archive")) },
+                                    leadingIcon = { Icon(if (archived) Icons.Outlined.Unarchive else Icons.Outlined.Archive, null) },
+                                    onClick = {
+                                        menu = false
+                                        scope.launch {
+                                            val error = store.setArchived(note, !archived, strings)
+                                            shell.notify(strings.t(error ?: if (archived) "android.notes.restored" else "android.notes.archived"))
+                                            if (error == null && !archived) back()
+                                        }
+                                    },
                                 )
                                 DropdownMenuItem(
                                     text = { Text(t("common.delete"), color = Yuvomi.colors.danger) },

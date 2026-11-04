@@ -244,6 +244,44 @@ class NotesStore(private val cache: ResponseCache, private val api: NotesApi, pr
         false
     }
 
+    /** NOTES-R31: the category names that mean "Archive". */
+    fun archiveNames(strings: io.github.marcomow.yuvomi.core.i18n.Strings): Set<String> =
+        setOf(strings.t("android.notes.archiveCategory"), "Archive")
+
+    /** The Archive category as the board knows it now, or null when there is none yet. */
+    fun archiveCategory(strings: io.github.marcomow.yuvomi.core.i18n.Strings): NoteCategory? =
+        NotesRules.archiveCategory(state.value.categories, archiveNames(strings))
+
+    /**
+     * NOTES-R31: archiving adds the Archive category (keeping the others), restoring removes it.
+     * The category is created on first use: for the household when the member may manage
+     * household categories, else their own. Only `category_ids` is sent, which the server allows
+     * on any note the member may see that is not locked. Returns an error key, or null.
+     */
+    suspend fun setArchived(note: Note, archived: Boolean, strings: io.github.marcomow.yuvomi.core.i18n.Strings): String? = try {
+        val archive = archiveCategory(strings) ?: if (archived) {
+            createCategory(
+                strings.t("android.notes.archiveCategory"),
+                if (state.value.canManageHousehold) NoteCategory.SCOPE_HOUSEHOLD else NoteCategory.SCOPE_PERSONAL,
+            )
+        } else {
+            null
+        }
+        if (archive == null) {
+            null
+        } else {
+            val ids = note.categories.map { it.id }.filter { it != archive.id } + listOfNotNull(archive.id.takeIf { archived })
+            val updated = api.update(note.id, kotlinx.serialization.json.buildJsonObject {
+                put("category_ids", kotlinx.serialization.json.JsonArray(ids.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+            })
+            replace(updated)
+            null
+        }
+    } catch (e: ApiProblem) {
+        if (NoteErrors.isGone(e)) drop(note.id)
+        NoteErrors.key(e)
+    }
+
     /** Creates a category and adds it to the shared list. Throws [ApiProblem]. */
     suspend fun createCategory(name: String, scopeKey: String, idempotencyKey: String = YuvomiClient.newIdempotencyKey()): NoteCategory {
         val created = api.createCategory(name.trim(), scopeKey, idempotencyKey)

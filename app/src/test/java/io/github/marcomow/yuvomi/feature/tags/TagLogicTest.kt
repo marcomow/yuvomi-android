@@ -99,4 +99,22 @@ class TagLogicTest {
         assertEquals("android.error.offline", TagStore.errorKey(ApiProblem.Network(IOException("down"))))
         assertEquals("android.tags.loadFailed", TagStore.errorKey(ApiProblem.Http(500, null, null)))
     }
+
+    /** TAGS-R14: completed and archived items count only when shown. */
+    @Test fun `done items are hidden unless shown, and counted`() {
+        val all = items + TaggedItem("tasks", "task:9", "Old", null, setOf("Garden"), "route/9", done = true) +
+            TaggedItem("tasks", "task:10", "Gone", null, setOf("old-project"), "route/10", done = true)
+        assertEquals(items, TagIndex.visible(all, showDone = false))
+        assertEquals(all, TagIndex.visible(all, showDone = true))
+        assertEquals(1, TagIndex.doneCount(all, "#garden"))
+        // A tag only on done items is not in the list while they are hidden.
+        assertNull(TagIndex.summarize(TagIndex.visible(all, false)).firstOrNull { it.label == "old-project" })
+    }
+
+    /** TAGS-R15: archived tags apart, by key. */
+    @Test fun `archived tags are split off the list`() {
+        val (active, archived) = TagIndex.split(TagIndex.summarize(items), setOf(TagKey.of("BBQ")))
+        assertEquals(listOf("garden", "Kids"), active.map { it.label })
+        assertEquals(listOf("BBQ"), archived.map { it.label })
+    }
 }

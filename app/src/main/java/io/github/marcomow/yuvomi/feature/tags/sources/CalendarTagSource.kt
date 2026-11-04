@@ -1,5 +1,8 @@
 package io.github.marcomow.yuvomi.feature.tags.sources
 
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.async
+import io.github.marcomow.yuvomi.feature.documents.DocumentRules
 import io.github.marcomow.yuvomi.feature.calendar.CalendarApi
 import io.github.marcomow.yuvomi.feature.calendar.CalendarEvent
 import io.github.marcomow.yuvomi.feature.calendar.CalendarRoutes
@@ -41,17 +44,23 @@ object CalendarTagSource : TagSource {
         }
 }
 
-/** Documents' part of the Tags view (TAGS-R2): hashtags in an active document's name and description. */
+/** Documents' part of the Tags view (TAGS-R2): hashtags in a document's name and description. */
 object DocumentsTagSource : TagSource {
     override val moduleId = "documents"
 
     override suspend fun load(shell: ShellContext): List<TaggedItem> {
         if (!shell.shows(moduleId)) return emptyList()
-        return items(DocumentsApi.decodeDocuments(DocumentsApi(shell.connection.client).list("active")))
+        // Active and archived documents; archived ones are [TaggedItem.done] (TAGS-R14).
+        val api = DocumentsApi(shell.connection.client)
+        return coroutineScope {
+            val active = async { DocumentsApi.decodeDocuments(api.list(DocumentRules.STATUS_ACTIVE)) }
+            val archived = async { DocumentsApi.decodeDocuments(api.list(DocumentRules.STATUS_ARCHIVED)) }
+            items(active.await() + archived.await())
+        }
     }
 
     fun items(documents: List<Document>): List<TaggedItem> = documents.mapNotNull { doc ->
         val tags = Hashtags.extract(doc.name, doc.description)
-        if (tags.isEmpty()) null else TaggedItem(moduleId, "document:${doc.id}", doc.name, doc.folderName, tags, DocumentsRoutes.document(doc.id))
+        if (tags.isEmpty()) null else TaggedItem(moduleId, "document:${doc.id}", doc.name, doc.folderName, tags, DocumentsRoutes.document(doc.id), done = doc.archived)
     }
 }

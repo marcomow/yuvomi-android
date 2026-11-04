@@ -201,6 +201,13 @@ Error `reason` values read: `notes_note_not_found` (404), `notes_selected_catego
   `common.errorGeneric`. The server's English text is never shown.
 - **NOTES-R30** Offline (ADR 0007): the cached board and notes show read-only under
   `OfflineBanner`; every write affordance is hidden.
+- **NOTES-R31** Archiving a note (app only; upstream has no note archive) adds the category named
+  "Archive" (`android.notes.archiveCategory` in the member's language, or English "Archive") and
+  keeps the note's other categories. Restoring removes it. On first use the category is created
+  for the household when the member may manage household categories, else as their own; a
+  household one wins when both exist. Only `category_ids` is sent (`PUT /notes/{id}`), which the
+  server allows on any visible note that is not locked. Archived notes leave the board until the
+  Archive category chip is chosen. The web app and the household see the category like any other.
 
 ## Acceptance criteria
 

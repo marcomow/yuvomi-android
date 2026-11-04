@@ -1,7 +1,12 @@
 {
   "android": {
     "notes": {
-      "moduleReadOnly": "You have read-only access to this module - changes aren't possible."
+      "moduleReadOnly": "You have read-only access to this module - changes aren't possible.",
+      "archiveCategory": "Archive",
+      "archive": "Archive note",
+      "restore": "Restore note",
+      "archived": "Note archived. Choose the Archive category on the board to see it.",
+      "restored": "Note restored."
     }
   }
 }

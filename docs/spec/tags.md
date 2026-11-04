@@ -75,6 +75,16 @@ Everything else is read through the modules' own API classes (see R2).
   tag, except inside an existing link. Shopping rows show their real tags and hashtags as
   `TagChips`. Covered: note view (not board previews, whose card is the tap target), recipe notes,
   event details, shopping rows and an item's read view.
+- **TAGS-R14** Completed and archived items are hidden by default: done and archived tasks
+  (the source now asks for `archived=1`), checked shopping items, archived documents (the source
+  reads `status=active` and `status=archived`) and archived notes (NOTES-R31). The chip **Show
+  completed and archived** on the list and on a tag's page shows them too, the choice is kept on
+  the phone, and the counts follow it. A tag's page says how many items it hides. Shown, they
+  are dimmed and struck through.
+- **TAGS-R15** Any tag can be archived from its page (menu: Archive tag / Restore tag). Upstream
+  has no tag archive, so the choice is kept on the phone, by `TagKey`, and changes nothing on the
+  server or in the items. Archived tags leave the list for a collapsed **Archived tags (N)**
+  section at its end; a search also searches them.
 - **TAGS-R9** Rename and delete are offered only for a real task tag (in `GET /tasks/tags`), when
   the member has `tasks: write` and is online (upstream: `openTagManager` returns when read-only).
 - **TAGS-R10** Rename: unchanged or empty name sends nothing (`_rename`); `.`/`..` are refused

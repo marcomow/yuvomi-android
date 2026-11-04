@@ -44,15 +44,33 @@ data class Creator(val name: String, val color: String?, val avatar: String?)
 
 object NotesRules {
 
-    /** `visibleNotes()`: creator, then every selected category (AND), then title or text containing the query. */
-    fun visible(notes: List<Note>, filter: BoardFilter): List<Note> {
+    /**
+     * `visibleNotes()`: creator, then every selected category (AND), then title or text containing
+     * the query. Archived notes ([archiveId], NOTES-R31) show only when the Archive category is
+     * one of the selected ones.
+     */
+    fun visible(notes: List<Note>, filter: BoardFilter, archiveId: Int? = null): List<Note> {
         val q = filter.query.trim().lowercase()
+        val showArchived = archiveId != null && archiveId in filter.categoryIds
         return notes.filter { n ->
+            if (!showArchived && archiveId != null && n.categories.any { it.id == archiveId }) return@filter false
             if (filter.creator.isNotEmpty() && n.creatorName != filter.creator) return@filter false
             if (!matchesCategories(n, filter.categoryIds)) return@filter false
             q.isEmpty() || n.title.orEmpty().lowercase().contains(q) || n.content.lowercase().contains(q)
         }
     }
+
+    /**
+     * NOTES-R31: the household's or the member's "Archive" category, by name in the member's
+     * language or in English. A household one wins, so the whole household shares one archive.
+     */
+    fun archiveCategory(categories: List<NoteCategory>, names: Collection<String>): NoteCategory? {
+        val keys = names.map { identityKey(it) }.toSet()
+        val matches = categories.filter { identityKey(it.name) in keys }
+        return matches.firstOrNull { !it.isPersonal } ?: matches.firstOrNull()
+    }
+
+    fun isArchived(note: Note, archiveId: Int?): Boolean = archiveId != null && note.categories.any { it.id == archiveId }
 
     fun matchesCategories(note: Note, selected: List<Int>): Boolean {
         if (selected.isEmpty()) return true

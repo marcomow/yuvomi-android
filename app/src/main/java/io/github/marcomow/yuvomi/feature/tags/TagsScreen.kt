@@ -1,5 +1,11 @@
 package io.github.marcomow.yuvomi.feature.tags
 
+import kotlinx.coroutines.launch
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.ExpandLess
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -71,8 +77,18 @@ fun TagsScreen(openTag: (String) -> Unit) {
     // Back in the foreground, or back from a tag's page, after more than a minute.
     LifecycleEventEffect(Lifecycle.Event.ON_RESUME) { store.refreshIfStale(shell) }
 
-    val summaries = remember(s.items) { TagIndex.summarize(s.items) }
-    val shown = remember(summaries, query) { TagIndex.filter(summaries, query) }
+    val settings = shell.container.settings
+    val showDone by settings.tagsShowDone.collectAsState(initial = false)
+    val archived by settings.archivedTags.collectAsState(initial = emptySet())
+    var archivedOpen by rememberSaveable { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
+
+    // TAGS-R14: completed and archived items count only when shown; TAGS-R15: archived tags apart.
+    val visibleItems = remember(s.items, showDone) { TagIndex.visible(s.items, showDone) }
+    val summaries = remember(visibleItems) { TagIndex.summarize(visibleItems) }
+    val (active, archivedTags) = remember(summaries, archived) { TagIndex.split(summaries, archived) }
+    val shown = remember(active, query) { TagIndex.filter(active, query) }
+    val shownArchived = remember(archivedTags, query) { TagIndex.filter(archivedTags, query) }
     val find = remember(summaries, query) { TagIndex.offersFind(summaries, query) }
 
     Scaffold(
@@ -91,6 +107,7 @@ fun TagsScreen(openTag: (String) -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
             )
+            ShowDoneChip(showDone) { on -> scope.launch { settings.setTagsShowDone(on) } }
             when {
                 s.loading && s.items.isEmpty() -> LoadingBox()
                 s.errorKey != null && s.items.isEmpty() -> ErrorBox(strings.t(s.errorKey!!), onRetry = { store.refresh(shell) })
@@ -118,11 +135,37 @@ fun TagsScreen(openTag: (String) -> Unit) {
                             item { EmptyState(t("android.tags.noMatch")) }
                         }
                         items(shown, key = { "tag-${it.key}" }) { tag -> TagRow(tag, onClick = { openTag(tag.label) }) }
+                        if (shownArchived.isNotEmpty()) {
+                            item(key = "archived-header") {
+                                ListItem(
+                                    headlineContent = { Text(t("android.tags.archivedSection", "count" to shownArchived.size)) },
+                                    leadingContent = { Icon(Icons.Outlined.Inventory2, null) },
+                                    trailingContent = { Icon(if (archivedOpen) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, null) },
+                                    modifier = Modifier.clickable { archivedOpen = !archivedOpen },
+                                )
+                            }
+                            if (archivedOpen || query.isNotBlank()) {
+                                items(shownArchived, key = { "archived-${it.key}" }) { tag -> TagRow(tag, onClick = { openTag(tag.label) }) }
+                            }
+                        }
                     }
                 }
             }
         }
     }
+}
+
+/** TAGS-R14: the switch for completed and archived items, shared by the list and a tag's page. */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+internal fun ShowDoneChip(showDone: Boolean, modifier: Modifier = Modifier.padding(horizontal = 16.dp), onChange: (Boolean) -> Unit) {
+    androidx.compose.material3.FilterChip(
+        selected = showDone,
+        onClick = { onChange(!showDone) },
+        label = { Text(t("android.tags.showDone")) },
+        leadingIcon = if (showDone) ({ Icon(Icons.Outlined.Check, null, Modifier.size(18.dp)) }) else null,
+        modifier = modifier,
+    )
 }
 
 @Composable

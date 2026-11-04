@@ -46,6 +46,8 @@ data class Task(
     @SerialName("document_count") val documentCount: Int? = null,
     val documents: List<TaskDocument>? = null,
     @SerialName("created_at") val createdAt: String? = null,
+    /** Set when the task is archived (upstream #688: its own axis next to `status`). */
+    @SerialName("archived_at") val archivedAt: String? = null,
     /** Never sent by the app; read only to prove partial updates keep it (TASKS-A5). */
     val countdown: FlexBool = false,
 ) {

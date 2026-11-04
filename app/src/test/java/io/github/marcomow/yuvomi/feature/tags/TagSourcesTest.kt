@@ -59,6 +59,35 @@ class TagSourcesTest {
         assertEquals("tasks.statusDone", items[1].subtitle)
         assertEquals(listOf("open", "in_progress", "done"), TasksTagSource.filter.statuses)
         assertTrue(TasksTagSource.filter.includeFuture)
+        assertTrue(TasksTagSource.filter.includeArchived)
+        assertTrue("archived" to "1" in TasksTagSource.filter.query())
+    }
+
+    /** TAGS-R14: done and archived tasks, checked items, archived documents and notes are done. */
+    @Test fun `completed and archived items are marked done`() {
+        val tasks = TasksTagSource.items(
+            listOf(
+                Task(id = 1, title = "#a open"),
+                Task(id = 2, title = "#a done", status = Task.STATUS_DONE),
+                Task(id = 3, title = "#a old", archivedAt = "2026-10-01 10:00:00"),
+            ),
+            text,
+        )
+        assertEquals(listOf(false, true, true), tasks.map { it.done })
+        assertEquals("tasks.statusArchived", tasks[2].subtitle)
+        val docs = DocumentsTagSource.items(
+            listOf(Document(id = 1, name = "#a now"), Document(id = 2, name = "#a old", status = io.github.marcomow.yuvomi.feature.documents.DocumentRules.STATUS_ARCHIVED)),
+        )
+        assertEquals(listOf(false, true), docs.map { it.done })
+        val archive = io.github.marcomow.yuvomi.feature.notes.NoteCategory(9, "Archive", io.github.marcomow.yuvomi.feature.notes.NoteCategory.SCOPE_HOUSEHOLD)
+        val notes = NotesTagSource.items(
+            listOf(
+                io.github.marcomow.yuvomi.feature.notes.Note(1, "#a kept"),
+                io.github.marcomow.yuvomi.feature.notes.Note(2, "#a gone", categories = listOf(archive)),
+            ),
+            text,
+        )
+        assertEquals(listOf(false, true), notes.map { it.done })
     }
 
     @Test fun `shopping items keep their mirrored tags and lists with a hashtag count too`() {

@@ -15,7 +15,16 @@
       "loadFailed": "The tags could not be read.",
       "taskOnly": "Only the tags of tasks change. #hashtags written in texts stay as they are.",
       "taskTagGone": "No task you can see carries this tag any more.",
-      "nameInvalid": "Enter a name for the tag."
+      "nameInvalid": "Enter a name for the tag.",
+      "showDone": "Show completed and archived",
+      "doneHidden": "{{count}} completed or archived items hidden",
+      "doneHidden_one": "{{count}} completed or archived item hidden",
+      "archive": "Archive tag",
+      "restore": "Restore tag",
+      "archived": "#{{tag}} archived. It is listed under Archived tags.",
+      "restored": "#{{tag}} is back in the list.",
+      "isArchived": "This tag is archived on this phone. Its items are unchanged.",
+      "archivedSection": "Archived tags ({{count}})"
     }
   }
 }

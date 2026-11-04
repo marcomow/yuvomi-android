@@ -11,8 +11,9 @@ import io.github.marcomow.yuvomi.feature.tags.TaggedItem
 
 /**
  * Tasks' part of the Tags view (TAGS-R2): the task's real tags (`task_tags`) and the hashtags
- * in its title and description. Every status that is not archived, later starts included, like
- * the board with all status filters on (`GET /tasks?status=open&status=in_progress&status=done&include_future=1`).
+ * in its title and description. Every status, later starts and archived tasks included
+ * (`GET /tasks?status=open&status=in_progress&status=done&include_future=1&archived=1`); done and
+ * archived ones are [TaggedItem.done] (TAGS-R14).
  */
 object TasksTagSource : TagSource {
     override val moduleId = "tasks"
@@ -20,6 +21,7 @@ object TasksTagSource : TagSource {
     val filter = TasksApi.Filter(
         statuses = listOf(Task.STATUS_OPEN, Task.STATUS_IN_PROGRESS, Task.STATUS_DONE),
         includeFuture = true,
+        includeArchived = true,
     )
 
     override suspend fun load(shell: ShellContext): List<TaggedItem> {
@@ -30,11 +32,13 @@ object TasksTagSource : TagSource {
     fun items(tasks: List<Task>, text: SourceText): List<TaggedItem> = tasks.mapNotNull { task ->
         val tags = TagIndex.union(task.tags, Hashtags.extract(task.title, task.description))
         if (tags.isEmpty()) return@mapNotNull null
-        val status = when (task.status) {
-            Task.STATUS_DONE -> text.label("tasks.statusDone")
-            Task.STATUS_IN_PROGRESS -> text.label("tasks.statusInProgress")
+        val status = when {
+            task.archivedAt != null -> text.label("tasks.statusArchived")
+            task.status == Task.STATUS_DONE -> text.label("tasks.statusDone")
+            task.status == Task.STATUS_IN_PROGRESS -> text.label("tasks.statusInProgress")
             else -> null
         }
-        TaggedItem(moduleId, "task:${task.id}", task.title, text.join(text.date(task.dueDate), status), tags, Routes.task(task.id))
+        TaggedItem(moduleId, "task:${task.id}", task.title, text.join(text.date(task.dueDate), status), tags, Routes.task(task.id),
+            done = task.archivedAt != null || task.status == Task.STATUS_DONE)
     }
 }

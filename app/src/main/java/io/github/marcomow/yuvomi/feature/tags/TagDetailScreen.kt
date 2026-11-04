@@ -1,5 +1,7 @@
 package io.github.marcomow.yuvomi.feature.tags
 
+import androidx.compose.material.icons.outlined.Unarchive
+import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -79,7 +81,14 @@ fun TagDetailScreen(tag: String, back: () -> Unit, retag: (String) -> Unit) {
 
     LaunchedEffect(store) { store.refreshIfStale(shell) }
 
-    val groups = remember(s.items, tag) { TagIndex.groups(s.items, tag) }
+    val settings = shell.container.settings
+    val showDone by settings.tagsShowDone.collectAsState(initial = false)
+    val archivedTags by settings.archivedTags.collectAsState(initial = emptySet())
+    val tagKey = remember(tag) { TagKey.of(tag.removePrefix("#")) }
+    val isArchived = tagKey in archivedTags
+    // TAGS-R14: completed and archived items only when shown, with a count of what is hidden.
+    val groups = remember(s.items, tag, showDone) { TagIndex.groups(TagIndex.visible(s.items, showDone), tag) }
+    val hiddenDone = remember(s.items, tag, showDone) { if (showDone) 0 else TagIndex.doneCount(s.items, tag) }
     val label = remember(s.items, tag) { TagIndex.label(s.items, tag) }
     val taskTag = TaskTagRules.find(s.taskTags, tag)
     val canManage = taskTag != null && shell.session.access("tasks") == "write" && !s.offline
@@ -138,9 +147,21 @@ fun TagDetailScreen(tag: String, back: () -> Unit, retag: (String) -> Unit) {
                 title = { Text("#$label") },
                 navigationIcon = { IconButton(onClick = back) { Icon(Icons.AutoMirrored.Outlined.ArrowBack, t("common.back")) } },
                 actions = {
+                    IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, t("common.moreActionsNamed", "name" to label)) }
+                    DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
+                        // TAGS-R15: archive any tag (kept on this phone); it moves to "Archived tags".
+                        DropdownMenuItem(
+                            text = { Text(t(if (isArchived) "android.tags.restore" else "android.tags.archive")) },
+                            leadingIcon = { Icon(if (isArchived) Icons.Outlined.Unarchive else Icons.Outlined.Archive, null) },
+                            onClick = {
+                                menu = false
+                                scope.launch {
+                                    settings.setTagArchived(tagKey, !isArchived)
+                                    shell.notify(strings.t(if (isArchived) "android.tags.restored" else "android.tags.archived", "tag" to label))
+                                }
+                            },
+                        )
                     if (canManage) {
-                        IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, t("common.moreActionsNamed", "name" to label)) }
-                        DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
                             DropdownMenuItem(
                                 text = { Text(t("tasks.tagRenameLabel", "tag" to taskTag!!.tag)) },
                                 leadingIcon = { Icon(Icons.Outlined.Edit, null) },
@@ -151,7 +172,7 @@ fun TagDetailScreen(tag: String, back: () -> Unit, retag: (String) -> Unit) {
                                 leadingIcon = { Icon(Icons.Outlined.Delete, null, tint = Yuvomi.colors.danger) },
                                 onClick = { menu = false; deleting = true },
                             )
-                        }
+                    }
                     }
                 },
             )
@@ -164,6 +185,22 @@ fun TagDetailScreen(tag: String, back: () -> Unit, retag: (String) -> Unit) {
                 s.errorKey != null && s.items.isEmpty() -> ErrorBox(strings.t(s.errorKey!!), onRetry = { store.refresh(shell) })
                 else -> PullToRefreshBox(isRefreshing = s.refreshing, onRefresh = { store.refresh(shell, pulled = true, force = true) }) {
                     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(bottom = 96.dp)) {
+                        item(key = "show-done") {
+                            Column(Modifier.padding(vertical = 4.dp)) {
+                                ShowDoneChip(showDone) { on -> scope.launch { settings.setTagsShowDone(on) } }
+                                if (hiddenDone > 0) {
+                                    Text(
+                                        t("android.tags.doneHidden", "count" to hiddenDone),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Yuvomi.colors.textSecondary,
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                    )
+                                }
+                                if (isArchived) {
+                                    Text(t("android.tags.isArchived"), style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp))
+                                }
+                            }
+                        }
                         if (s.offline) {
                             item { OfflineBanner(shell.formats.dateTime(Instant.ofEpochMilli(s.cachedAt!!).atZone(shell.time.zone))) }
                         }
@@ -260,7 +297,13 @@ private fun GroupHeader(group: TagGroup) {
 private fun ItemRow(item: TaggedItem, tag: String, open: () -> Unit) {
     val others = remember(item, tag) { TagIndex.otherTags(item, tag) }
     ListItem(
-        headlineContent = { Text(item.title) },
+        headlineContent = {
+            Text(
+                item.title,
+                color = if (item.done) Yuvomi.colors.textSecondary else androidx.compose.ui.graphics.Color.Unspecified,
+                textDecoration = if (item.done) androidx.compose.ui.text.style.TextDecoration.LineThrough else null,
+            )
+        },
         supportingContent = if (item.subtitle == null && others.isEmpty()) null else {
             {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {

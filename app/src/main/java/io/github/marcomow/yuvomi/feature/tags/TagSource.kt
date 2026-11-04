@@ -20,6 +20,8 @@ data class TaggedItem(
     /** The native route that opens the item, or null when [webPath] opens it in the browser. */
     val route: String?,
     val webPath: String? = null,
+    /** Completed or archived (a done or archived task, a checked item, an archived note or document); hidden unless the member shows them (TAGS-R14). */
+    val done: Boolean = false,
 )
 
 /**

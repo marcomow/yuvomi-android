@@ -41,6 +41,20 @@ object TagIndex {
         return out
     }
 
+    /** TAGS-R14: completed and archived items only when the member shows them. */
+    fun visible(items: List<TaggedItem>, showDone: Boolean): List<TaggedItem> =
+        if (showDone) items else items.filterNot { it.done }
+
+    /** How many of [items] carrying [tag] are completed or archived. */
+    fun doneCount(items: List<TaggedItem>, tag: String): Int {
+        val key = TagKey.of(tag.removePrefix("#"))
+        return items.count { it.done && it.tags.any { t -> TagKey.of(t) == key } }
+    }
+
+    /** TAGS-R15: the tags the member archived (by [TagKey]) apart from the rest, each list in [summarize] order. */
+    fun split(summaries: List<TagSummary>, archived: Set<String>): Pair<List<TagSummary>, List<TagSummary>> =
+        summaries.partition { it.key !in archived }
+
     /** Every tag of [items] with its count, most used first, then by name (upstream's `allTags` order). */
     fun summarize(items: List<TaggedItem>): List<TagSummary> {
         data class Acc(val spellings: LinkedHashMap<String, Int> = LinkedHashMap(), var count: Int = 0, val modules: MutableSet<String> = HashSet())

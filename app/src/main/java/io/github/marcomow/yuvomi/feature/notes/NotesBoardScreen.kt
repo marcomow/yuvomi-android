@@ -98,7 +98,8 @@ fun NotesBoardScreen(openNote: (Int) -> Unit, newNote: () -> Unit, manageCategor
     }
 
     val notes = s.shown
-    val visible = NotesRules.visible(notes, s.filter)
+    // NOTES-R31: archived notes stay off the board until the Archive category chip is chosen.
+    val visible = NotesRules.visible(notes, s.filter, NotesRules.archiveCategory(s.categories, store.archiveNames(strings))?.id)
 
     Scaffold(
         topBar = {
