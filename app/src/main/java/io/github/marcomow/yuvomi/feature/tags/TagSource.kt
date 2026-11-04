@@ -20,9 +20,17 @@ data class TaggedItem(
     /** The native route that opens the item, or null when [webPath] opens it in the browser. */
     val route: String?,
     val webPath: String? = null,
-    /** Completed or archived (a done or archived task, a checked item, an archived note or document); hidden unless the member shows them (TAGS-R14). */
+    /** Completed (a done task, a checked item); hidden unless the member shows them (TAGS-R14). */
     val done: Boolean = false,
-)
+    /** Archived by its module's own means (an archived document, a task upstream archived). */
+    val archivedNatively: Boolean = false,
+) {
+    /** Archived: natively, or by the reserved tag `#archived` ([Archived]). */
+    val archived: Boolean get() = archivedNatively || Archived.inTags(tags)
+
+    /** Hidden while completed and archived items are hidden (TAGS-R14). */
+    val finished: Boolean get() = done || archived
+}
 
 /**
  * A module's contribution to the Tags view. Each module implements one in its own package;

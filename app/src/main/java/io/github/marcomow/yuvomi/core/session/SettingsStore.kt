@@ -36,7 +36,6 @@ class SettingsStore(private val context: Context, private val box: SecretBox) {
         val phoneReminders = booleanPreferencesKey("phoneReminders")
         val tagsBarSlot = intPreferencesKey("tagsBarSlot")
         val tagsShowDone = booleanPreferencesKey("tagsShowDone")
-        val archivedTags = stringSetPreferencesKey("archivedTags")
         val dismissedUpdate = stringPreferencesKey("dismissedUpdate")
     }
 
@@ -78,13 +77,6 @@ class SettingsStore(private val context: Context, private val box: SecretBox) {
     /** The Tags view shows completed and archived items too (TAGS-R14); off by default. */
     val tagsShowDone: Flow<Boolean> = context.dataStore.data.map { it[Keys.tagsShowDone] ?: false }
     suspend fun setTagsShowDone(on: Boolean) = context.dataStore.edit { it[Keys.tagsShowDone] = on }
-
-    /** Tags the member archived, by `TagKey` (TAGS-R15). Kept on the phone: upstream has no tag archive. */
-    val archivedTags: Flow<Set<String>> = context.dataStore.data.map { it[Keys.archivedTags] ?: emptySet() }
-    suspend fun setTagArchived(key: String, archived: Boolean) = context.dataStore.edit {
-        val now = it[Keys.archivedTags] ?: emptySet()
-        it[Keys.archivedTags] = if (archived) now + key else now - key
-    }
 
     /** Reminders as phone notifications (REM-R6), on by default. */
     val phoneReminders: Flow<Boolean> = context.dataStore.data.map { it[Keys.phoneReminders] ?: true }

@@ -61,6 +61,6 @@ object DocumentsTagSource : TagSource {
 
     fun items(documents: List<Document>): List<TaggedItem> = documents.mapNotNull { doc ->
         val tags = Hashtags.extract(doc.name, doc.description)
-        if (tags.isEmpty()) null else TaggedItem(moduleId, "document:${doc.id}", doc.name, doc.folderName, tags, DocumentsRoutes.document(doc.id), done = doc.archived)
+        if (tags.isEmpty()) null else TaggedItem(moduleId, "document:${doc.id}", doc.name, doc.folderName, tags, DocumentsRoutes.document(doc.id), archivedNatively = doc.archived)
     }
 }

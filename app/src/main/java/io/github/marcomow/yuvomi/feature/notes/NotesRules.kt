@@ -35,8 +35,14 @@ data class NoteViewer(
 }
 
 /** The board's search and filter row (NOTES-R3 to R6). */
-data class BoardFilter(val query: String = "", val creator: String = "", val categoryIds: List<Int> = emptyList()) {
-    val isFiltered: Boolean get() = query.trim().isNotEmpty() || creator.isNotEmpty() || categoryIds.isNotEmpty()
+data class BoardFilter(
+    val query: String = "",
+    val creator: String = "",
+    val categoryIds: List<Int> = emptyList(),
+    /** NOTES-R31: the archived notes (`#archived`) instead of the others. */
+    val archived: Boolean = false,
+) {
+    val isFiltered: Boolean get() = query.trim().isNotEmpty() || creator.isNotEmpty() || categoryIds.isNotEmpty() || archived
 }
 
 /** One person in the creator filter: the name is the filter value, as upstream filters by `creator_name`. */
@@ -46,31 +52,21 @@ object NotesRules {
 
     /**
      * `visibleNotes()`: creator, then every selected category (AND), then title or text containing
-     * the query. Archived notes ([archiveId], NOTES-R31) show only when the Archive category is
-     * one of the selected ones.
+     * the query. Archived notes (`#archived`, NOTES-R31) show only in the Archived filter, and
+     * only they do there.
      */
-    fun visible(notes: List<Note>, filter: BoardFilter, archiveId: Int? = null): List<Note> {
+    fun visible(notes: List<Note>, filter: BoardFilter): List<Note> {
         val q = filter.query.trim().lowercase()
-        val showArchived = archiveId != null && archiveId in filter.categoryIds
         return notes.filter { n ->
-            if (!showArchived && archiveId != null && n.categories.any { it.id == archiveId }) return@filter false
+            if (isArchived(n) != filter.archived) return@filter false
             if (filter.creator.isNotEmpty() && n.creatorName != filter.creator) return@filter false
             if (!matchesCategories(n, filter.categoryIds)) return@filter false
             q.isEmpty() || n.title.orEmpty().lowercase().contains(q) || n.content.lowercase().contains(q)
         }
     }
 
-    /**
-     * NOTES-R31: the household's or the member's "Archive" category, by name in the member's
-     * language or in English. A household one wins, so the whole household shares one archive.
-     */
-    fun archiveCategory(categories: List<NoteCategory>, names: Collection<String>): NoteCategory? {
-        val keys = names.map { identityKey(it) }.toSet()
-        val matches = categories.filter { identityKey(it.name) in keys }
-        return matches.firstOrNull { !it.isPersonal } ?: matches.firstOrNull()
-    }
-
-    fun isArchived(note: Note, archiveId: Int?): Boolean = archiveId != null && note.categories.any { it.id == archiveId }
+    /** NOTES-R31: archived through the shared tag `#archived` in its title or text. */
+    fun isArchived(note: Note): Boolean = io.github.marcomow.yuvomi.feature.tags.Archived.inText(note.title, note.content)
 
     fun matchesCategories(note: Note, selected: List<Int>): Boolean {
         if (selected.isEmpty()) return true

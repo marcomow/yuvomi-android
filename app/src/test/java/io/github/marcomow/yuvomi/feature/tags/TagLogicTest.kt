@@ -4,6 +4,7 @@ import io.github.marcomow.yuvomi.core.api.ApiProblem
 import io.github.marcomow.yuvomi.core.i18n.Strings
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNull
+import org.junit.Assert.assertTrue
 import org.junit.Test
 import java.io.File
 import java.io.IOException
@@ -111,10 +112,31 @@ class TagLogicTest {
         assertNull(TagIndex.summarize(TagIndex.visible(all, false)).firstOrNull { it.label == "old-project" })
     }
 
-    /** TAGS-R15: archived tags apart, by key. */
-    @Test fun `archived tags are split off the list`() {
-        val (active, archived) = TagIndex.split(TagIndex.summarize(items), setOf(TagKey.of("BBQ")))
-        assertEquals(listOf("garden", "Kids"), active.map { it.label })
-        assertEquals(listOf("BBQ"), archived.map { it.label })
+    /** TAGS-R15: a tag is archived when all its items are finished and one is archived; `#archived` leads them. */
+    @Test fun `archived tags follow their items`() {
+        val all = listOf(
+            TaggedItem("tasks", "task:1", "Old plan", null, setOf("trip", "archived"), "r1"),
+            TaggedItem("shopping", "item:2", "Tent", null, setOf("trip"), "r2", done = true),
+            TaggedItem("notes", "note:3", "Ideas", null, setOf("party"), "r3"),
+            TaggedItem("tasks", "task:4", "Done only", null, setOf("chores"), "r4", done = true),
+        )
+        assertEquals(setOf(TagKey.of("trip")), TagIndex.archivedTags(all))
+        val (active, archived) = TagIndex.split(TagIndex.summarize(all), TagIndex.archivedTags(all))
+        assertEquals(listOf("chores", "party"), active.map { it.label }.sorted())
+        assertEquals(listOf("archived", "trip"), archived.map { it.label })
+        // The page of #archived never hides its items.
+        assertEquals(all, TagIndex.visible(all, showDone = false, tag = "#archived"))
+    }
+
+    /** TAGS-R15: the reserved tag in tags and in text. */
+    @Test fun `archived is added and removed once, in tags and in text`() {
+        assertEquals(listOf("a", "archived"), Archived.tags(listOf("a"), true))
+        assertEquals(listOf("a", "Archived"), Archived.tags(listOf("a", "Archived"), true))
+        assertEquals(listOf("a"), Archived.tags(listOf("a", "Archived"), false))
+        assertEquals("Buy soil\n\n#archived", Archived.text("Buy soil  ", true))
+        assertEquals("#archived", Archived.text(null, true))
+        assertEquals("Buy soil", Archived.text("Buy soil\n\n#archived", false))
+        assertEquals("Keep #archivedx and https://x.org/#archived", Archived.text("Keep #archivedx and https://x.org/#archived #Archived", false))
+        assertTrue(Archived.inText("x #ARCHIVED"))
     }
 }

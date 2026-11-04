@@ -72,6 +72,15 @@ class TagStore(
         job = scope.launch { load(shell) }
     }
 
+    /** TAGS-R16: archive or restore everything carrying [tag], then read again. */
+    suspend fun archiveTag(shell: ShellContext, tag: String, archive: Boolean): TagArchiving.Result {
+        val key = TagKey.of(tag.removePrefix("#"))
+        val carrying = state.value.items.filter { item -> item.tags.any { TagKey.of(it) == key } }
+        val result = TagArchiving.apply(shell, carrying, archive)
+        load(shell)
+        return result
+    }
+
     /** Refreshes when nothing came from the server yet or the last load is older than [maxAgeMs]. */
     fun refreshIfStale(shell: ShellContext, maxAgeMs: Long = 60_000) {
         if (System.currentTimeMillis() - lastLoaded > maxAgeMs) refresh(shell)

@@ -56,7 +56,7 @@ class TasksViewModel(private val container: AppContainer, presetAssignee: Int?) 
             if (meta != null) _state.update { it.copy(meta = TasksApi.decodeMeta(ApiJson.parseToJsonElement(meta.json))) }
             if (list != null) {
                 _state.update {
-                    it.copy(tasks = TasksApi.decodeList(ApiJson.parseToJsonElement(list.json)), loading = false, cachedAt = list.savedAt)
+                    it.copy(tasks = hideArchived(TasksApi.decodeList(ApiJson.parseToJsonElement(list.json)), it.filter), loading = false, cachedAt = list.savedAt)
                 }
             }
         }
@@ -71,7 +71,8 @@ class TasksViewModel(private val container: AppContainer, presetAssignee: Int?) 
                 val metaJob = async { api.meta() }
                 val listJson = api.list(filter)
                 val metaJson = metaJob.await()
-                val tasks = TasksApi.decodeList(listJson)
+                // TASKS-R41: tasks tagged `archived` only when that tag is filtered for.
+                val tasks = hideArchived(TasksApi.decodeList(listJson), filter)
                 val meta = TasksApi.decodeMeta(metaJson)
                 cacheKey(filter)?.let { container.cache.write(it, listJson.toString()) }
                 container.cache.write(CACHE_META, metaJson.toString())
@@ -92,6 +93,10 @@ class TasksViewModel(private val container: AppContainer, presetAssignee: Int?) 
             }
         }
     }
+
+    private fun hideArchived(tasks: List<Task>, filter: TasksApi.Filter): List<Task> =
+        if (io.github.marcomow.yuvomi.feature.tags.Archived.inTags(filter.tags)) tasks
+        else tasks.filterNot { io.github.marcomow.yuvomi.feature.tags.Archived.inTags(it.tags) }
 
     fun setFilter(filter: TasksApi.Filter) {
         if (filter == state.value.filter) return

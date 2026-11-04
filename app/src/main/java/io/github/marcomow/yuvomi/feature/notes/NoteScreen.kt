@@ -88,15 +88,15 @@ fun NoteScreen(noteId: Int, back: () -> Unit, edit: (Int) -> Unit) {
                                     leadingIcon = { Icon(Icons.Outlined.PushPin, null) },
                                     onClick = { menu = false; scope.launch { report(store.togglePin(note)) } },
                                 )
-                                // NOTES-R31: archive or restore through the Archive category.
-                                val archived = NotesRules.isArchived(note, store.archiveCategory(strings)?.id)
+                                // NOTES-R31: archive or restore through the shared tag `#archived`.
+                                val archived = NotesRules.isArchived(note)
                                 DropdownMenuItem(
                                     text = { Text(t(if (archived) "android.notes.restore" else "android.notes.archive")) },
                                     leadingIcon = { Icon(if (archived) Icons.Outlined.Unarchive else Icons.Outlined.Archive, null) },
                                     onClick = {
                                         menu = false
                                         scope.launch {
-                                            val error = store.setArchived(note, !archived, strings)
+                                            val error = store.setArchived(note, !archived)
                                             shell.notify(strings.t(error ?: if (archived) "android.notes.restored" else "android.notes.archived"))
                                             if (error == null && !archived) back()
                                         }

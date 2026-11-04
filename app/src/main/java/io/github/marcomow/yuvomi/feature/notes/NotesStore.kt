@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.put
 import java.util.WeakHashMap
 
 /**
@@ -244,39 +245,20 @@ class NotesStore(private val cache: ResponseCache, private val api: NotesApi, pr
         false
     }
 
-    /** NOTES-R31: the category names that mean "Archive". */
-    fun archiveNames(strings: io.github.marcomow.yuvomi.core.i18n.Strings): Set<String> =
-        setOf(strings.t("android.notes.archiveCategory"), "Archive")
-
-    /** The Archive category as the board knows it now, or null when there is none yet. */
-    fun archiveCategory(strings: io.github.marcomow.yuvomi.core.i18n.Strings): NoteCategory? =
-        NotesRules.archiveCategory(state.value.categories, archiveNames(strings))
-
     /**
-     * NOTES-R31: archiving adds the Archive category (keeping the others), restoring removes it.
-     * The category is created on first use: for the household when the member may manage
-     * household categories, else their own. Only `category_ids` is sent, which the server allows
-     * on any note the member may see that is not locked. Returns an error key, or null.
+     * NOTES-R31: archiving adds `#archived` on a line of its own at the end of the text, restoring
+     * takes every `#archived` out of the title and text. The text is a shared edit, so it needs
+     * the right to change the note. Returns an error key, or null.
      */
-    suspend fun setArchived(note: Note, archived: Boolean, strings: io.github.marcomow.yuvomi.core.i18n.Strings): String? = try {
-        val archive = archiveCategory(strings) ?: if (archived) {
-            createCategory(
-                strings.t("android.notes.archiveCategory"),
-                if (state.value.canManageHousehold) NoteCategory.SCOPE_HOUSEHOLD else NoteCategory.SCOPE_PERSONAL,
-            )
-        } else {
-            null
-        }
-        if (archive == null) {
-            null
-        } else {
-            val ids = note.categories.map { it.id }.filter { it != archive.id } + listOfNotNull(archive.id.takeIf { archived })
-            val updated = api.update(note.id, kotlinx.serialization.json.buildJsonObject {
-                put("category_ids", kotlinx.serialization.json.JsonArray(ids.map { kotlinx.serialization.json.JsonPrimitive(it) }))
-            })
-            replace(updated)
-            null
-        }
+    suspend fun setArchived(note: Note, archived: Boolean): String? = try {
+        val tag = io.github.marcomow.yuvomi.feature.tags.Archived
+        val title = if (archived) note.title else note.title?.let { tag.text(it, false) }
+        val updated = api.update(note.id, kotlinx.serialization.json.buildJsonObject {
+            put("content", tag.text(note.content, archived))
+            if (title != note.title) put("title", title)
+        })
+        replace(updated)
+        null
     } catch (e: ApiProblem) {
         if (NoteErrors.isGone(e)) drop(note.id)
         NoteErrors.key(e)

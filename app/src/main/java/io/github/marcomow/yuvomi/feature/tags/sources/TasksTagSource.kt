@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.tags.sources
 
+import io.github.marcomow.yuvomi.feature.tags.Archived
 import io.github.marcomow.yuvomi.core.api.TasksApi
 import io.github.marcomow.yuvomi.core.api.model.Task
 import io.github.marcomow.yuvomi.feature.shell.Routes
@@ -33,12 +34,12 @@ object TasksTagSource : TagSource {
         val tags = TagIndex.union(task.tags, Hashtags.extract(task.title, task.description))
         if (tags.isEmpty()) return@mapNotNull null
         val status = when {
-            task.archivedAt != null -> text.label("tasks.statusArchived")
+            task.archivedAt != null || Archived.inTags(task.tags) -> text.label("tasks.statusArchived")
             task.status == Task.STATUS_DONE -> text.label("tasks.statusDone")
             task.status == Task.STATUS_IN_PROGRESS -> text.label("tasks.statusInProgress")
             else -> null
         }
         TaggedItem(moduleId, "task:${task.id}", task.title, text.join(text.date(task.dueDate), status), tags, Routes.task(task.id),
-            done = task.archivedAt != null || task.status == Task.STATUS_DONE)
+            done = task.status == Task.STATUS_DONE, archivedNatively = task.archivedAt != null)
     }
 }

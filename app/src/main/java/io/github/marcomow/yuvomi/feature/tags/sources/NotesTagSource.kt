@@ -3,7 +3,6 @@ package io.github.marcomow.yuvomi.feature.tags.sources
 import io.github.marcomow.yuvomi.feature.notes.Note
 import io.github.marcomow.yuvomi.feature.notes.NotesApi
 import io.github.marcomow.yuvomi.feature.notes.NotesRoutes
-import io.github.marcomow.yuvomi.feature.notes.NotesRules
 import io.github.marcomow.yuvomi.feature.shell.ShellContext
 import io.github.marcomow.yuvomi.feature.tags.Hashtags
 import io.github.marcomow.yuvomi.feature.tags.TagSource
@@ -27,8 +26,7 @@ object NotesTagSource : TagSource {
         val title = note.title?.trim()?.takeIf { it.isNotEmpty() }
             ?: note.content.lineSequence().map { it.trim().replace(MARKUP, "").trim() }.firstOrNull { it.isNotEmpty() }?.take(80)
             ?: text.label("notes.viewNote")
-        // An archived note (NOTES-R31) is [TaggedItem.done] (TAGS-R14).
-        val archived = NotesRules.archiveCategory(note.categories, setOf(text.label("android.notes.archiveCategory"), "Archive")) != null
-        TaggedItem(moduleId, "note:${note.id}", title, note.creatorName, tags, NotesRoutes.note(note.id), done = archived)
+        // A note with `#archived` in its text is archived through its tags (NOTES-R31, [TaggedItem.archived]).
+        TaggedItem(moduleId, "note:${note.id}", title, note.creatorName, tags, NotesRoutes.note(note.id))
     }
 }

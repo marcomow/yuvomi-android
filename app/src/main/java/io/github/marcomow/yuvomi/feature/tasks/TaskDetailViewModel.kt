@@ -153,6 +153,22 @@ class TaskDetailViewModel(private val container: AppContainer, private val taskI
         }
     }
 
+    /** TASKS-R41: archive or restore with the shared tag `archived` ([io.github.marcomow.yuvomi.feature.tags.Archived]). */
+    suspend fun setArchived(archived: Boolean): String? {
+        val api = api ?: return null
+        val task = state.value.task ?: return null
+        val tags = io.github.marcomow.yuvomi.feature.tags.Archived.tags(task.tags, archived)
+        return try {
+            api.update(taskId, kotlinx.serialization.json.buildJsonObject {
+                put("tags", kotlinx.serialization.json.JsonArray(tags.map { kotlinx.serialization.json.JsonPrimitive(it) }))
+            })
+            load()
+            null
+        } catch (e: ApiProblem) {
+            TaskCompletion.errorKey(e)
+        }
+    }
+
     suspend fun addComment(text: String): String? {
         val api = api ?: return null
         val trimmed = text.trim()

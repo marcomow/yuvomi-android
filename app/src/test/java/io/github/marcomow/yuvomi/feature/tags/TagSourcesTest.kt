@@ -73,21 +73,23 @@ class TagSourcesTest {
             ),
             text,
         )
-        assertEquals(listOf(false, true, true), tasks.map { it.done })
+        assertEquals(listOf(false, true, true), tasks.map { it.finished })
+        assertEquals(listOf(false, false, true), tasks.map { it.archived })
         assertEquals("tasks.statusArchived", tasks[2].subtitle)
         val docs = DocumentsTagSource.items(
             listOf(Document(id = 1, name = "#a now"), Document(id = 2, name = "#a old", status = io.github.marcomow.yuvomi.feature.documents.DocumentRules.STATUS_ARCHIVED)),
         )
-        assertEquals(listOf(false, true), docs.map { it.done })
-        val archive = io.github.marcomow.yuvomi.feature.notes.NoteCategory(9, "Archive", io.github.marcomow.yuvomi.feature.notes.NoteCategory.SCOPE_HOUSEHOLD)
+        assertEquals(listOf(false, true), docs.map { it.archived })
         val notes = NotesTagSource.items(
             listOf(
                 io.github.marcomow.yuvomi.feature.notes.Note(1, "#a kept"),
-                io.github.marcomow.yuvomi.feature.notes.Note(2, "#a gone", categories = listOf(archive)),
+                io.github.marcomow.yuvomi.feature.notes.Note(2, "#a gone", "text\n\n#archived"),
             ),
             text,
         )
-        assertEquals(listOf(false, true), notes.map { it.done })
+        assertEquals(listOf(false, true), notes.map { it.archived })
+        val tagged = TasksTagSource.items(listOf(Task(id = 4, title = "#a", tags = listOf("Archived"))), text).single()
+        assertTrue(tagged.archived && tagged.finished && !tagged.done)
     }
 
     @Test fun `shopping items keep their mirrored tags and lists with a hashtag count too`() {

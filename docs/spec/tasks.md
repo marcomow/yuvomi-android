@@ -242,6 +242,10 @@ Error `reason` values the app maps to messages: `tasks_task_not_found` (404), `t
   Documents access, and "no documents" would be a false statement.
 - **TASKS-R40** Linking, unlinking and uploading documents are tier 3 and offered as
   "Manage in the web app".
+- **TASKS-R41** Archive task / Restore task (task menu) adds or removes the real tag `archived`
+  (TAGS-R15), which everyone sees. The list hides tasks with that tag unless the tag filter asks
+  for `archived`. Upstream's own archive (`archived_at`) is separate and counts as archived in
+  the Tags view.
 
 ## Acceptance criteria
 

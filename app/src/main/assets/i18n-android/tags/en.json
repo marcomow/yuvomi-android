@@ -21,10 +21,15 @@
       "doneHidden_one": "{{count}} completed or archived item hidden",
       "archive": "Archive tag",
       "restore": "Restore tag",
-      "archived": "#{{tag}} archived. It is listed under Archived tags.",
-      "restored": "#{{tag}} is back in the list.",
-      "isArchived": "This tag is archived on this phone. Its items are unchanged.",
-      "archivedSection": "Archived tags ({{count}})"
+      "isArchived": "Everything carrying this tag is completed or archived.",
+      "archivedSection": "Archived tags ({{count}})",
+      "archivedItems": "#{{tag}}: {{count}} items archived.",
+      "archivedItems_one": "#{{tag}}: {{count}} item archived.",
+      "restoredItems": "#{{tag}}: {{count}} items restored.",
+      "restoredItems_one": "#{{tag}}: {{count}} item restored.",
+      "archiveFailed": "{{count}} could not be changed.",
+      "archiveSkipped": "{{count}} in other modules stay as they are.",
+      "reservedHint": "#archived is the household's archive: everything archived carries it, and only here it is never hidden."
     }
   }
 }

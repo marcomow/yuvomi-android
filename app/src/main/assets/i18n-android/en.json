@@ -59,7 +59,11 @@
       "showLater": "Show tasks that start later",
       "startAfterDue": "The start date is after the due date.",
       "timeNeedsDate": "A time needs a due date.",
-      "titleRequired": "Please enter a title."
+      "titleRequired": "Please enter a title.",
+      "archive": "Archive task",
+      "restore": "Restore task",
+      "archived": "Task archived: it now carries the tag archived.",
+      "restored": "Task restored."
     },
     "version": {
       "newer": "This server is newer than the version this app was tested with. Some things may not work.",

@@ -41,19 +41,37 @@ object TagIndex {
         return out
     }
 
-    /** TAGS-R14: completed and archived items only when the member shows them. */
-    fun visible(items: List<TaggedItem>, showDone: Boolean): List<TaggedItem> =
-        if (showDone) items else items.filterNot { it.done }
+    /**
+     * TAGS-R14: completed and archived items only when the member shows them. The page of
+     * `#archived` itself always shows its items: it is where archived things are found.
+     */
+    fun visible(items: List<TaggedItem>, showDone: Boolean, tag: String? = null): List<TaggedItem> =
+        if (showDone || (tag != null && Archived.isTag(tag))) items else items.filterNot { it.finished }
 
     /** How many of [items] carrying [tag] are completed or archived. */
     fun doneCount(items: List<TaggedItem>, tag: String): Int {
         val key = TagKey.of(tag.removePrefix("#"))
-        return items.count { it.done && it.tags.any { t -> TagKey.of(t) == key } }
+        return items.count { it.finished && it.tags.any { t -> TagKey.of(t) == key } }
     }
 
-    /** TAGS-R15: the tags the member archived (by [TagKey]) apart from the rest, each list in [summarize] order. */
-    fun split(summaries: List<TagSummary>, archived: Set<String>): Pair<List<TagSummary>, List<TagSummary>> =
-        summaries.partition { it.key !in archived }
+    /**
+     * TAGS-R15: the archived tags, by [TagKey]: every item carrying the tag is completed or
+     * archived, and at least one is archived. `#archived` itself is never one.
+     */
+    fun archivedTags(items: List<TaggedItem>): Set<String> {
+        val byKey = HashMap<String, MutableList<TaggedItem>>()
+        for (item in items) for (tag in union(item.tags)) byKey.getOrPut(TagKey.of(tag)) { mutableListOf() } += item
+        return byKey.filter { (key, carrying) ->
+            key != TagKey.of(Archived.TAG) && carrying.all { it.finished } && carrying.any { it.archived }
+        }.keys
+    }
+
+    /** TAGS-R15: the list's tags apart from the archived ones, each in [summarize] order; `#archived` leads the archived part. */
+    fun split(summaries: List<TagSummary>, archived: Set<String>): Pair<List<TagSummary>, List<TagSummary>> {
+        val reserved = TagKey.of(Archived.TAG)
+        val (rest, archivedPart) = summaries.partition { it.key !in archived && it.key != reserved }
+        return rest to (archivedPart.sortedBy { if (it.key == reserved) 0 else 1 })
+    }
 
     /** Every tag of [items] with its count, most used first, then by name (upstream's `allTags` order). */
     fun summarize(items: List<TaggedItem>): List<TagSummary> {
@@ -121,14 +139,16 @@ object TagIndex {
         val tags: List<String> = emptyList(),
         val route: String? = null,
         val webPath: String? = null,
+        val done: Boolean = false,
+        val archivedNatively: Boolean = false,
     )
 
     fun encode(items: List<TaggedItem>): String = ApiJson.encodeToString(
         ListSerializer(Stored.serializer()),
-        items.map { Stored(it.moduleId, it.key, it.title, it.subtitle, it.tags.toList(), it.route, it.webPath) },
+        items.map { Stored(it.moduleId, it.key, it.title, it.subtitle, it.tags.toList(), it.route, it.webPath, it.done, it.archivedNatively) },
     )
 
     fun decode(json: String): List<TaggedItem> =
         ApiJson.decodeFromString(ListSerializer(Stored.serializer()), json)
-            .map { TaggedItem(it.moduleId, it.key, it.title, it.subtitle, it.tags.toSet(), it.route, it.webPath) }
+            .map { TaggedItem(it.moduleId, it.key, it.title, it.subtitle, it.tags.toSet(), it.route, it.webPath, it.done, it.archivedNatively) }
 }

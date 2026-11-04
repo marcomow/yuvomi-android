@@ -79,14 +79,16 @@ fun TagsScreen(openTag: (String) -> Unit) {
 
     val settings = shell.container.settings
     val showDone by settings.tagsShowDone.collectAsState(initial = false)
-    val archived by settings.archivedTags.collectAsState(initial = emptySet())
     var archivedOpen by rememberSaveable { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    // TAGS-R14: completed and archived items count only when shown; TAGS-R15: archived tags apart.
+    // TAGS-R14: completed and archived items count only when shown; TAGS-R15: archived tags
+    // (shared, through `#archived`) apart, always listed with all their items.
     val visibleItems = remember(s.items, showDone) { TagIndex.visible(s.items, showDone) }
     val summaries = remember(visibleItems) { TagIndex.summarize(visibleItems) }
-    val (active, archivedTags) = remember(summaries, archived) { TagIndex.split(summaries, archived) }
+    val archived = remember(s.items) { TagIndex.archivedTags(s.items) }
+    val active = remember(summaries, archived) { TagIndex.split(summaries, archived).first }
+    val archivedTags = remember(s.items, archived) { TagIndex.split(TagIndex.summarize(s.items), archived).second }
     val shown = remember(active, query) { TagIndex.filter(active, query) }
     val shownArchived = remember(archivedTags, query) { TagIndex.filter(archivedTags, query) }
     val find = remember(summaries, query) { TagIndex.offersFind(summaries, query) }

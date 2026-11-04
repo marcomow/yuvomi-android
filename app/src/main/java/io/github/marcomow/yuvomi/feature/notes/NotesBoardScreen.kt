@@ -1,5 +1,6 @@
 package io.github.marcomow.yuvomi.feature.notes
 
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
@@ -98,8 +99,8 @@ fun NotesBoardScreen(openNote: (Int) -> Unit, newNote: () -> Unit, manageCategor
     }
 
     val notes = s.shown
-    // NOTES-R31: archived notes stay off the board until the Archive category chip is chosen.
-    val visible = NotesRules.visible(notes, s.filter, NotesRules.archiveCategory(s.categories, store.archiveNames(strings))?.id)
+    // NOTES-R31: archived notes (`#archived`) only in the Archived filter.
+    val visible = NotesRules.visible(notes, s.filter)
 
     Scaffold(
         topBar = {
@@ -249,7 +250,7 @@ private fun SearchField(filter: BoardFilter, onFilter: (BoardFilter) -> Unit) {
 private fun FilterRow(notes: List<Note>, categories: List<NoteCategory>, filter: BoardFilter, onFilter: (BoardFilter) -> Unit) {
     val creators = NotesRules.creators(notes)
     val chips = NotesRules.filterCategories(notes, categories, filter.categoryIds)
-    if (creators.size < 2 && chips.isEmpty()) return
+    if (creators.size < 2 && chips.isEmpty() && notes.none(NotesRules::isArchived) && !filter.archived) return
     Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
         if (creators.size >= 2) {
             Row(
@@ -288,6 +289,16 @@ private fun FilterRow(notes: List<Note>, categories: List<NoteCategory>, filter:
                     )
                 }
             }
+        }
+        // NOTES-R31: the archived notes (`#archived`) in place of the others.
+        val archivedCount = notes.count(NotesRules::isArchived)
+        if (archivedCount > 0 || filter.archived) {
+            FilterChip(
+                selected = filter.archived,
+                onClick = { onFilter(filter.copy(archived = !filter.archived)) },
+                label = { Text(t("android.notes.archivedFilter", "count" to archivedCount)) },
+                leadingIcon = { Icon(androidx.compose.material.icons.Icons.Outlined.Inventory2, null, Modifier.size(16.dp)) },
+            )
         }
     }
 }

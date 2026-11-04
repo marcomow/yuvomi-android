@@ -140,6 +140,18 @@ fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, addSubt
                             if (!task.isDone && !shell.session.soloHousehold && task.parentTaskId == null) {
                                 DropdownMenuItem(text = { Text(t("tasks.doneByMenuItem")) }, onClick = { menu = false; pickDoer = true })
                             }
+                            // TASKS-R41: archived for everyone through the shared tag `archived`.
+                            val archived = io.github.marcomow.yuvomi.feature.tags.Archived.inTags(task.tags)
+                            DropdownMenuItem(
+                                text = { Text(t(if (archived) "android.tasks.restore" else "android.tasks.archive")) },
+                                onClick = {
+                                    menu = false
+                                    scope.launch {
+                                        val error = vm.setArchived(!archived)
+                                        shell.notify(strings.t(error ?: if (archived) "android.tasks.restored" else "android.tasks.archived"))
+                                    }
+                                },
+                            )
                             DropdownMenuItem(text = { Text(t("android.browser.openWebApp")) }, onClick = { menu = false; shell.openWeb("/tasks") })
                         }
                     }

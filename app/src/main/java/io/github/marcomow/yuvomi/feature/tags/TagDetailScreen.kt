@@ -83,12 +83,12 @@ fun TagDetailScreen(tag: String, back: () -> Unit, retag: (String) -> Unit) {
 
     val settings = shell.container.settings
     val showDone by settings.tagsShowDone.collectAsState(initial = false)
-    val archivedTags by settings.archivedTags.collectAsState(initial = emptySet())
     val tagKey = remember(tag) { TagKey.of(tag.removePrefix("#")) }
-    val isArchived = tagKey in archivedTags
+    val reserved = Archived.isTag(tag)
+    val isArchived = remember(s.items, tagKey) { tagKey in TagIndex.archivedTags(s.items) }
     // TAGS-R14: completed and archived items only when shown, with a count of what is hidden.
-    val groups = remember(s.items, tag, showDone) { TagIndex.groups(TagIndex.visible(s.items, showDone), tag) }
-    val hiddenDone = remember(s.items, tag, showDone) { if (showDone) 0 else TagIndex.doneCount(s.items, tag) }
+    val groups = remember(s.items, tag, showDone) { TagIndex.groups(TagIndex.visible(s.items, showDone, tag), tag) }
+    val hiddenDone = remember(s.items, tag, showDone) { if (showDone || reserved) 0 else TagIndex.doneCount(s.items, tag) }
     val label = remember(s.items, tag) { TagIndex.label(s.items, tag) }
     val taskTag = TaskTagRules.find(s.taskTags, tag)
     val canManage = taskTag != null && shell.session.access("tasks") == "write" && !s.offline
@@ -149,18 +149,22 @@ fun TagDetailScreen(tag: String, back: () -> Unit, retag: (String) -> Unit) {
                 actions = {
                     IconButton(onClick = { menu = true }) { Icon(Icons.Outlined.MoreVert, t("common.moreActionsNamed", "name" to label)) }
                     DropdownMenu(expanded = menu, onDismissRequest = { menu = false }) {
-                        // TAGS-R15: archive any tag (kept on this phone); it moves to "Archived tags".
-                        DropdownMenuItem(
-                            text = { Text(t(if (isArchived) "android.tags.restore" else "android.tags.archive")) },
-                            leadingIcon = { Icon(if (isArchived) Icons.Outlined.Unarchive else Icons.Outlined.Archive, null) },
-                            onClick = {
-                                menu = false
-                                scope.launch {
-                                    settings.setTagArchived(tagKey, !isArchived)
-                                    shell.notify(strings.t(if (isArchived) "android.tags.restored" else "android.tags.archived", "tag" to label))
-                                }
-                            },
-                        )
+                        // TAGS-R16: archive a tag = archive its tasks, notes and shopping items with `#archived`.
+                        if (!reserved && !s.offline) {
+                            DropdownMenuItem(
+                                text = { Text(t(if (isArchived) "android.tags.restore" else "android.tags.archive")) },
+                                leadingIcon = { Icon(if (isArchived) Icons.Outlined.Unarchive else Icons.Outlined.Archive, null) },
+                                onClick = {
+                                    menu = false
+                                    scope.launch {
+                                        busy = true
+                                        val result = store.archiveTag(shell, tag, archive = !isArchived)
+                                        busy = false
+                                        shell.notify(TagArchiving.message(result, label, archive = !isArchived, strings))
+                                    }
+                                },
+                            )
+                        }
                     if (canManage) {
                             DropdownMenuItem(
                                 text = { Text(t("tasks.tagRenameLabel", "tag" to taskTag!!.tag)) },
@@ -196,8 +200,13 @@ fun TagDetailScreen(tag: String, back: () -> Unit, retag: (String) -> Unit) {
                                         modifier = Modifier.padding(horizontal = 16.dp),
                                     )
                                 }
-                                if (isArchived) {
-                                    Text(t("android.tags.isArchived"), style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary, modifier = Modifier.padding(horizontal = 16.dp))
+                                if (isArchived || reserved) {
+                                    Text(
+                                        t(if (reserved) "android.tags.reservedHint" else "android.tags.isArchived"),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = Yuvomi.colors.textSecondary,
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                    )
                                 }
                             }
                         }
