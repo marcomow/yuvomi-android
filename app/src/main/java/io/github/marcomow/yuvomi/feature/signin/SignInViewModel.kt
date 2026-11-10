@@ -128,7 +128,9 @@ class SignInViewModel(
             } catch (e: ApiProblem.Http) {
                 _state.update {
                     when {
-                        e.status == 401 && e.serverMessage?.startsWith("No pending sign-in") == true -> it.copy(
+                        // SIGNIN-R19: the reason since 2.87.0, the English text before it.
+                        e.reason == "two_factor_no_pending_sign_in" ||
+                            e.status == 401 && e.serverMessage?.startsWith("No pending sign-in") == true -> it.copy(
                             busy = false, step = Step.PASSWORD, password = "", messageKey = "login.twoFactorExpired",
                         )
                         e.status == 401 -> it.copy(busy = false, code = "", messageKey = "login.twoFactorInvalid")

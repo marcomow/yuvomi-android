@@ -64,6 +64,10 @@ data class LedgerEntry(
     @SerialName("user_name") val userName: String? = null,
     @SerialName("user_color") val userColor: String? = null,
     @SerialName("user_avatar") val userAvatar: String? = null,
+    /** Late completion decay (upstream 2.86.0, REW-R26): days past due at booking, or null. */
+    @SerialName("decay_days") val decayDays: Int? = null,
+    /** The point value before the reduction; null when nothing was reduced. */
+    @SerialName("base_points") val basePoints: Int? = null,
 )
 
 /** A request: a reward (`kind = reward`) or pocket money (`withdrawal`, `deposit`). */

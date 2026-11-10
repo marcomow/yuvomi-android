@@ -28,6 +28,8 @@ class PantryApi(private val client: YuvomiClient) {
         val expiresOn: String?,
         val minQuantity: Double?,
         val notes: String?,
+        /** Upstream 2.85.0: `min_quantity` writes the product's minimum, so it goes only when changed. */
+        val sendMinQuantity: Boolean = true,
     ) {
         fun toJson(): JsonObject = buildJsonObject {
             put("name", name)
@@ -36,7 +38,7 @@ class PantryApi(private val client: YuvomiClient) {
             put("location_id", locationId?.let(::JsonPrimitive) ?: JsonNull)
             put("category", category)
             put("expires_on", expiresOn?.let(::JsonPrimitive) ?: JsonNull)
-            put("min_quantity", minQuantity?.let(::JsonPrimitive) ?: JsonNull)
+            if (sendMinQuantity) put("min_quantity", minQuantity?.let(::JsonPrimitive) ?: JsonNull)
             put("notes", notes?.let(::JsonPrimitive) ?: JsonNull)
         }
     }
@@ -44,7 +46,8 @@ class PantryApi(private val client: YuvomiClient) {
     /** One entry of an import: a batch with its shortfall text, or a product without batches. */
     sealed interface TransferEntry {
         data class Batch(val itemId: Int, val quantity: String?) : TransferEntry
-        data class Product(val productId: Int) : TransferEntry
+        /** `{ pantry_product_id, quantity? }`; the quantity is display text (upstream 2.85.0). */
+        data class Product(val productId: Int, val quantity: String? = null) : TransferEntry
     }
 
     suspend fun stock(): JsonElement = kitchen.pantry()
@@ -102,7 +105,10 @@ class PantryApi(private val client: YuvomiClient) {
                                 put("pantry_item_id", entry.itemId)
                                 put("quantity", entry.quantity?.let(::JsonPrimitive) ?: JsonNull)
                             }
-                            is TransferEntry.Product -> buildJsonObject { put("pantry_product_id", entry.productId) }
+                            is TransferEntry.Product -> buildJsonObject {
+                                put("pantry_product_id", entry.productId)
+                                entry.quantity?.let { put("quantity", it) }
+                            }
                         },
                     )
                 }

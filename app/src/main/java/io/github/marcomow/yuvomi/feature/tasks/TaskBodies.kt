@@ -46,7 +46,7 @@ object TaskBodies {
         if (new.dueDate != old.dueDate) put("due_date", new.dueDate?.toString().json())
         if (new.dueTime != old.dueTime) put("due_time", new.dueTime?.toString().json())
         if (new.tags != old.tags) put("tags", JsonArray(new.tags.map(::JsonPrimitive)))
-        if (!solo && new.assignees != old.assignees) put("assigned_to", JsonArray(new.assignees.sorted().map(::JsonPrimitive)))
+        if (!solo && new.assignees != old.assignees) put("assigned_to", JsonArray(assigneeOrder(new.assignees, task).map(::JsonPrimitive)))
         if (!solo && new.visibility != old.visibility) put("visibility", JsonPrimitive(new.visibility))
         if (new.locked != old.locked) put("locked", JsonPrimitive(new.locked))
         if (new.points != old.points && new.points.toIntOrNull() != null) put("points", JsonPrimitive(new.points.toInt()))
@@ -57,6 +57,16 @@ object TaskBodies {
             put("recurrence_from_completion", JsonPrimitive(rule != null && new.fromCompletion))
         }
     })
+
+    /**
+     * TASKS-R44: the first id of `assigned_to` becomes the primary assignee, and
+     * `assigned_users` lists the primary first (upstream 2.86.0, #2569). An edit of the people
+     * keeps the current primary in front while they stay assigned; the rest follow by id.
+     */
+    internal fun assigneeOrder(ids: Set<Int>, task: Task): List<Int> {
+        val primary = task.assignedUsers.firstOrNull()?.id?.takeIf { it in ids }
+        return listOfNotNull(primary) + ids.filter { it != primary }.sorted()
+    }
 
     private fun String?.json() = if (this == null) JsonNull else JsonPrimitive(this)
 }

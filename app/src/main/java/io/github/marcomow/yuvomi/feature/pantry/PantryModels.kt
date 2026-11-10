@@ -15,6 +15,10 @@ data class PantryItem(
     @SerialName("location_icon") val locationIcon: String? = null,
     val category: String? = null,
     @SerialName("expires_on") val expiresOn: String? = null,
+    /**
+     * Deprecated upstream in 2.85.0 (removal on or after 2027-03-01): it returns the minimum of
+     * the item's product, and writing it sets the product's minimum. Read [PantryProduct.minQuantity].
+     */
     @SerialName("min_quantity") val minQuantity: Double? = null,
     val notes: String? = null,
     @SerialName("product_id") val productId: Int? = null,
@@ -28,6 +32,9 @@ data class PantryProduct(
     val unit: String? = null,
     val category: String? = null,
     @SerialName("batch_count") val batchCount: Int = 0,
+    /** The product's minimum (upstream 2.85.0, part 3 of #1448; PANTRY-R23). */
+    @SerialName("min_quantity") val minQuantity: Double? = null,
+    @SerialName("total_quantity") val totalQuantity: Double? = null,
 )
 
 @Serializable

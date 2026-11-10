@@ -76,6 +76,8 @@ data class CalendarEvent(
     @SerialName("can_override_occurrence") val canOverrideOccurrence: Boolean = false,
     @SerialName("can_detach_occurrence") val canDetachOccurrence: Boolean = false,
     @SerialName("reminder_owner_id") val reminderOwnerId: Int? = null,
+    /** `TENTATIVE`, `CONFIRMED` or `CANCELLED` from an ICS, CalDAV or iCloud source (upstream 2.86.0, CAL-R30). */
+    @SerialName("provider_status") val providerStatus: String? = null,
     @SerialName("reminder_anchor_start") val reminderAnchorStart: String? = null,
 ) {
     val isBirthday: Boolean get() = birthdayName != null

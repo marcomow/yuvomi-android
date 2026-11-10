@@ -99,6 +99,16 @@ class BudgetCategoriesViewModel(
                 changed()
                 if (success != null) notify(strings.t(success))
             } catch (e: ApiProblem) {
+                val reason = (e as? ApiProblem.Http)?.reason
+                if (reason == "budget_category_not_found" || reason == "budget_subcategory_not_found") {
+                    // Someone else deleted it meanwhile: show today's list. A delete of it is done.
+                    runCatching { api.categories(strings.locale) }.getOrNull()?.let { c -> _state.update { it.copy(categories = c) } }
+                    changed()
+                    if (success == "category.deleted") {
+                        notify(strings.t(success))
+                        return@launch
+                    }
+                }
                 notify(BudgetText.categoryError(e, strings))
             } finally {
                 _state.update { it.copy(busy = false) }

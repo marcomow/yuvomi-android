@@ -131,6 +131,8 @@ internal fun BatchRow(
 ) {
     val strings = LocalStrings.current
     val status = PantryStatus.of(item, today)
+    // PANTRY-R24: low and out are the product's, and only on the row that stands for it.
+    val stock = opts.stock
     val place = PantryText.place(item, strings)
     val title = when {
         !opts.batch -> item.name
@@ -167,16 +169,13 @@ internal fun BatchRow(
                     PantryText.expiry(item, status, today, strings)?.let {
                         Badge(it, if (status.expiry == PantryStatus.Expiry.EXPIRED) Yuvomi.colors.danger else Yuvomi.colors.warning)
                     }
-                    when {
-                        status.out -> Badge(strings.t("pantry.badgeOut"), Yuvomi.colors.danger)
-                        status.low -> Badge(strings.t("pantry.badgeLow"), Yuvomi.colors.warning)
-                    }
+                    StockBadge(stock)
                     if (where.isNotEmpty()) {
                         Text(where.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
                     }
                 }
             }
-            if ((status.out || status.low) && canShop) {
+            if (stock != null && (stock.out || stock.low) && canShop) {
                 IconButton(onClick = onCart) {
                     Icon(Icons.Outlined.AddShoppingCart, contentDescription = "${strings.t("common.toShoppingList")}: $controlName")
                 }
@@ -197,14 +196,21 @@ internal fun BatchRow(
 /** A product with several batches (`productEl`): total, most urgent expiry, where; opens its batches. */
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun ProductRow(product: PantryView.ProductEntry, today: LocalDate, expanded: Boolean, onToggle: () -> Unit) {
+internal fun ProductRow(
+    product: PantryView.ProductEntry,
+    today: LocalDate,
+    expanded: Boolean,
+    canShop: Boolean = false,
+    onCart: () -> Unit = {},
+    onToggle: () -> Unit,
+) {
     val strings = LocalStrings.current
     val urgent = PantryView.mostUrgent(product.batches, today)
     Row(
         Modifier
             .fillMaxWidth()
             .clickable(onClick = onToggle)
-            .padding(horizontal = 16.dp, vertical = 10.dp),
+            .padding(start = 16.dp, end = 8.dp, top = 10.dp, bottom = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
@@ -217,7 +223,14 @@ internal fun ProductRow(product: PantryView.ProductEntry, today: LocalDate, expa
                         Badge(it, if (status.expiry == PantryStatus.Expiry.EXPIRED) Yuvomi.colors.danger else Yuvomi.colors.warning)
                     }
                 }
+                StockBadge(product.stock)
                 Text(PantryText.where(product.batches, strings), style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
+            }
+        }
+        // PANTRY-R26: the product's cart hands it over with the shortfall over all batches.
+        if (canShop && product.id != null && (product.stock.out || product.stock.low)) {
+            IconButton(onClick = onCart) {
+                Icon(Icons.Outlined.AddShoppingCart, contentDescription = "${strings.t("common.toShoppingList")}: ${product.name}")
             }
         }
         Icon(if (expanded) Icons.Outlined.ExpandLess else Icons.Outlined.ExpandMore, contentDescription = null)
@@ -247,12 +260,25 @@ internal fun EmptyProductRow(
         ) {
             Column(Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(2.dp)) {
                 Text(product.name, style = MaterialTheme.typography.bodyLarge, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                // PANTRY-R27: out of stock only with a minimum; without one it is listed plainly.
+                val out = product.stock.out
                 FlowRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                    Text(PantryUnits.quantityLabel(0.0, product.unit, strings), style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.danger)
-                    Badge(strings.t("pantry.badgeOut"), Yuvomi.colors.danger)
+                    Text(
+                        PantryUnits.quantityLabel(0.0, product.unit, strings),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (out) Yuvomi.colors.danger else Yuvomi.colors.textSecondary,
+                    )
+                    if (out) Badge(strings.t("pantry.badgeOut"), Yuvomi.colors.danger)
+                    if (PantryStatus.hasMinimum(product.minQuantity)) {
+                        Text(
+                            strings.t("pantry.minimumShort", "quantity" to PantryUnits.quantityLabel(product.minQuantity!!, product.unit, strings)),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Yuvomi.colors.textSecondary,
+                        )
+                    }
                 }
             }
-            if (product.id != null && canShop) {
+            if (product.id != null && canShop && product.stock.out) {
                 IconButton(onClick = onCart) {
                     Icon(Icons.Outlined.AddShoppingCart, contentDescription = "${strings.t("common.toShoppingList")}: ${product.name}")
                 }
@@ -302,5 +328,16 @@ internal fun PantryDetailsSheet(item: PantryItem, locations: List<PantryLocation
             row(t("pantry.notesLabel"), item.notes.orEmpty())
             Box(Modifier.size(8.dp))
         }
+    }
+}
+
+/** `stockBadge`: "Out of stock" or "Running low" of a product's stock, or nothing. */
+@Composable
+private fun StockBadge(stock: PantryStatus.Stock?) {
+    val strings = LocalStrings.current
+    when {
+        stock == null -> Unit
+        stock.out -> Badge(strings.t("pantry.badgeOut"), Yuvomi.colors.danger)
+        stock.low -> Badge(strings.t("pantry.badgeLow"), Yuvomi.colors.warning)
     }
 }

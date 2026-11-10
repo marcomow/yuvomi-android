@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import io.github.marcomow.yuvomi.core.design.Yuvomi
@@ -123,8 +124,26 @@ internal fun LedgerRow(entry: LedgerEntry, showName: Boolean = true) {
     ListItem(
         leadingContent = { EntryIcon(ledgerIcon(entry.type), entry.delta > 0) },
         headlineContent = { Text(RewardsRules.ledgerReason(entry, strings)) },
-        supportingContent = { Text(listOfNotNull(entry.userName?.takeIf { showName }, date.ifEmpty { null }).joinToString(" · ")) },
-        trailingContent = { DeltaText(RewardsRules.delta(entry.delta, strings), entry.delta > 0) },
+        supportingContent = {
+            Text(listOfNotNull(entry.userName?.takeIf { showName }, date.ifEmpty { null }, RewardsRules.decayNote(entry, strings)).joinToString(" · "))
+        },
+        trailingContent = {
+            // REW-R26: a reduced earning shows its full value struck through, said as "instead of 5".
+            val base = RewardsRules.decayBase(entry)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (base != null) {
+                    val insteadOf = strings.t("rewards.ledgerLateDecayInsteadOf", "count" to base)
+                    Text(
+                        RewardsRules.points(base, strings),
+                        style = MaterialTheme.typography.bodySmall,
+                        textDecoration = TextDecoration.LineThrough,
+                        color = Yuvomi.colors.textSecondary,
+                        modifier = Modifier.padding(end = 6.dp).semantics { contentDescription = insteadOf },
+                    )
+                }
+                DeltaText(RewardsRules.delta(entry.delta, strings), entry.delta > 0)
+            }
+        },
     )
 }
 

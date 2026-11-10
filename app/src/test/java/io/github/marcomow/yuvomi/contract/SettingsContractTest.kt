@@ -331,7 +331,8 @@ class SettingsContractTest : ContractTestBase() {
         assertTrue("keep" in webdav && "configured" in webdav)
         assertEquals(webdav.bool("enabled"), alex.data(SettingsOperation.WEBDAV_CONFIG_UPDATE, body = buildJsonObject { put("enabled", webdav.bool("enabled")) }).obj().bool("enabled"))
         expectHttp(400) { alex.data(SettingsOperation.WEBDAV_CONFIG_UPDATE, body = buildJsonObject { put("url", "ftp://nope") }) }
-        expectHttp(400) { alex.data(SettingsOperation.WEBDAV_TEST, body = buildJsonObject { put("url", "https://webdav.example.invalid/") ; put("username", "x"); put("password", "y") }, idempotencyKey = YuvomiClient.newIdempotencyKey()) }
+        // Since 2.87.0 a server that cannot be reached answers 502 `remote_unreachable`, never its own text.
+        expectHttp(502, "remote_unreachable") { alex.data(SettingsOperation.WEBDAV_TEST, body = buildJsonObject { put("url", "https://webdav.example.invalid/") ; put("username", "x"); put("password", "y") }, idempotencyKey = YuvomiClient.newIdempotencyKey()) }
         if (!webdav.bool("configured")) {
             // Unconfigured, upstream's uploadBackup skips the upload and the route still answers
             // with the local snapshot (server/services/webdav-backup.js); 500 only when no local

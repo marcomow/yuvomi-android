@@ -1,6 +1,6 @@
 # Spec: Overview
 
-Status: ready for implementation · Upstream checked: 2.84.0 · Decisions: ADR 0002, 0006, 0007,
+Status: ready for implementation · Upstream checked: 2.87.0 · Decisions: ADR 0002, 0006, 0007,
 0010
 
 ## Purpose
@@ -151,6 +151,11 @@ tile's saved `options`; translating those is a follow-up (OVERVIEW-R15).
   left the tile is not there at all (`countdownAvailable`); a missing or malformed `countdowns`
   is the generic tile (OVERVIEW-R12).
 
+- **OVERVIEW-R18** The phone arrangement (2.85.0, #2109): when `dashboard_widgets_phone` in
+  `/preferences` is a list, the overview takes its tile order and visibility from it, while
+  size and options follow `dashboard_widgets` (`mergePhoneDisplayCfg`); `null` follows the
+  desktop arrangement. Arranging the phone tiles stays in the web app.
+
 ### Loading, refresh, offline
 
 - **OVERVIEW-R13** Opening the screen shows the cached overview at once when there is one, then
@@ -181,6 +186,7 @@ tile's saved `options`; translating those is a follow-up (OVERVIEW-R15).
 | OVERVIEW-A12 | Given `countdowns` with an event, a task and a document about Emma then "Key dates" shows them with the count phrases and "… · Emma", and "+N more" against `countdownTotal`; with Documents switched off the document row is gone; with no row left the tile is gone. | unit + ui |
 | OVERVIEW-A13 | Given a document row in "Key dates" when it is tapped then the documents viewer route `documents?open=<id>` opens. | ui |
 | OVERVIEW-A10 | Given the calendar tile when an appointment is tapped then the browser opens `<server>/calendar?open=<id>`. | ui |
+| OVERVIEW-A14 | Given a phone arrangement with the calendar first and shopping hidden then the overview orders and hides tiles by it, with the desktop's sizes; without one it follows the desktop. | unit |
 
 ## Strings
 

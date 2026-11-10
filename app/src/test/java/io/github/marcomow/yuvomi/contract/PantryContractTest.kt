@@ -161,10 +161,15 @@ class PantryContractTest : ContractTestBase() {
             api.undoTransfer(first.addedIds)
             assertEquals(1, api.toShopping(list.id, listOf(entry), YuvomiClient.newIdempotencyKey()).also { api.undoTransfer(it.addedIds) }.added)
 
-            // A product without batches goes over by its id.
+            // PANTRY-A23: the minimum and the total belong to the product (upstream 2.85.0).
             val productId = batch.productId!!
+            val listed = PantryApi.decodeStock(api.stock()).products.first { it.id == productId }
+            assertEquals(3.0, listed.minQuantity!!, 0.0)
+            assertEquals(1.0, listed.totalQuantity!!, 0.0)
+
+            // A product without batches goes over by its id, with the shortfall as display text.
             api.delete(batch.id)
-            val product = api.toShopping(list.id, listOf(TransferEntry.Product(productId)), YuvomiClient.newIdempotencyKey())
+            val product = api.toShopping(list.id, listOf(TransferEntry.Product(productId, "3 cans")), YuvomiClient.newIdempotencyKey())
             assertEquals(1, product.added)
             api.undoTransfer(product.addedIds)
             api.deleteProduct(productId)

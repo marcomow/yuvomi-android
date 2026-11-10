@@ -82,14 +82,21 @@ fun PantryScreen(vm: PantryViewModel, openItem: (Int?) -> Unit, openLocations: (
     }
 
     val placeLabel = { name: String -> PantryText.locationLabel(name, strings) }
-    val chips = PantryView.chips(s.items, s.stock.locations, s.filter, s.today)
+    val chips = PantryView.chips(s.items, s.stock.locations, s.filter, s.today, s.products)
     val filter = chips.filter
     LaunchedEffect(filter) { if (filter != s.filter) vm.setFilter(filter) }
     val input = PantryView.Input(s.items, s.products, s.stock.locations, s.stock.categories, s.query, filter, s.today, placeLabel)
+    val stock = PantryView.stock(input)
     val visible = PantryView.visibleItems(input)
-    val sections = if (filter == PantryView.ALL) PantryView.sections(input, visible) else null
+    // PANTRY-R25: "Running low" lists products, as one flat group without a heading.
+    val low = if (filter == "low") PantryView.lowProducts(input) else emptyList()
+    val sections = when (filter) {
+        PantryView.ALL -> PantryView.sections(input, visible)
+        "low" -> listOf(PantryView.Section("", low))
+        else -> null
+    }
     val shown = sections?.sumOf { it.products.size } ?: visible.size
-    val showBulk = filter == "low" && s.items.isNotEmpty() && visible.isNotEmpty() && canShop
+    val showBulk = low.isNotEmpty() && canShop
 
     val open: (PantryItem) -> Unit = { item -> if (editable) openItem(item.id) else details = item }
 
@@ -115,8 +122,8 @@ fun PantryScreen(vm: PantryViewModel, openItem: (Int?) -> Unit, openLocations: (
             if (showBulk) {
                 Surface(tonalElevation = 3.dp, modifier = Modifier.fillMaxWidth()) {
                     Row(Modifier.padding(horizontal = 16.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                        Text(t("pantry.bulkPillLabel", "count" to visible.size), modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
-                        Button(onClick = { vm.cartAll(visible) }, enabled = !s.transferring) { Text(t("pantry.toShoppingAll")) }
+                        Text(t("pantry.bulkPillLabel", "count" to low.size), modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyMedium)
+                        Button(onClick = { vm.cartProducts(low) }, enabled = !s.transferring) { Text(t("pantry.toShoppingAll")) }
                     }
                 }
             }
@@ -157,8 +164,10 @@ fun PantryScreen(vm: PantryViewModel, openItem: (Int?) -> Unit, openLocations: (
                                 NoResults(s.query, filter, input) { vm.resetSearch() }
                             }
                             sections != null -> sections.forEach { section ->
-                                item(key = "s-${section.category}") {
-                                    SectionHeader(PantryText.categoryLabel(section.category, strings), section.products.size)
+                                if (filter == PantryView.ALL) {
+                                    item(key = "s-${section.category}") {
+                                        SectionHeader(PantryText.categoryLabel(section.category, strings), section.products.size)
+                                    }
                                 }
                                 section.products.forEach { product ->
                                     productItems(product, s, editable, canShop, open, vm)
@@ -169,7 +178,7 @@ fun PantryScreen(vm: PantryViewModel, openItem: (Int?) -> Unit, openLocations: (
                                 items(PantryView.flatItems(visible, filter), key = { "f-${it.id}" }) { item ->
                                     BatchRow(
                                         item = item,
-                                        opts = PantryView.flatRowOptions(item, byProduct),
+                                        opts = PantryView.flatRowOptions(item, byProduct, stock),
                                         today = s.today,
                                         underPlaceChip = PantryView.placeFilterId(filter) != null,
                                         editable = editable,
@@ -228,7 +237,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.productItems(
                 product = product,
                 editable = editable,
                 canShop = canShop,
-                onCart = { product.id?.let(vm::cartProduct) },
+                onCart = { vm.cartProduct(product) },
                 onDelete = { product.id?.let(vm::deleteProduct) },
             )
         }
@@ -237,7 +246,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.productItems(
             item(key = "b-${item.id}") {
                 BatchRow(
                     item = item,
-                    opts = PantryView.RowOptions(batch = false, byDate = false, total = null),
+                    opts = PantryView.RowOptions(batch = false, byDate = false, total = null, stock = product.stock),
                     today = s.today,
                     underPlaceChip = false,
                     editable = editable,
@@ -252,7 +261,7 @@ private fun androidx.compose.foundation.lazy.LazyListScope.productItems(
         else -> {
             val expanded = product.key in s.expanded || product.openForSearch
             item(key = "p-${product.key}") {
-                ProductRow(product, s.today, expanded) { vm.toggleProduct(product.key) }
+                ProductRow(product, s.today, expanded, canShop, onCart = { vm.cartProduct(product) }) { vm.toggleProduct(product.key) }
             }
             if (expanded) {
                 val total = PantryView.total(product.batches)

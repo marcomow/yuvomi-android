@@ -1,6 +1,6 @@
 # Spec: Contacts
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/contacts/` (`ContactsRules`, `VCard` and
 `BirthField` are the pure ports; `ContactsViewModel` the list, `ContactDetailViewModel` the read
@@ -135,6 +135,9 @@ the integrator moves them. `GET /preferences` (core) gives the household region 
   the limit sentences name the pinned server's limits, because the client keeps no `params`.
 - **CONT-R21** `ContactsTagSource`: a `#hashtag` in a contact's name or notes is a tag; each tagged
   contact opens its read view.
+
+- **CONT-R22** A category deleted meanwhile (2.86.0, `contacts_category_not_found`) reads
+  `category.errorGone` and reloads the manager; deleting one that is already gone counts as done.
 
 ## Acceptance criteria
 

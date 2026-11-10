@@ -384,6 +384,8 @@ object ContactsRules {
             "category_in_use" -> strings.t("category.errorInUse", "count" to (http.serverMessage?.let { Regex("by (\\d+) contact").find(it)?.groupValues?.get(1)?.toIntOrNull() } ?: 0))
             "category_last" -> strings.t("category.errorLast")
             "category_exists" -> strings.t("category.errorExists")
+            // CONTACTS: upstream 2.86.0 names a category someone else deleted meanwhile.
+            "contacts_category_not_found" -> strings.t("category.errorGone")
             else -> errorSentence(e, strings)
         }
     }

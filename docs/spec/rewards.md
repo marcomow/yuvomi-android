@@ -1,6 +1,6 @@
 # Spec: Rewards
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/rewards/` (`RewardsRules` and
 `RewardsMoney` are the pure ports; `RewardsViewModel` the two tabs and every form,
@@ -165,6 +165,12 @@ requirement says so ("Differs:").
 - **REW-R25** Tags view (`RewardsTagSource`): every reward of the catalogue the member sees whose
   name or description carries a `#hashtag`; it opens the catalogue tab.
 
+- **REW-R26** Late completion decay (2.86.0): a ledger row with `decay_days` above 0 adds
+  `rewards.ledgerLateDecayNote` ("2 days late") to its meta line and shows `base_points` struck
+  through before the booked points, announced as `rewards.ledgerLateDecayInsteadOf`.
+- **REW-R27** Settings → Rewards offers `tasks_late_decay_enabled` (admins, off by default,
+  `settings.rewardsLateDecayLabel` and `Hint`) on servers from 2.86.0 on.
+
 ## Acceptance criteria
 
 | ID | Criterion | Test |
@@ -181,4 +187,5 @@ requirement says so ("Differs:").
 | REW-A10 | Redeeming sends `{ catalog_id, user_id, note }` with an idempotency key and refuses too few points | `RewardsScreenTest` |
 | REW-A11 | The history filters by person | `RewardsScreenTest` |
 | REW-A12 | Rewards with hashtags become tagged items that open the catalogue | `RewardsLogicTest` |
+| REW-A13 | A reduced earning names its days late and its full value; other rows are unchanged | `RewardsLogicTest` |
 | REW-C1–C9 | Every operation against the real server | `RewardsContractTest` |

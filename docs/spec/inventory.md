@@ -1,6 +1,6 @@
 # Spec: Inventory
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/inventory/` (`InventoryRules` is the pure
 port; `InventoryViewModel` the list, `ItemDetailViewModel` the read view, `ItemEditorViewModel`

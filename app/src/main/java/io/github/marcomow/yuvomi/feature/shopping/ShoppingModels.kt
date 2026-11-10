@@ -45,6 +45,15 @@ data class ShoppingCategory(
 @Serializable
 data class ShoppingStore(val id: Int, val name: String = "")
 
+/** One recorded purchase of `GET /shopping/price-history` (upstream 2.86.0, part 1 of #1003). */
+@Serializable
+data class Purchase(
+    @SerialName("item_name") val itemName: String = "",
+    @SerialName("price_cents") val priceCents: Long? = null,
+    @SerialName("store_name") val storeName: String? = null,
+    @SerialName("purchased_at") val purchasedAt: String? = null,
+)
+
 @Serializable
 data class Suggestion(val name: String = "", val category: String? = null, val quantity: String? = null)
 

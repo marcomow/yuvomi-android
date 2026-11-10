@@ -131,6 +131,15 @@ fun RewardsSection(ctx: SectionContext) {
             ctx.save("settings.rewardsSaved", buildJsonObject { put("rewards_require_approval", it) })
         }
     }
+    // REW-R27: late completion decay, opt-in, offered from the release that has it.
+    val version = io.github.marcomow.yuvomi.feature.shell.LocalShell.current.session.serverVersion
+    if ((io.github.marcomow.yuvomi.core.session.VersionGate.compare(version, io.github.marcomow.yuvomi.feature.rewards.RewardsRules.LATE_DECAY_SINCE) ?: 0) >= 0) {
+        SettingsGroup(footer = t("settings.rewardsLateDecayHint")) {
+            SwitchRow(t("settings.rewardsLateDecayLabel"), p.bool("tasks_late_decay_enabled", false), enabled = ctx.editable) {
+                ctx.save("settings.rewardsSaved", buildJsonObject { put("tasks_late_decay_enabled", it) })
+            }
+        }
+    }
     SettingsGroup(footer = t(if (persisted > 0) "settings.rewardsDefaultPointsHint" else "settings.rewardsDefaultPointsOffHint")) {
         GroupBody {
             Field(t("settings.rewardsDefaultPointsLabel"), text, { text = it.filter(Char::isDigit).take(5) }, error, enabled = ctx.editable, keyboard = KeyboardType.Number)

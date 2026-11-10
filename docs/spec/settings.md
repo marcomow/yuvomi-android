@@ -1,6 +1,6 @@
 # Spec: Settings
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0005, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0005, 0006, 0007, 0011, 0015
 
 ## Purpose
 
@@ -185,6 +185,12 @@ Not under `/settings` but only called by settings sheets (other builders may als
 - **SET-R78** Errors map through `SettingsErrors` (`knownKey` of `friendly-error.js`); the
   server's English text is never shown, except a channel's or WebDAV's recorded `lastError`,
   which the web app shows too. ✅
+
+- **SET-R79** Family dialogs read upstream's member reasons (2.86.0): `members_username_taken`
+  and `members_username_invalid` at the username field, `members_member_not_found` closes the
+  dialog, says so and reloads the list. A bare 409 from an older server keeps the app's
+  "username taken". Every other new reason (API tokens, two-factor, SSO, displays) reads the
+  shared table through SET-R78.
 
 ## Acceptance criteria
 

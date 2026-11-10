@@ -25,6 +25,8 @@ object NoteErrors {
         SELECTED_CATEGORY_GONE to "notes.errorSelectedCategoryGone",
         "category_exists" to "category.errorExists",
         "category_last" to "category.errorLast",
+        // Upstream 2.86.0: a category deleted meanwhile, or another person's personal one.
+        "notes_category_not_found" to "category.errorGone",
     )
 
     /** An i18n key for [e]. [fallback] is the general sentence of the place, as `errorSentence(err, fallbackKey)`. */

@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Yuvomi API",
-    "version": "2.84.0",
+    "version": "2.87.0",
     "description": "OpenAPI documentation for the Yuvomi family organizer backend."
   },
   "servers": [
@@ -689,7 +689,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Second step after POST /auth/login answered with `twoFactorRequired`. Accepts either the six-digit TOTP code or one of the recovery codes; the response says which one was used. The pending sign-in expires after five minutes.",
+        "description": "Second step after POST /auth/login answered with `twoFactorRequired`. Accepts either the six-digit TOTP code or one of the recovery codes; the response says which one was used. The pending sign-in expires after five minutes.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `two_factor_no_pending_sign_in` (401, no sign-in is waiting for a code, or it has expired), `account_cannot_sign_in` (403, the account is deactivated or may not sign in).",
         "requestBody": {
           "required": true,
           "description": "JSON request body",
@@ -748,7 +748,7 @@
             "description": "Two-factor authentication is already enabled"
           }
         },
-        "description": "Creates a TOTP secret and returns it as an otpauth URI plus an SVG QR code (data URL). Not active until confirmed via /auth/2fa/enable. Fails with 409 if two-factor is already enabled.",
+        "description": "Creates a TOTP secret and returns it as an otpauth URI plus an SVG QR code (data URL). Not active until confirmed via /auth/2fa/enable. Fails with 409 if two-factor is already enabled.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `already_enabled` (409, two-factor authentication is already turned on).",
         "security": [
           {
             "bearerAuth": []
@@ -1187,7 +1187,8 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `oidc_not_linked` (409, the account is not linked), `oidc_password_required` (409, the account has no password, so the link is its only way in), `last_sso_admin` (409, the last administrator linked to SSO cannot unlink while password login is off)."
       }
     },
     "/api/v1/auth/oidc/link/start": {
@@ -1207,7 +1208,7 @@
             "description": "Account is already linked"
           }
         },
-        "description": "Returns the provider authorization URL for the browser to follow. Deliberately a POST with CSRF protection: as a plain link, a forged request could attach an attacker-owned identity to the signed-in session.",
+        "description": "Returns the provider authorization URL for the browser to follow. Deliberately a POST with CSRF protection: as a plain link, a forged request could attach an attacker-owned identity to the signed-in session.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `oidc_not_configured` (404, SSO is not set up on this instance), `oidc_already_linked` (409, the account is already linked).",
         "security": [
           {
             "bearerAuth": []
@@ -1459,7 +1460,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Creates an invite link so a new member can set their own password. Role and family role are fixed here and are taken from the invitation when it is accepted.\n\nAdmin-only endpoint.",
+        "description": "Creates an invite link so a new member can set their own password. Role and family role are fixed here and are taken from the invitation when it is accepted.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `members_username_invalid` (400, 3-64 letters, numbers, dots, hyphens or underscores), `members_username_taken` (409, another account has this username).",
         "security": [
           {
             "bearerAuth": []
@@ -2014,7 +2015,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "A new account with `family_role: child` that is not an administrator starts with the child defaults as member overrides: `budget` none, `housekeeping` and `waste` read, the capabilities `health_use_fasting`, `housekeeping_view_amounts`, `calendar_edit_others`, `notes_edit_others`, `inventory_edit_others`, `inventory_view_prices` and `tasks_reorder_family` none - only where the role profile is not already stricter. Existing accounts and a later change of the family role keep their rights.\n\nAdmin-only endpoint.",
+        "description": "A new account with `family_role: child` that is not an administrator starts with the child defaults as member overrides: `budget` none, `housekeeping` and `waste` read, the capabilities `health_use_fasting`, `housekeeping_view_amounts`, `calendar_edit_others`, `notes_edit_others`, `inventory_edit_others`, `inventory_view_prices` and `tasks_reorder_family` none - only where the role profile is not already stricter. Existing accounts and a later change of the family role keep their rights.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `members_username_invalid` (400, 3-64 letters, numbers, dots, hyphens or underscores), `members_username_taken` (409, another account has this username), `members_sso_email_required` (400, an account without a password needs an email address), `members_sso_email_ambiguous` (400, that email address already belongs to another member).",
         "security": [
           {
             "bearerAuth": []
@@ -2081,7 +2082,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `account_deactivated` (400, a deactivated account cannot become an administrator).",
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `account_deactivated` (400, a deactivated account cannot become an administrator), `members_member_not_found` (404, the member no longer exists), `members_username_invalid` (400, 3-64 letters, numbers, dots, hyphens or underscores), `members_username_taken` (409, another account has this username), `members_sso_email_required` (400, an account without a password needs an email address), `members_sso_email_ambiguous` (400, that email address already belongs to another member), `last_admin` (400, at least one system admin must remain), `last_sso_admin` (400, the last administrator linked to SSO cannot be demoted while password login is off).",
         "parameters": [
           {
             "name": "id",
@@ -2670,7 +2671,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Creates a credential whose creator remains the audit owner. An administrator may select a non-guest family member as its subject; token requests then use that member identity and permissions.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `account_deactivated` (400, the chosen account is deactivated).",
+        "description": "Creates a credential whose creator remains the audit owner. An administrator may select a non-guest family member as its subject; token requests then use that member identity and permissions.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `account_deactivated` (400, the chosen account is deactivated), `api_tokens_name_required` (400, the name is empty), `api_tokens_name_too_long` (400, the name is longer than 100 characters), `api_tokens_expiry_past` (400, `expires_at` is not in the future), `api_tokens_subject_unknown` (400, there is no account with `subject_user_id`, for example because it was deleted meanwhile).",
         "security": [
           {
             "bearerAuth": []
@@ -3266,7 +3267,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Admin only. A display is a `users` row of its own kind (#1208, DECISIONS entry 4): not a household member, without a password, and unable to sign in with a username and password or through SSO. This list is the exact counterpart of the member predicate - it shows only the accounts every list of people leaves out. Each entry carries `show_screensaver` (whether the display may show the photo screensaver, #1766) and its devices with \"last seen\" and, for a revoked one, the moment it was revoked; no secret is ever returned. Beside `data` the answer carries `area_modules`: the modules a paired display reads besides the overview itself, derived from its fixed scope list.",
+        "description": "Admin only. A display is a `users` row of its own kind (#1208, DECISIONS entry 4): not a household member, without a password, and unable to sign in with a username and password or through SSO. This list is the exact counterpart of the member predicate - it shows only the accounts every list of people leaves out. Each entry carries `device_settings` (null until saved, otherwise night_from/night_until, idle_seconds, show_clock and cover_photo; #2436), `show_screensaver` (whether the display may show the photo screensaver, #1766) and its devices with \"last seen\" and, for a revoked one, the moment it was revoked; no secret is ever returned. Beside `data` the answer carries `area_modules`: the modules a paired display reads besides the overview itself, derived from its fixed scope list.",
         "security": [
           {
             "bearerAuth": []
@@ -3445,7 +3446,7 @@
         "tags": [
           "Displays"
         ],
-        "summary": "Switch the photo screensaver on or off for a wall display",
+        "summary": "Manage a wall display’s night hours and screensaver",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -3457,7 +3458,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Admin only (#1766). A display changes no settings itself, so whether it shows the photo screensaver is chosen here, per display, and off by default. While it is off the display's requests to `/screensaver/photos` and `/screensaver/photos/{id}` are refused at the scope gate; the change applies from the tablet's next request. Only a real boolean is accepted.",
+        "description": "Admin only (#1766, #2436). Supply show_screensaver, a complete device_settings object, or both. Invalid values reject the whole change with 400. Device options are returned by GET /displays and only to that tablet in GET /preferences as display_device_settings. Until first saved, device_settings is null and local tablet choices remain active. An online visible tablet checks every 30 seconds and on resume; night/idle apply then and clock/cover apply on the next screensaver start. A display changes no settings itself, so whether it shows the photo screensaver is chosen here, per display, and off by default. While it is off the display's requests to `/screensaver/photos` and `/screensaver/photos/{id}` are refused at the scope gate; the change applies from the tablet's next request. Only a real boolean is accepted.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `displays_display_not_found` (404, there is no display with this id, or it has been deleted).",
         "security": [
           {
             "bearerAuth": []
@@ -3496,10 +3497,60 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "show_screensaver"
+                "minProperties": 1,
+                "anyOf": [
+                  {
+                    "required": [
+                      "show_screensaver"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "device_settings"
+                    ]
+                  }
                 ],
                 "properties": {
+                  "device_settings": {
+                    "type": "object",
+                    "additionalProperties": false,
+                    "required": [
+                      "night_from",
+                      "night_until",
+                      "idle_seconds",
+                      "show_clock",
+                      "cover_photo"
+                    ],
+                    "properties": {
+                      "night_from": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 23,
+                        "description": "Start hour in household time. Must differ from night_until."
+                      },
+                      "night_until": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "maximum": 23
+                      },
+                      "idle_seconds": {
+                        "type": "integer",
+                        "enum": [
+                          60,
+                          120,
+                          300,
+                          600,
+                          900
+                        ]
+                      },
+                      "show_clock": {
+                        "type": "boolean"
+                      },
+                      "cover_photo": {
+                        "type": "boolean"
+                      }
+                    }
+                  },
                   "show_screensaver": {
                     "type": "boolean",
                     "description": "Whether this display may show the photo screensaver. Off by default."
@@ -3526,7 +3577,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Admin only. Removes the account and, through `ON DELETE CASCADE`, its pairing codes and devices - any paired tablet stops working on its next request.",
+        "description": "Admin only. Removes the account and, through `ON DELETE CASCADE`, its pairing codes and devices - any paired tablet stops working on its next request.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `displays_display_not_found` (404, there is no display with this id, or it has been deleted).",
         "security": [
           {
             "bearerAuth": []
@@ -3587,7 +3638,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Admin only. Returns a ten-character code in plaintext exactly once, valid for 15 minutes. Issuing a new code spends the previous one immediately: two open codes would be two keys to the same door, and the older one would hang around unnoticed.",
+        "description": "Admin only. Returns a ten-character code in plaintext exactly once, valid for 15 minutes. Issuing a new code spends the previous one immediately: two open codes would be two keys to the same door, and the older one would hang around unnoticed.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `displays_display_not_found` (404, there is no display with this id, or it has been deleted).",
         "security": [
           {
             "bearerAuth": []
@@ -3689,7 +3740,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Admin only. Sets `revoked_at` rather than deleting the row, so a revocation stays provable. Access ends on the device's next request - the credential is checked against the database every time, so there is no cached state a revocation would have to catch up with. The device has to belong to the display named in the path.",
+        "description": "Admin only. Sets `revoked_at` rather than deleting the row, so a revocation stays provable. Access ends on the device's next request - the credential is checked against the database every time, so there is no cached state a revocation would have to catch up with. The device has to belong to the display named in the path.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `displays_device_not_found` (404, the device does not exist or does not belong to this display).",
         "security": [
           {
             "bearerAuth": []
@@ -3778,7 +3829,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Admin only. Deletes the row of a device that has been revoked - every new pairing revokes the device before it, and those rows otherwise stay in the list for good. This cannot be undone. A device that is still paired is refused with 409 and `reason: \"display_device_active\"`: revoke it first. The device has to belong to the display named in the path.",
+        "description": "Admin only. Deletes the row of a device that has been revoked - every new pairing revokes the device before it, and those rows otherwise stay in the list for good. This cannot be undone. A device that is still paired is refused with 409 and `reason: \"display_device_active\"`: revoke it first. The device has to belong to the display named in the path.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `displays_device_not_found` (404, the device does not exist or does not belong to this display).",
         "security": [
           {
             "bearerAuth": []
@@ -3851,6 +3902,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "`database_key` (see DatabaseKeyStatus) says where the database key comes from, never its value; `GET /api/v1/backup/database-key` returns a generated one.\n\nAdmin-only endpoint.",
         "security": [
           {
             "bearerAuth": []
@@ -3861,8 +3913,7 @@
           {
             "cookieAuth": []
           }
-        ],
-        "description": "Admin-only endpoint."
+        ]
       }
     },
     "/api/v1/backup/database": {
@@ -3893,6 +3944,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "The backup is checked for integrity before it is sent. A backup that fails the check is discarded and answered with 500 and reason `backup_verify_failed`.\n\nAdmin-only endpoint.",
         "security": [
           {
             "bearerAuth": []
@@ -3903,8 +3955,52 @@
           {
             "cookieAuth": []
           }
+        ]
+      }
+    },
+    "/api/v1/backup/database-key": {
+      "get": {
+        "tags": [
+          "Backup"
         ],
-        "description": "Admin-only endpoint."
+        "summary": "Show the generated database key",
+        "operationId": "getDatabaseKey",
+        "responses": {
+          "200": {
+            "description": "Origin of the key, and the key itself when Yuvomi generated it",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseKeyResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "429": {
+            "description": "More than 10 views in 10 minutes"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "description": "Returns the DB_ENCRYPTION_KEY that Yuvomi generated on the first start of a new installation and stores in `.secrets/DB_ENCRYPTION_KEY` next to the database (`origin` `stored` or `generated`), so the administrator can keep a copy with the backups: without it, no backup opens once that volume is lost. A key from DB_ENCRYPTION_KEY or DB_ENCRYPTION_KEY_FILE is never returned, it is already in the configuration; then only `origin` and `encrypted` come back. Not available on a signed-in device (403, reason `device_credential`). Every response is `Cache-Control: no-store`, each view is logged with the administrator's id and never the key, and an administrator gets 10 views per 10 minutes.\n\nAdmin-only endpoint.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
       }
     },
     "/api/v1/backup/restore": {
@@ -3943,7 +4039,7 @@
             "description": "Still busy after the wait limit (reason `restore_busy`); nothing was changed"
           }
         },
-        "description": "A backup carries the encryption of the installation that wrote it. To restore an encrypted backup from ANOTHER installation, send that installation's DB_ENCRYPTION_KEY in `X-Backup-Key`: the backup is re-encrypted with this installation's own key, and the sent key is used only for this request and never stored. The key is accepted only in this header, never in the URL. If this installation's own key already opens the backup, the header is ignored. An installation without a DB_ENCRYPTION_KEY of its own refuses a backup key rather than storing the backup decrypted. Every 400 response may carry a machine-readable `reason`: `backup_key_required` (the backup does not open with this installation's key - send `X-Backup-Key`), `backup_key_wrong`, `backup_key_invalid` (header is not base64), `own_key_missing`, `backup_damaged`, `backup_unreadable`, `backup_corrupt` (the integrity check found damage in the backup file). A second restore while one is still running is refused with 409 and reason `restore_in_progress`. If syncs, backups or requests are still running after 60 seconds, the restore gives up without changing anything: 503 with reason `restore_busy`. A failed restore leaves this installation unchanged.\n\nAdmin-only endpoint.",
+        "description": "A backup carries the encryption of the installation that wrote it. To restore an encrypted backup from ANOTHER installation, send that installation's DB_ENCRYPTION_KEY in `X-Backup-Key`: the backup is re-encrypted with this installation's own key, and the sent key is used only for this request and never stored. The key is accepted only in this header, never in the URL. If this installation's own key already opens the backup, the header is ignored. An installation without a DB_ENCRYPTION_KEY of its own refuses a backup key rather than storing the backup decrypted. Every 400 response may carry a machine-readable `reason`: `backup_key_required` (the backup does not open with this installation's key - send `X-Backup-Key`), `backup_key_wrong`, `backup_key_invalid` (header is not base64), `own_key_missing`, `backup_damaged`, `backup_unreadable`, `backup_corrupt` (the integrity check found damage in the backup file), `backup_file_empty` (the request body is empty), `backup_not_yuvomi` (a readable SQLite file without the Yuvomi schema), `backup_newer_version` (written by a newer Yuvomi - update first). A second restore while one is still running is refused with 409 and reason `restore_in_progress`. If syncs, backups or requests are still running after 60 seconds, the restore gives up without changing anything: 503 with reason `restore_busy`. A body larger than BACKUP_UPLOAD_LIMIT is refused with 413, reason `backup_file_too_large` and the limit as `params.limit` (e.g. `\"100mb\"`). A failed restore leaves this installation unchanged.\n\nAdmin-only endpoint.",
         "security": [
           {
             "bearerAuth": []
@@ -4185,7 +4281,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Optional overrides `url`, `username`, `password`, `remotePath`; missing fields fall back to the stored configuration. An override with a different server (scheme, host and port) or username but no new password is refused with 400 and `errorCode: password_required` before any request is made, so the stored password never reaches a server it was not entered for.\n\nAdmin-only endpoint.",
+        "description": "Optional overrides `url`, `username`, `password`, `remotePath`; missing fields fall back to the stored configuration. An override with a different server (scheme, host and port) or username but no new password is refused with 400 and `errorCode: password_required` before any request is made, so the stored password never reaches a server it was not entered for. Missing `url`, `username` or `password` answers 400 with `errorCode: config_incomplete`. A refusal of the server answers 502 with `remote_auth_failed`, `remote_http_status`, `remote_unreachable` or `remote_failed` and the class in `detail` (`HTTP 401`, `ECONNREFUSED`), never the server's text. A failure on this server (the database, the local file, a filesystem error) answers 500 with `backup_local_failed`.\n\nAdmin-only endpoint.",
         "security": [
           {
             "bearerAuth": []
@@ -4252,6 +4348,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "A refusal of the server answers 502 with `remote_auth_failed`, `remote_http_status`, `remote_unreachable` or `remote_failed` and the class in `detail` (`HTTP 401`, `ECONNREFUSED`), never the server's text. A failure on this server (the database, the local file, a filesystem error) answers 500 with `backup_local_failed`.\n\nAdmin-only endpoint.",
         "security": [
           {
             "bearerAuth": []
@@ -4262,8 +4359,7 @@
           {
             "cookieAuth": []
           }
-        ],
-        "description": "Admin-only endpoint."
+        ]
       }
     },
     "/api/v1/backup/webdav/trigger": {
@@ -4296,6 +4392,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "A failed local snapshot, or a failure on this server while uploading (the database, the local file, a filesystem error), answers 500 with `backup_local_failed`. A refused upload answers 502 with `remote_auth_failed`, `remote_http_status`, `remote_unreachable` or `remote_failed` and the class in `detail` (`HTTP 507`, `ECONNREFUSED`), never the server's text.\n\nAdmin-only endpoint.",
         "security": [
           {
             "bearerAuth": []
@@ -4307,7 +4404,6 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
         "parameters": [
           {
             "name": "X-CSRF-Token",
@@ -4511,7 +4607,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Several tags narrow the result: a task must carry all of them. Tag matching ignores case, including non-ASCII letters. Archived tasks are omitted unless asked for. `document_count` counts the linked documents the caller may see; `GET /api/v1/tasks/{id}` also carries them as `documents`. Without access to the Documents module (for API tokens a `documents:read` scope) both are `null` - not told, which is not the same as `0` or an empty list.",
+        "description": "Several tags narrow the result: a task must carry all of them. Tag matching ignores case, including non-ASCII letters. Archived tasks are omitted unless asked for. `document_count` counts the linked documents the caller may see; `GET /api/v1/tasks/{id}` also carries them as `documents`. Without access to the Documents module (for API tokens a `documents:read` scope) both are `null` - not told, which is not the same as `0` or an empty list. A rotating task (`rotation_mode: \"round_robin\"`, fixed order only, #1763) additionally carries `rotation_pool` (member ids in delivery order, `null` when the task does not rotate), `rotation_last_user` (informational - which member the pointer names), `rotation_last_position` (the pointer: the pool position of the last recipient; the order reads the position, never the head, so a member leaving the pool does not restart the series) and `rotation_next_user` - the member the next occurrence would go to, resolved by the same rule that hands out the next instance (pointer plus one in pool order, over the gaps of departed members and the slots of deactivated ones), `null` when rotation is off or fewer than two members are active.",
         "security": [
           {
             "bearerAuth": []
@@ -4667,7 +4763,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Body accepts `locked: true` to close the task definition to everyone but its creator and administrators (#830). A subtask under a locked parent inherits the lock, and adding one requires the same rights. `status` may be set on creation (#807); it runs through the same transition handling as PUT and PATCH, so creating a task as `done` books its points and writes its completion entry. `null`, an empty string and `archived` all fall back to `open` - filing a task away is a separate axis and not something a creation can do.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_parent_not_found` (404, `parent_task_id` names a task that does not exist or is not visible to you).",
+        "description": "Body accepts `locked: true` to close the task definition to everyone but its creator and administrators (#830). A subtask under a locked parent inherits the lock, and adding one requires the same rights. `status` may be set on creation (#807); it runs through the same transition handling as PUT and PATCH, so creating a task as `done` books its points and writes its completion entry. `null`, an empty string and `archived` all fall back to `open` - filing a task away is a separate axis and not something a creation can do. Rotation: `rotation_mode: \"round_robin\"` (the only mode - a fixed order, not a set, #1763) with `rotation_pool` (array of member ids, the list order is the delivery order) hands every follow-up instance to the next member. A mode requires a recurring task and a pool of at least 2 known household members, anything else answers 400.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_parent_not_found` (404, `parent_task_id` names a task that does not exist or is not visible to you).",
         "security": [
           {
             "bearerAuth": []
@@ -5142,7 +5238,7 @@
             }
           }
         },
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `category_exists` (409, a category with this name already exists)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_category_not_found` (404, the category does not exist - deleted), `category_exists` (409, a category with this name already exists)."
       },
       "delete": {
         "tags": [
@@ -5191,7 +5287,7 @@
             }
           }
         ],
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `category_in_use` (409, tasks still use the category; `count` carries how many), `category_last` (409, the last category cannot be deleted)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_category_not_found` (404, the category does not exist - deleted), `category_in_use` (409, tasks still use the category; `count` carries how many), `category_last` (409, the last category cannot be deleted)."
       }
     },
     "/api/v1/tasks/sync-targets": {
@@ -5746,11 +5842,21 @@
               }
             }
           },
+          "409": {
+            "description": "The task repeats in another app with a rule Yuvomi cannot follow (reason `task_foreign_series`, rule in `external_rrule`, no `is_recurring` here): ticking it off here would end the series there, so it is ticked off in that app (#2506). Other changes stay allowed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "On a locked task (`locked: 1`) only the creator and administrators may change the definition - title, description, category, priority, dates, recurrence, points, visibility, tags, sync target, the lock itself, and assigning other members. Everyone else may still send the full body as long as the outcome differs only in `status` or in their own entry in `assigned_to`; anything else answers 403. The comparison is against the stored values, not against which fields were sent. Returns `{ data: Task }`; the task additionally carries `next_due_date` (YYYY-MM-DD) under the same rule as PATCH /tasks/{id}/status: the due date of the next occurrence still pending and visible to the caller when this call moved a recurring task into `done`, and `null` in every other case - no status change, a change that is not a transition into `done`, a task without recurrence, a series that has ended, or a next occurrence the caller cannot see.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private).",
+        "description": "On a locked task (`locked: 1`) only the creator and administrators may change the definition - title, description, category, priority, dates, recurrence, points, visibility, tags, sync target, the lock itself, and assigning other members. Everyone else may still send the full body as long as the outcome differs only in `status` or in their own entry in `assigned_to`; anything else answers 403. The comparison is against the stored values, not against which fields were sent. Rotation fields follow the rule of the rest of the body: absent means untouched; `rotation_mode: null` clears mode, pool and pointer together. Sending only `rotation_pool` re-deals the pool positions but keeps the pointer, so an edited order continues the rotation from where it stands instead of resetting it; changing the mode starts the round fresh. Returns `{ data: Task }`; the task additionally carries `next_due_date` (YYYY-MM-DD) under the same rule as PATCH /tasks/{id}/status: the due date of the next occurrence still pending and visible to the caller when this call moved a recurring task into `done`, and `null` in every other case - no status change, a change that is not a transition into `done`, a task without recurrence, a series that has ended, or a next occurrence the caller cannot see.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private), `task_foreign_series` (409, the task repeats in another app with a rule Yuvomi cannot follow - it is in `external_rrule` - and is ticked off there, #2506).",
         "security": [
           {
             "bearerAuth": []
@@ -5909,11 +6015,21 @@
               }
             }
           },
+          "409": {
+            "description": "The task repeats in another app with a rule Yuvomi cannot follow (reason `task_foreign_series`, rule in `external_rrule`, no `is_recurring` here): ticking it off here would end the series there, so it is ticked off in that app (#2506). Other changes stay allowed.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiError"
+                }
+              }
+            }
+          },
           "500": {
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Body: { status, done_by_user_id? }. Sending `archived` files the task away without touching its status - use PATCH /archive instead. Deliberately open on a locked task: ticking one off is the interaction the lock exists to preserve. `done_by_user_id` names who actually did the task (#1205), which is not necessarily the caller - on a shared tablet it rarely is. It has to be a household member (400 otherwise), it only applies to the transition into `done` and is ignored on any other status change, and it decides where the points go: a named member who takes part in rewards receives them instead of the assignees, a named member who does not take part means no points at all rather than crediting someone who did not do it. Omit it and nothing changes: the history shows the caller and the assignees rule applies. The naming is as idempotent as the completion itself - correcting it means reopening the task and ticking it off again. A paired wall display reaches this route too, and only this one of the writing routes (#1209): for it the field is required rather than optional, only the transition into `done` is allowed, and the task has to be visible to the whole household, which answers 404 rather than 403 so an invisible task is not confirmed to exist. Returns `{ data: { id, status, archived_at, next_due_date } }`. `next_due_date` (YYYY-MM-DD) is the due date of the next occurrence still pending - not done and not archived, so one that is `in_progress` counts - when this call completed a recurring task, and `null` in every other case: a task without recurrence, a series that has ended, a status change that is not a transition into `done`, and the `archived` shortcut, which omits the field.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private), `display_action` (403, a paired display can only tick a task off).",
+        "description": "Body: { status, done_by_user_id? }. Sending `archived` files the task away without touching its status - use PATCH /archive instead. Deliberately open on a locked task: ticking one off is the interaction the lock exists to preserve. `done_by_user_id` names who actually did the task (#1205), which is not necessarily the caller - on a shared tablet it rarely is. It has to be a household member (400 otherwise), it only applies to the transition into `done` and is ignored on any other status change, and it decides where the points go: a named member who takes part in rewards receives them instead of the assignees, a named member who does not take part means no points at all rather than crediting someone who did not do it. Omit it and nothing changes: the history shows the caller and the assignees rule applies. The naming is as idempotent as the completion itself - correcting it means reopening the task and ticking it off again. A paired wall display reaches this route too, and only this one of the writing routes (#1209): for it the field is required rather than optional, only the transition into `done` is allowed, and the task has to be visible to the whole household, which answers 404 rather than 403 so an invisible task is not confirmed to exist. Returns `{ data: { id, status, archived_at, next_due_date } }`. `next_due_date` (YYYY-MM-DD) is the due date of the next occurrence still pending - not done and not archived, so one that is `in_progress` counts - when this call completed a recurring task, and `null` in every other case: a task without recurrence, a series that has ended, a status change that is not a transition into `done`, and the `archived` shortcut, which omits the field.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private), `display_action` (403, a paired display can only tick a task off), `task_foreign_series` (409, the task repeats in another app with a rule Yuvomi cannot follow - it is in `external_rrule` - and is ticked off there, #2506).",
         "security": [
           {
             "bearerAuth": []
@@ -6906,7 +7022,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Every entry carries its person, points and type. `reason` and `task_id` of an entry that belongs to a task are `null` unless the entry is the caller's own or the caller can see that task (same rule as GET /tasks, no admin bypass); once the task is deleted they stay with the entry's owner. Bonus, adjustment and redemption entries keep their `reason` for everyone. Points only: pocket money entries live in the same ledger but never appear here (see GET /rewards/money/ledger).",
+        "description": "Every entry carries its person, points and type. `reason` and `task_id` of an entry that belongs to a task are `null` unless the entry is the caller's own or the caller can see that task (same rule as GET /tasks, no admin bypass); once the task is deleted they stay with the entry's owner. Bonus, adjustment and redemption entries keep their `reason` for everyone. Points only: pocket money entries live in the same ledger but never appear here (see GET /rewards/money/ledger). LATE COMPLETION DECAY (household setting `tasks_late_decay_enabled`, off by default): an earn entry booked after the task's due day carries `decay_days` (calendar days past due at booking) and `base_points` (the point value before the reduction, `max(1, base - days)` was booked); both are `null` when nothing was reduced, and both follow the same visibility rule as `reason` and `task_id` - `null` for a task the caller may not see.",
         "security": [
           {
             "bearerAuth": []
@@ -8171,6 +8287,70 @@
         }
       }
     },
+    "/api/v1/shopping/price-history": {
+      "get": {
+        "tags": [
+          "Shopping"
+        ],
+        "summary": "Get purchase price history for an item",
+        "responses": {
+          "200": {
+            "description": "Successful response"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        },
+        "description": "Returns recorded purchase history facts (item_name, price_cents, store_name, purchased_at) matching item name case-insensitively, ordered by purchased_at DESC.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "description": "Item name to look up purchases for (matched case-insensitively).",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "description": "Maximum number of recorded purchases to return (1-50, defaults to 10).",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 50,
+              "default": 10
+            }
+          },
+          {
+            "name": "exclude_item_id",
+            "in": "query",
+            "required": false,
+            "description": "Optional shopping item ID to exclude its current purchase from results. A value that is not a positive integer is a 400.",
+            "schema": {
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        ]
+      }
+    },
     "/api/v1/shopping/suggestions": {
       "get": {
         "tags": [
@@ -8888,7 +9068,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Adds low or empty pantry items to the list. An open (unchecked) item of the same name on the list - compared trimmed, with whitespace collapsed and case-insensitive - means the ingredient is skipped and counted in `skipped` instead of being added twice; rows of one name in one transfer become one item. This is the one rule of every kitchen path to the shopping list (recipe, meal, meal-plan import, pantry). An entry is `{ pantry_item_id, quantity? }` for a batch, or `{ pantry_product_id }` for a household product without batches, which goes over with its name and category and no quantity. Reads the pantry, so it requires read access to the `pantry` module in addition to `shopping` - a credential without it is refused with 403.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `shopping_list_not_found` (404, the list does not exist - deleted), `cross_module_access` (403, the caller has no read access to the pantry - for API tokens a `pantry:read` scope).",
+        "description": "Adds low or empty pantry items to the list. An open (unchecked) item of the same name on the list - compared trimmed, with whitespace collapsed and case-insensitive - means the ingredient is skipped and counted in `skipped` instead of being added twice; rows of one name in one transfer become one item. This is the one rule of every kitchen path to the shopping list (recipe, meal, meal-plan import, pantry). An entry is `{ pantry_item_id, quantity? }` for a batch, or `{ pantry_product_id, quantity? }` for a household product, which goes over with its name and category; `quantity` is display text, such as the shortfall to the minimum of the product. Reads the pantry, so it requires read access to the `pantry` module in addition to `shopping` - a credential without it is refused with 403.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `shopping_list_not_found` (404, the list does not exist - deleted), `cross_module_access` (403, the caller has no read access to the pantry - for API tokens a `pantry:read` scope).",
         "security": [
           {
             "bearerAuth": []
@@ -10771,7 +10951,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Each pantry item is one batch (a quantity with its own location and best-before date). `product_id` names the household product the batch belongs to: batches with the same name, compared trimmed, case-insensitive and with collapsed whitespace, and the same unit share one product. The server sets it on every write that changes the name, unit or category, and moves the batch to another product when the name or unit no longer matches; a `product_id` in a request body is ignored. Every pantry item response carries it. `products` lists the household products (`id`, `name`, `unit`, `category`, `batch_count`), including products whose last batch is gone (`batch_count` 0).",
+        "description": "Each pantry item is one batch (a quantity with its own location and best-before date). `product_id` names the household product the batch belongs to: batches with the same name, compared trimmed, case-insensitive and with collapsed whitespace, and the same unit share one product. The server sets it on every write that changes the name, unit or category, and moves the batch to another product when the name or unit no longer matches; a `product_id` in a request body is ignored. Every pantry item response carries it. `products` lists the household products (`id`, `name`, `unit`, `category`, `min_quantity`, `batch_count`, `total_quantity`), including products whose last batch is gone (`batch_count` 0, `total_quantity` 0). The minimum belongs to the product: a product is out of stock when `total_quantity` is 0 and running low when it is at or below `min_quantity`. `min_quantity` on a pantry item is deprecated: it returns the minimum of the product the item belongs to, and a write of it on a batch (create with a number, replace or partial update when the field is sent; null clears) is written through to the product, so it applies to all its batches. A replace or create without the field leaves the minimum of the product alone. Read the minimum from `products` instead.",
         "security": [
           {
             "bearerAuth": []
@@ -10810,6 +10990,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "`min_quantity` on a pantry item is deprecated: it returns the minimum of the product the item belongs to, and a write of it on a batch (create with a number, replace or partial update when the field is sent; null clears) is written through to the product, so it applies to all its batches. A replace or create without the field leaves the minimum of the product alone. Read the minimum from `products` instead.",
         "security": [
           {
             "bearerAuth": []
@@ -10954,7 +11135,8 @@
               }
             }
           }
-        }
+        },
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `pantry_location_exists` (409, a storage location with this name already exists)."
       }
     },
     "/api/v1/pantry/locations/reorder": {
@@ -11069,7 +11251,8 @@
               }
             }
           }
-        }
+        },
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `pantry_location_not_found` (404, the storage location does not exist - deleted), `pantry_location_exists` (409, a storage location with this name already exists)."
       },
       "delete": {
         "tags": [
@@ -11087,7 +11270,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Items keep their stock and become location-less; the last remaining location cannot be deleted.",
+        "description": "Items keep their stock and become location-less; the last remaining location cannot be deleted.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `pantry_location_not_found` (404, the storage location does not exist - deleted), `pantry_location_last` (400, the last storage location cannot be deleted).",
         "security": [
           {
             "bearerAuth": []
@@ -11343,6 +11526,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "`min_quantity` on a pantry item is deprecated: it returns the minimum of the product the item belongs to, and a write of it on a batch (create with a number, replace or partial update when the field is sent; null clears) is written through to the product, so it applies to all its batches. A replace or create without the field leaves the minimum of the product alone. Read the minimum from `products` instead.",
         "security": [
           {
             "bearerAuth": []
@@ -11403,6 +11587,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "`min_quantity` on a pantry item is deprecated: it returns the minimum of the product the item belongs to, and a write of it on a batch (create with a number, replace or partial update when the field is sent; null clears) is written through to the product, so it applies to all its batches. A replace or create without the field leaves the minimum of the product alone. Read the minimum from `products` instead.",
         "security": [
           {
             "bearerAuth": []
@@ -13288,6 +13473,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "`pantry.expired` counts expired batches; `pantry.low` and `pantry.out` count household products, read over the sum of their batches against the minimum of the product (a product without batches is out only when it has a minimum above 0). `pantry.attention` counts each product once: a product needs attention when it is out, running low, or has at least one expired batch, so a product that is low and has two expired batches is one. The parts do not add up to `attention`.",
         "security": [
           {
             "bearerAuth": []
@@ -13690,7 +13876,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "When Google no longer accepts the stored sign-in (`invalid_grant`), the answer is `409` with reason `google_reauth_required`, and syncing pauses until the account is connected again (#2019).\n\nAdmin-only endpoint.",
+        "description": "When Google no longer accepts the stored sign-in (`invalid_grant`), the answer is `409` with reason `google_reauth_required`, and syncing pauses until the account is connected again (#2019).\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `google_not_configured` (409, Google Calendar is not set up or not connected); a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "security": [
           {
             "bearerAuth": []
@@ -13775,7 +13961,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Calendars of the connected Google account. When Google no longer accepts the stored sign-in (`invalid_grant`), the answer is `409` with reason `google_reauth_required` instead of a list, and nothing is sent to Google until the account is connected again (#2019).\n\nAdmin-only endpoint.",
+        "description": "Calendars of the connected Google account. When Google no longer accepts the stored sign-in (`invalid_grant`), the answer is `409` with reason `google_reauth_required` instead of a list, and nothing is sent to Google until the account is connected again (#2019).\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `google_not_configured` (409, Google Calendar is not set up or not connected); a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "security": [
           {
             "bearerAuth": []
@@ -13818,7 +14004,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `google_not_configured` (409, Google Calendar is not set up or not connected); a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "parameters": [
           {
             "name": "X-CSRF-Token",
@@ -14038,7 +14224,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `apple_not_configured` (409, no Apple calendar is connected); a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "parameters": [
           {
             "name": "X-CSRF-Token",
@@ -14103,7 +14289,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `apple_url_invalid` (400, `url` does not start with http(s)), `apple_no_calendars` (400, connected, but the account has no calendars); a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "parameters": [
           {
             "name": "X-CSRF-Token",
@@ -14284,7 +14470,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Optional `default_assignee_user_ids`: household members every event newly imported from the subscription is assigned to (#1897), the first one primary; or the earlier form `default_assignee_user_id` with one person or null. The answer carries both, the single field holding the first person.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `calendar_assignee_invalid` (400, not a list of user ids), `calendar_assignee_unknown` (400, a user id names no account), `calendar_assignee_not_member` (400, a person who is not a household member; people already stored on the source stay valid).",
+        "description": "Optional `default_assignee_user_ids`: household members every event newly imported from the subscription is assigned to (#1897), the first one primary; or the earlier form `default_assignee_user_id` with one person or null. The answer carries both, the single field holding the first person. The subscription is created even when its first fetch fails: the answer is still `201`, with `syncError` (the error text for a named case, otherwise a fixed sentence), `syncReason` (the case, for example `calendar_ics_http_status`, or `null` when the app cannot name it) and, where a number matters, `syncParams` (#2566).\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `calendar_assignee_invalid` (400, not a list of user ids), `calendar_assignee_unknown` (400, a user id names no account), `calendar_assignee_not_member` (400, a person who is not a household member; people already stored on the source stay valid), `calendar_subscription_name_invalid` (400, `name` is empty or longer than 100 characters), `calendar_ics_url_invalid` (400, `url` is not an address), `calendar_ics_url_scheme` (400, only https:// and webcal:// - with ICS_SUBSCRIPTION_ALLOW_PRIVATE_NETWORK also http://), `calendar_ics_private_address` (400, the address resolves to a private network), `calendar_ics_http_status` (400, the feed answered with a status that is not a success; `params.status`), `calendar_ics_too_large` (400, the feed is larger than the limit; `params.limit_mb`).",
         "security": [
           {
             "bearerAuth": []
@@ -14348,7 +14534,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Optional `default_assignee_user_ids`: household members every event newly imported from the subscription is assigned to (#1897), the first one primary; or the earlier form `default_assignee_user_id` with one person or null. The answer carries both, the single field holding the first person.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `calendar_assignee_invalid` (400, not a list of user ids), `calendar_assignee_unknown` (400, a user id names no account), `calendar_assignee_not_member` (400, a person who is not a household member; people already stored on the source stay valid), `calendar_subscription_not_found` (404).",
+        "description": "Optional `default_assignee_user_ids`: household members every event newly imported from the subscription is assigned to (#1897), the first one primary; or the earlier form `default_assignee_user_id` with one person or null. The answer carries both, the single field holding the first person.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `calendar_assignee_invalid` (400, not a list of user ids), `calendar_assignee_unknown` (400, a user id names no account), `calendar_assignee_not_member` (400, a person who is not a household member; people already stored on the source stay valid), `calendar_subscription_not_found` (404), `calendar_subscription_name_invalid` (400, `name` is empty or longer than 100 characters).",
         "security": [
           {
             "bearerAuth": []
@@ -14470,6 +14656,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "A feed that does not deliver answers `400` with its `reason` (`calendar_ics_http_status`, `calendar_ics_too_large`, `calendar_ics_private_address`, ...) instead of `200` (#2566). Scheduled runs keep skipping such a feed silently.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `calendar_subscription_not_found` (404).",
         "security": [
           {
             "bearerAuth": []
@@ -14510,8 +14697,7 @@
               "maxLength": 255
             }
           }
-        ],
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `calendar_subscription_not_found` (404)."
+        ]
       }
     },
     "/api/v1/calendar/import": {
@@ -14541,7 +14727,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Response: { data: { imported, skipped, assigned, total } }. `assigned` (#1940) counts events that already existed and got at least one of the chosen people added; they are also counted in `skipped`.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `calendar_assignee_invalid` (400, not a list of user ids), `calendar_assignee_unknown` (400, a user id names no account), `calendar_assignee_not_member` (400, a person who is not a household member; people already stored on the source stay valid).",
+        "description": "Response: { data: { imported, skipped, assigned, total } }. `assigned` (#1940) counts events that already existed and got at least one of the chosen people added; they are also counted in `skipped`.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `calendar_assignee_invalid` (400, not a list of user ids), `calendar_assignee_unknown` (400, a user id names no account), `calendar_assignee_not_member` (400, a person who is not a household member; people already stored on the source stay valid), `calendar_selected_calendar_not_found` (400, the `local_calendar_id` names a local calendar that no longer exists), `calendar_ics_url_invalid` (400, `url` is not an address), `calendar_ics_url_scheme` (400, only https:// and webcal:// - with ICS_SUBSCRIPTION_ALLOW_PRIVATE_NETWORK also http://), `calendar_ics_private_address` (400, the address resolves to a private network), `calendar_ics_http_status` (400, the feed answered with a status that is not a success; `params.status`), `calendar_ics_too_large` (400, the feed is larger than the limit; `params.limit_mb`); a feed that cannot be fetched otherwise: a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "security": [
           {
             "bearerAuth": []
@@ -15351,7 +15537,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `caldav_account_exists` (409, an account with this URL and username is already connected), `caldav_no_calendars` (400, the server answered, but the account has no calendars); a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "parameters": [
           {
             "name": "X-CSRF-Token",
@@ -15944,7 +16130,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint."
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `outlook_not_configured` (503, MS_CLIENT_ID, MS_CLIENT_SECRET or MS_REDIRECT_URI is not set)."
       }
     },
     "/api/v1/calendar/outlook/callback": {
@@ -16008,7 +16194,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint."
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `outlook_not_configured` (503, MS_CLIENT_ID, MS_CLIENT_SECRET or MS_REDIRECT_URI is not set)."
       }
     },
     "/api/v1/calendar/outlook/accounts/{id}": {
@@ -16170,7 +16356,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `outlook_not_configured` (503, MS_CLIENT_ID, MS_CLIENT_SECRET or MS_REDIRECT_URI is not set), `outlook_reauth_required` (409, Microsoft no longer accepts the stored sign-in); a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "parameters": [
           {
             "name": "id",
@@ -16289,7 +16475,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `outlook_not_configured` (503, MS_CLIENT_ID, MS_CLIENT_SECRET or MS_REDIRECT_URI is not set), `outlook_reauth_required` (409, Microsoft no longer accepts the stored sign-in); a refusal of the server answers 502 with `remote_auth_failed` (HTTP 401/403), `remote_http_status` (another HTTP status, `params.status`), `remote_unreachable` (network, TLS or timeout) or `remote_failed`, the class in `detail` (`HTTP 401`, `ECONNREFUSED`, `timeout`), never the server's text.",
         "parameters": [
           {
             "name": "X-CSRF-Token",
@@ -17865,7 +18051,8 @@
               }
             }
           }
-        }
+        },
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `notes_category_not_found` (404, the category does not exist - deleted, or it is another person's personal category)."
       }
     },
     "/api/v1/notes/categories/{id}": {
@@ -17960,7 +18147,7 @@
             }
           }
         },
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `category_exists` (409, a category with this name already exists)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `notes_category_not_found` (404, the category does not exist - deleted, or it is another person's personal category), `category_exists` (409, a category with this name already exists)."
       },
       "delete": {
         "tags": [
@@ -18024,7 +18211,8 @@
               "type": "string"
             }
           }
-        ]
+        ],
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `notes_category_not_found` (404, the category does not exist - deleted, or it is another person's personal category)."
       }
     },
     "/api/v1/contacts": {
@@ -18374,7 +18562,7 @@
             }
           }
         },
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `category_exists` (409, a category with this name already exists)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `contacts_category_not_found` (404, the category does not exist - deleted), `category_exists` (409, a category with this name already exists)."
       },
       "delete": {
         "tags": [
@@ -18423,7 +18611,7 @@
             }
           }
         ],
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `category_in_use` (409, contacts still use the category; `count` carries how many), `category_last` (409, the last category cannot be deleted)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `contacts_category_not_found` (404, the category does not exist - deleted), `category_in_use` (409, contacts still use the category; `count` carries how many), `category_last` (409, the last category cannot be deleted)."
       }
     },
     "/api/v1/contacts/cardav/accounts": {
@@ -20452,7 +20640,7 @@
             }
           }
         },
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `category_exists` (409, a category with this name already exists)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `budget_category_not_found` (404, the category does not exist - deleted), `category_exists` (409, a category with this name already exists)."
       },
       "delete": {
         "tags": [
@@ -20500,7 +20688,7 @@
             }
           }
         ],
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `category_in_use` (409, budget entries or split expenses and their recurring series still use the category; `count` carries how many), `category_last` (409, the last category cannot be deleted)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `budget_category_not_found` (404, the category does not exist - deleted), `category_in_use` (409, budget entries or split expenses and their recurring series still use the category; `count` carries how many), `category_last` (409, the last category cannot be deleted)."
       }
     },
     "/api/v1/budget/categories/{categoryKey}/subcategories": {
@@ -20578,7 +20766,8 @@
               ]
             }
           }
-        ]
+        ],
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `budget_category_not_found` (404, the category does not exist - deleted)."
       },
       "post": {
         "tags": [
@@ -20658,7 +20847,7 @@
             }
           }
         },
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `subcategory_exists` (409, a subcategory with this name already exists)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `budget_category_not_found` (404, the category does not exist - deleted), `subcategory_exists` (409, a subcategory with this name already exists)."
       }
     },
     "/api/v1/budget/categories/{key}/subcategories/reorder": {
@@ -20791,7 +20980,7 @@
             }
           }
         },
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `subcategory_exists` (409, a subcategory with this name already exists)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `budget_subcategory_not_found` (404, the subcategory does not exist - deleted), `subcategory_exists` (409, a subcategory with this name already exists)."
       },
       "delete": {
         "tags": [
@@ -20849,7 +21038,7 @@
             }
           }
         ],
-        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `subcategory_in_use` (409, entries still use the subcategory; `count` carries how many), `subcategory_last` (409, the last subcategory cannot be deleted)."
+        "description": "A refusal a user can reach carries a `reason` next to `error` (#1909): `budget_subcategory_not_found` (404, the subcategory does not exist - deleted), `subcategory_in_use` (409, entries still use the subcategory; `count` carries how many), `subcategory_last` (409, the last subcategory cannot be deleted)."
       }
     },
     "/api/v1/budget/accounts": {
@@ -23005,7 +23194,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Returns the selected and effective upload destinations, local-folder override, WebDAV configuration and secret-free Google Drive status. Environment-controlled WebDAV fields are reported individually. Passwords and OAuth tokens are never returned.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `documents_storage_failed` (502, the storage backend failed).",
+        "description": "Returns the selected and effective upload destinations, local-folder override, WebDAV configuration and secret-free Google Drive status. Environment-controlled WebDAV fields are reported individually. Passwords and OAuth tokens are never returned.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `documents_storage_failed` (502, the storage backend failed; a refused or unreachable WebDAV store adds its class in `detail`, such as `HTTP 401` or `ECONNREFUSED`, never its text).",
         "security": [
           {
             "bearerAuth": []
@@ -23057,7 +23246,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Updates the explicit upload destination and any DB-backed WebDAV fields not controlled by environment variables. Sending only `selected_upload_backend` leaves WebDAV fields unchanged. Google Drive must be connected before selection, and a successful OAuth callback never changes the selector. When WebDAV documents exist, connection changes require `confirm_existing_access: true` and a successful read check against an existing object. Use `clear_password: true` to explicitly remove a stored password.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `documents_storage_failed` (502, the storage backend failed).",
+        "description": "Updates the explicit upload destination and any DB-backed WebDAV fields not controlled by environment variables. Sending only `selected_upload_backend` leaves WebDAV fields unchanged. Google Drive must be connected before selection, and a successful OAuth callback never changes the selector. When WebDAV documents exist, connection changes require `confirm_existing_access: true` and a successful read check against an existing object. Use `clear_password: true` to explicitly remove a stored password.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `documents_storage_failed` (502, the storage backend failed; a refused or unreachable WebDAV store adds its class in `detail`, such as `HTTP 401` or `ECONNREFUSED`, never its text).",
         "security": [
           {
             "bearerAuth": []
@@ -23143,7 +23332,7 @@
             }
           }
         },
-        "description": "Tests the effective hybrid configuration with a temporary PUT/GET/DELETE roundtrip in the target folder without persisting supplied connection fields.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `documents_storage_failed` (502, the storage backend failed).",
+        "description": "Tests the effective hybrid configuration with a temporary PUT/GET/DELETE roundtrip in the target folder without persisting supplied connection fields.\n\nAdmin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `documents_storage_failed` (502, the storage backend failed; a refused or unreachable WebDAV store adds its class in `detail`, such as `HTTP 401` or `ECONNREFUSED`, never its text).",
         "security": [
           {
             "bearerAuth": []
@@ -24338,7 +24527,7 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
+        "description": "Admin-only endpoint.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `dms_field_required` (400, name, base URL, API token or - for Papra - the organization ID is empty), `dms_url_invalid` (400, the base URL does not start with http:// or https://), `dms_account_exists` (409, an account with this base URL already exists).",
         "parameters": [
           {
             "name": "X-CSRF-Token",
@@ -24846,7 +25035,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Returns `{ data: { provider, city, units, current, today, forecast } }` or `{ data: null, reason }` when there is no weather: `reason` is `not_configured` (no provider set up, or the chosen one is incomplete - no coordinates, no API key) or `upstream_error` (a provider is set up but the request to it failed; the server logs the cause). `today` carries the calendar day at the weather location plus its high/low; `forecast` holds the following days only. `provider` is `open-meteo` (icon fields are Lucide icon names, `desc` is a `wmo.<code>` i18n key) or `openweathermap` (legacy; icon fields are OWM icon codes, `desc` is localized text).",
+        "description": "Returns `{ data: { provider, city, units, current, today, forecast } }` or `{ data: null, reason }` when there is no weather: `reason` is `not_configured` (no provider set up, or the chosen one is incomplete - no coordinates, no API key) or `upstream_error` (a provider is set up but the request to it failed; the server logs the cause). `city` is the configured place name, or `null` when none is set (the coordinates are never sent in its place). `today` carries the calendar day at the weather location plus its high/low; `forecast` holds the following days only. `provider` is `open-meteo` (icon fields are Lucide icon names, `desc` is a `wmo.<code>` i18n key) or `openweathermap` (legacy; icon fields are OWM icon codes, `desc` is localized text).",
         "security": [
           {
             "bearerAuth": []
@@ -25028,7 +25217,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "`language` is admin-only: an ISO-639-1 code with a locale file, or `null`/`\"\"` to fall back to automatic derivation from `region`. Changing it (or `region`, or `date_format`) re-titles the stored birthday events so every channel stays consistent. `timezone` is admin-only too: an IANA zone (validated against ICU, so aliases like `Europe/Kiev` are accepted), or `null`/`\"\"` to fall back to the `TZ` env var, then the host zone, then UTC. It is the household zone used wherever a time carries none of its own - the calendar day server-side jobs call \"today\", the zone of the exported ICS feed, and the clock time events arrive with in Google and Outlook. The GET response carries both views: `timezone` (what is chosen, `null` for automatic) and `timezone_effective` (what applies, never `null`). `timezone_hint_dismissed` (admin-only boolean, household-wide) records that an admin has answered the question whether the household should adopt the browser zone; every accepted `timezone` write sets it to `true` as well. Weather fields (`weather_provider`, `weather_lat`, `weather_lon`, `weather_city`, `weather_units`) and holiday fields (`holiday_country`, `holiday_subdivision`, `holiday_group`, `holiday_show_public`, `holiday_show_school`, `holiday_public_color`, `holiday_school_color`) are admin-only. `weather_lat`/`weather_lon` are validated to ±90 / ±180, and `null` deletes them; colors must be 6-digit hex. Module feature toggles `health_cycle_enabled` (show the health cycle tab household-wide) and `rewards_require_approval` (redemptions need admin approval) are admin-only booleans, both default `true`. `health_cycle_enabled_user` is the per-user opt-out for the same tab and is writable by anyone for themselves; it can only narrow the household setting, never widen it. The GET response exposes all three views: `health_cycle_enabled` (household), `health_cycle_enabled_user` (mine) and the read-only `health_cycle_effective` (both combined, which is what the UI renders). Overview fields: `dashboard_widgets` (array of `{id, visible, order, size, options?}`; `options` is stored but not interpreted - the server validates only its shape: a flat object, at most 8 keys, values boolean, finite number, short string or list of short strings) and `dashboard_today_glance` are personal and writable by anyone for themselves; sending `null` for either deletes the personal value, so the caller follows the household default again - including every later change to it. `dashboard_widgets_default` and `dashboard_today_glance_default` are the household default and admin-only; they never overwrite a member who has an arrangement of their own, and `null` removes the default.",
+        "description": "`language` is admin-only: an ISO-639-1 code with a locale file, or `null`/`\"\"` to fall back to automatic derivation from `region`. Changing it (or `region`, or `date_format`) re-titles the stored birthday events so every channel stays consistent. `timezone` is admin-only too: an IANA zone (validated against ICU, so aliases like `Europe/Kiev` are accepted), or `null`/`\"\"` to fall back to the `TZ` env var, then the host zone, then UTC. It is the household zone used wherever a time carries none of its own - the calendar day server-side jobs call \"today\", the zone of the exported ICS feed, and the clock time events arrive with in Google and Outlook. The GET response carries both views: `timezone` (what is chosen, `null` for automatic) and `timezone_effective` (what applies, never `null`). `timezone_hint_dismissed` (admin-only boolean, household-wide) records that an admin has answered the question whether the household should adopt the browser zone; every accepted `timezone` write sets it to `true` as well. Weather fields (`weather_provider`, `weather_lat`, `weather_lon`, `weather_city`, `weather_units`) and holiday fields (`holiday_country`, `holiday_subdivision`, `holiday_group`, `holiday_show_public`, `holiday_show_school`, `holiday_public_color`, `holiday_school_color`) are admin-only. `weather_lat`/`weather_lon` are validated to ±90 / ±180, and `null` deletes them; colors must be 6-digit hex. Module feature toggles `health_cycle_enabled` (show the health cycle tab household-wide) and `rewards_require_approval` (redemptions need admin approval) are admin-only booleans, both default `true`. `tasks_late_decay_enabled` (admin-only boolean, default `false`) is the late-completion decay: a task completed after its `due_date` earns one point less per full overdue day (calendar days in the household zone), never below one point; the ledger rows of a reduced earning carry `decay_days` and `base_points`, other earn rows keep both `null`. `health_cycle_enabled_user` is the per-user opt-out for the same tab and is writable by anyone for themselves; it can only narrow the household setting, never widen it. The GET response exposes all three views: `health_cycle_enabled` (household), `health_cycle_enabled_user` (mine) and the read-only `health_cycle_effective` (both combined, which is what the UI renders). Overview fields: `dashboard_widgets` (array of `{id, visible, order, size, options?}`; `options` is stored but not interpreted - the server validates only its shape: a flat object, at most 8 keys, values boolean, finite number, short string or list of short strings) and `dashboard_today_glance` are personal and writable by anyone for themselves; sending `null` for either deletes the personal value, so the caller follows the household default again - including every later change to it. `dashboard_widgets_default` and `dashboard_today_glance_default` are the household default and admin-only; they never overwrite a member who has an arrangement of their own, and `null` removes the default.",
         "security": [
           {
             "bearerAuth": []
@@ -25422,7 +25611,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "The caller's own reminders that are not due yet, for a client that schedules them on the device. Both edges of the window count, and it spans at most 14 days. Only what lies after the current moment comes back, also when `from` is in the past: a reminder is in `GET /reminders/pending` from the moment it is due and in this list until then, never in both. Sorted by the moment the reminder fires, at most 200 rows, counted after everything the caller may not see is left out. The list is a snapshot: the server keeps rebuilding derived types, and it does not know what a client scheduled.\n\nThe rules of `GET /reminders/pending` apply: own, non-dismissed rows only, nothing whose entity is hidden from the caller, no task or event that is gone, nothing from a module the household switched off, and only origins the caller may read. On top of them, a task that is done or archived is left out, and comes back when it is reopened: what a client schedules fires without asking again. A client still has to cancel its own notification when a task is checked off, because this list only changes at the next fetch. An API token needs `calendar:read` to reach this route and a read scope of the module behind each origin for its rows, for example `tasks:read` for `task`; a row the caller may not read is left out, not refused.\n\nUse `fires_at`, not `remind_at`, to schedule: `remind_at` is UTC without a suffix, and rows written up to v2.68.0 may carry an offset.",
+        "description": "The caller's own reminders that are not due yet, for a client that schedules them on the device. Both edges of the window count, and it spans at most 14 days. Only what lies after the current moment comes back, also when `from` is in the past: a reminder is in `GET /reminders/pending` from the moment it is due and in this list until then, never in both. Sorted by the moment the reminder fires, at most 200 rows, counted after everything the caller may not see is left out. The list is a snapshot: the server keeps rebuilding derived types, and it does not know what a client scheduled.\n\nThe rules of `GET /reminders/pending` apply: own, non-dismissed rows only, nothing whose entity is hidden from the caller, no task or event that is gone, no reminder of a series whose first occurrence was deleted, nothing from a module the household switched off, and only origins the caller may read. On top of them, a task that is done or archived is left out, and comes back when it is reopened: what a client schedules fires without asking again. A client still has to cancel its own notification when a task is checked off, because this list only changes at the next fetch. An API token needs `calendar:read` to reach this route and a read scope of the module behind each origin for its rows, for example `tasks:read` for `task`; a row the caller may not read is left out, not refused.\n\nUse `fires_at`, not `remind_at`, to schedule: `remind_at` is UTC without a suffix, and rows written up to v2.68.0 may carry an offset.",
         "security": [
           {
             "bearerAuth": []
@@ -44055,6 +44244,9 @@
           "created_at",
           "updated_at",
           "external_source",
+          "rotation_mode",
+          "rotation_last_user",
+          "rotation_last_position",
           "assigned_name",
           "assigned_color",
           "assigned_avatar",
@@ -44255,6 +44447,13 @@
               "null"
             ]
           },
+          "external_rrule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "RRULE of a series another app owns (iOS Reminders, Tasks.org), as that app wrote it; null otherwise. A rule Yuvomi can follow also arrives as `is_recurring`/`recurrence_rule`, and ticking the task off then moves the series on in that app. Otherwise ticking it off answers 409 `task_foreign_series` (#2506, #2515)."
+          },
           "target_caldav_account_id": {
             "type": [
               "integer",
@@ -44322,6 +44521,49 @@
               "type": "string"
             },
             "description": "Free-form labels, distinct from the single `category`."
+          },
+          "rotation_mode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "round_robin",
+              null
+            ],
+            "description": "Rotation of a recurring series (#1763): `round_robin` hands every follow-up instance to the next member of `rotation_pool` in a fixed order, null without rotation."
+          },
+          "rotation_last_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Informational: the member the pointer names. The order reads `rotation_last_position`, never this field."
+          },
+          "rotation_last_position": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "The pointer: the pool position that received the last occurrence, null before the first hand-over."
+          },
+          "rotation_pool": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "description": "Member ids in delivery order, deactivated members included, null when the task does not rotate."
+          },
+          "rotation_next_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The member the next occurrence goes to, by the same rule that hands it out; null when rotation is off or no member can take it."
           }
         }
       },
@@ -44377,6 +44619,9 @@
           "created_at",
           "updated_at",
           "external_source",
+          "rotation_mode",
+          "rotation_last_user",
+          "rotation_last_position",
           "assigned_name",
           "assigned_color",
           "assigned_avatar",
@@ -44581,6 +44826,13 @@
               "null"
             ]
           },
+          "external_rrule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "RRULE of a series another app owns (iOS Reminders, Tasks.org), as that app wrote it; null otherwise. A rule Yuvomi can follow also arrives as `is_recurring`/`recurrence_rule`, and ticking the task off then moves the series on in that app. Otherwise ticking it off answers 409 `task_foreign_series` (#2506, #2515)."
+          },
           "target_caldav_account_id": {
             "type": [
               "integer",
@@ -44648,6 +44900,49 @@
               "type": "string"
             },
             "description": "Free-form labels, distinct from the single `category`."
+          },
+          "rotation_mode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "round_robin",
+              null
+            ],
+            "description": "Rotation of a recurring series (#1763): `round_robin` hands every follow-up instance to the next member of `rotation_pool` in a fixed order, null without rotation."
+          },
+          "rotation_last_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Informational: the member the pointer names. The order reads `rotation_last_position`, never this field."
+          },
+          "rotation_last_position": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "The pointer: the pool position that received the last occurrence, null before the first hand-over."
+          },
+          "rotation_pool": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "description": "Member ids in delivery order, deactivated members included, null when the task does not rotate."
+          },
+          "rotation_next_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The member the next occurrence goes to, by the same rule that hands it out; null when rotation is off or no member can take it."
           },
           "subtask_total": {
             "type": "integer",
@@ -44742,6 +45037,9 @@
           "created_at",
           "updated_at",
           "external_source",
+          "rotation_mode",
+          "rotation_last_user",
+          "rotation_last_position",
           "assigned_name",
           "assigned_color",
           "assigned_avatar",
@@ -44945,6 +45243,13 @@
               "null"
             ]
           },
+          "external_rrule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "RRULE of a series another app owns (iOS Reminders, Tasks.org), as that app wrote it; null otherwise. A rule Yuvomi can follow also arrives as `is_recurring`/`recurrence_rule`, and ticking the task off then moves the series on in that app. Otherwise ticking it off answers 409 `task_foreign_series` (#2506, #2515)."
+          },
           "target_caldav_account_id": {
             "type": [
               "integer",
@@ -45013,6 +45318,49 @@
             },
             "description": "Free-form labels, distinct from the single `category`."
           },
+          "rotation_mode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "round_robin",
+              null
+            ],
+            "description": "Rotation of a recurring series (#1763): `round_robin` hands every follow-up instance to the next member of `rotation_pool` in a fixed order, null without rotation."
+          },
+          "rotation_last_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Informational: the member the pointer names. The order reads `rotation_last_position`, never this field."
+          },
+          "rotation_last_position": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "The pointer: the pool position that received the last occurrence, null before the first hand-over."
+          },
+          "rotation_pool": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "description": "Member ids in delivery order, deactivated members included, null when the task does not rotate."
+          },
+          "rotation_next_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The member the next occurrence goes to, by the same rule that hands it out; null when rotation is off or no member can take it."
+          },
           "subtasks": {
             "type": "array",
             "items": {
@@ -45065,6 +45413,9 @@
           "created_at",
           "updated_at",
           "external_source",
+          "rotation_mode",
+          "rotation_last_user",
+          "rotation_last_position",
           "assigned_name",
           "assigned_color",
           "assigned_avatar",
@@ -45267,6 +45618,13 @@
               "null"
             ]
           },
+          "external_rrule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "RRULE of a series another app owns (iOS Reminders, Tasks.org), as that app wrote it; null otherwise. A rule Yuvomi can follow also arrives as `is_recurring`/`recurrence_rule`, and ticking the task off then moves the series on in that app. Otherwise ticking it off answers 409 `task_foreign_series` (#2506, #2515)."
+          },
           "target_caldav_account_id": {
             "type": [
               "integer",
@@ -45334,6 +45692,49 @@
               "type": "string"
             },
             "description": "Free-form labels, distinct from the single `category`."
+          },
+          "rotation_mode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "round_robin",
+              null
+            ],
+            "description": "Rotation of a recurring series (#1763): `round_robin` hands every follow-up instance to the next member of `rotation_pool` in a fixed order, null without rotation."
+          },
+          "rotation_last_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Informational: the member the pointer names. The order reads `rotation_last_position`, never this field."
+          },
+          "rotation_last_position": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "The pointer: the pool position that received the last occurrence, null before the first hand-over."
+          },
+          "rotation_pool": {
+            "type": [
+              "array",
+              "null"
+            ],
+            "items": {
+              "type": "integer"
+            },
+            "description": "Member ids in delivery order, deactivated members included, null when the task does not rotate."
+          },
+          "rotation_next_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "The member the next occurrence goes to, by the same rule that hands it out; null when rotation is off or no member can take it."
           },
           "subtasks": {
             "type": "array",
@@ -45738,6 +46139,26 @@
             "type": "boolean",
             "description": "Read as true or false, so 0 and 1 work as well."
           },
+          "rotation_mode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "round_robin",
+              null
+            ],
+            "description": "Requires a recurring task and a pool of at least 2 household members (400 otherwise). Null clears mode, pool and pointer. Omitted on update, the rotation stays."
+          },
+          "rotation_pool": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Member ids, the list order is the delivery order. On update it is merged with the stored pool: a deactivated member left out keeps its place."
+          },
           "sync_target": {
             "type": [
               "string",
@@ -45902,6 +46323,26 @@
           "locked": {
             "type": "boolean",
             "description": "Read as true or false, so 0 and 1 work as well."
+          },
+          "rotation_mode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "round_robin",
+              null
+            ],
+            "description": "Requires a recurring task and a pool of at least 2 household members (400 otherwise). Null clears mode, pool and pointer. Omitted on update, the rotation stays."
+          },
+          "rotation_pool": {
+            "type": "array",
+            "maxItems": 10,
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "description": "Member ids, the list order is the delivery order. On update it is merged with the stored pool: a deactivated member left out keeps its place."
           },
           "sync_target": {
             "type": [
@@ -46499,6 +46940,13 @@
               "string",
               "null"
             ]
+          },
+          "provider_status": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The event status an ICS subscription, CalDAV or iCloud reports: `TENTATIVE`, `CONFIRMED` or `CANCELLED`, null when the provider sends none and for every other event. A `CANCELLED` event stays in the calendar answers but reminds no one and is left out of `GET /calendar/upcoming`, the dashboard and the countdowns."
           },
           "subscription_id": {
             "type": [
@@ -48901,6 +49349,79 @@
           "credential"
         ]
       },
+      "DatabaseKeyStatus": {
+        "type": "object",
+        "description": "Where this installation's DB_ENCRYPTION_KEY comes from, without its value.",
+        "properties": {
+          "origin": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "env",
+              "file",
+              "stored",
+              "generated",
+              null
+            ],
+            "description": "`env`: DB_ENCRYPTION_KEY is set. `file`: read through DB_ENCRYPTION_KEY_FILE. `stored`: read from `.secrets/DB_ENCRYPTION_KEY` next to the database. `generated`: created there on this start. `null`: no key, or the origin is not known."
+          },
+          "encrypted": {
+            "type": "boolean",
+            "description": "Whether the database is encrypted with a key."
+          }
+        },
+        "required": [
+          "origin",
+          "encrypted"
+        ]
+      },
+      "DatabaseKey": {
+        "type": "object",
+        "properties": {
+          "origin": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "env",
+              "file",
+              "stored",
+              "generated",
+              null
+            ],
+            "description": "As in DatabaseKeyStatus."
+          },
+          "encrypted": {
+            "type": "boolean"
+          },
+          "key": {
+            "type": "string",
+            "description": "The key itself. Only for `stored` and `generated`, the keys Yuvomi created on its own."
+          },
+          "path": {
+            "type": "string",
+            "description": "The file the key is stored in. Only together with `key`."
+          }
+        },
+        "required": [
+          "origin",
+          "encrypted"
+        ]
+      },
+      "DatabaseKeyResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/DatabaseKey"
+          }
+        },
+        "required": [
+          "data"
+        ]
+      },
       "ClientPermissions": {
         "type": "object",
         "description": "The resolved rights of the account, for hiding what it cannot reach. The server enforces them either way. A device is an ordinary member here, also for an administrator.",
@@ -49542,6 +50063,13 @@
               "null"
             ]
           },
+          "external_rrule": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "RRULE of a series another app owns (iOS Reminders, Tasks.org), as that app wrote it; null otherwise. A rule Yuvomi can follow also arrives as `is_recurring`/`recurrence_rule`, and ticking the task off then moves the series on in that app. Otherwise ticking it off answers 409 `task_foreign_series` (#2506, #2515)."
+          },
           "target_caldav_account_id": {
             "type": [
               "integer",
@@ -49595,6 +50123,32 @@
             "items": {
               "$ref": "#/components/schemas/AssignedPerson"
             }
+          },
+          "rotation_mode": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "round_robin",
+              null
+            ],
+            "description": "Rotation of a recurring series (#1763): `round_robin` hands every follow-up instance to the next member of `rotation_pool` in a fixed order, null without rotation."
+          },
+          "rotation_last_user": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Informational: the member the pointer names. The order reads `rotation_last_position`, never this field."
+          },
+          "rotation_last_position": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "description": "The pointer: the pool position that received the last occurrence, null before the first hand-over."
           }
         },
         "required": [
@@ -49620,6 +50174,9 @@
           "created_at",
           "updated_at",
           "external_source",
+          "rotation_mode",
+          "rotation_last_user",
+          "rotation_last_position",
           "assigned_name",
           "assigned_color",
           "assigned_users"

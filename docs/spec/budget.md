@@ -1,6 +1,6 @@
 # Spec: Budget
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/budget/`. Pure ports: `Money`
 (`utils/money.js`, `utils/amount-field.js`), `RegionPresets` (`settings/region-presets.js`),
@@ -125,6 +125,10 @@ found" (`common.errorNotFound`, `loadErrorSentence`), never as an unsupported op
   categories against the previous period with plan targets, CSV export, empty state that adds an
   entry dated into the period, error with retry. Drawn with Compose Canvas.
 - **BUDGET-R21** `budget: read`: everything readable, no FAB, no Book, no Edit, no menus that write.
+
+- **BUDGET-R31** A category or subcategory someone else deleted meanwhile (2.86.0,
+  `budget_category_not_found`, `budget_subcategory_not_found`) reads `category.errorGone` /
+  `category.errorSubGone` and reloads the list; deleting one that is already gone counts as done.
 
 ### Differs / left out
 

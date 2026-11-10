@@ -161,6 +161,10 @@ fun EventDetailScreen(back: () -> Unit, edit: () -> Unit) {
                 Spacer(Modifier.width(10.dp))
                 Text(text.whenText(ev), style = MaterialTheme.typography.titleMedium)
             }
+            // CAL-R30: the provider cancelled it; it stays visible so nobody wonders where it went.
+            if (CalendarRules.isProviderCancelled(ev)) {
+                Text(t("calendar.cancelled"), style = MaterialTheme.typography.labelLarge, color = Yuvomi.colors.danger)
+            }
             if (ev.assignedUsers.isNotEmpty()) {
                 Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
                     ev.assignedUsers.forEach { p ->

@@ -52,6 +52,17 @@ object WidgetConfig {
         return 0
     }
 
+    /**
+     * OVERVIEW-R18: the phone arrangement (upstream 2.85.0, #2109, `mergePhoneDisplayCfg`).
+     * With `dashboard_widgets_phone` the phone takes its own order and visibility, while size
+     * and options follow the desktop arrangement; without it the phone follows the desktop.
+     */
+    fun forPhone(desktop: JsonElement?, phone: JsonElement?): List<Widget> {
+        val desk = normalize(desktop)
+        if (phone !is JsonArray) return desk
+        return normalize(phone).map { p -> desk.firstOrNull { it.id == p.id }?.copy(visible = p.visible, order = p.order) ?: p }
+    }
+
     fun normalize(input: JsonElement?): List<Widget> {
         val valid = (input as? JsonArray).orEmpty().mapIndexedNotNull { i, element ->
             val w = element as? JsonObject ?: return@mapIndexedNotNull null

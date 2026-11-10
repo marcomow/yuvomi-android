@@ -86,4 +86,21 @@ class WidgetConfigTest {
         assertEquals("1x2", WidgetConfig.nearestPreset("1x4"))
         assertEquals("2x1", WidgetConfig.nearestPreset("4x1"))
     }
+
+    /** OVERVIEW-A14: the phone takes its own order and visibility, size from the desktop. */
+    @Test fun `the phone arrangement wins order and visibility`() {
+        fun w(id: String, order: Int, visible: Boolean = true, size: String? = null) = buildJsonObject {
+            put("id", id); put("order", order); put("visible", visible); if (size != null) put("size", size)
+        }
+        val desktop = JsonArray(listOf(w("tasks", 0, size = "2x2"), w("shopping", 1), w("calendar", 2)))
+        val phone = JsonArray(listOf(w("calendar", 0), w("tasks", 1), w("shopping", 2, visible = false)))
+        val merged = WidgetConfig.forPhone(desktop, phone)
+        val mine = setOf("calendar", "tasks", "shopping")
+        assertEquals(listOf("calendar", "tasks", "shopping"), merged.map { it.id }.filter { it in mine })
+        assertEquals("2x2", merged.first { it.id == "tasks" }.size)
+        assertFalse(merged.first { it.id == "shopping" }.visible)
+        // Without a phone arrangement (null) the phone follows the desktop.
+        assertEquals(WidgetConfig.normalize(desktop), WidgetConfig.forPhone(desktop, JsonNull))
+        assertEquals(WidgetConfig.normalize(desktop), WidgetConfig.forPhone(desktop, null))
+    }
 }

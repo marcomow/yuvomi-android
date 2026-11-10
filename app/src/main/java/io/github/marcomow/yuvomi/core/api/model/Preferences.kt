@@ -11,6 +11,8 @@ data class Preferences(
     @SerialName("timezone_effective") val timezoneEffective: String? = null,
     @SerialName("disabled_modules") val disabledModules: List<String> = emptyList(),
     @SerialName("dashboard_widgets") val dashboardWidgets: JsonElement? = null,
+    /** The member's own phone arrangement, null when the phone follows the desktop (upstream 2.85.0). */
+    @SerialName("dashboard_widgets_phone") val dashboardWidgetsPhone: JsonElement? = null,
     @SerialName("dashboard_today_glance") val dashboardTodayGlance: FlexBool = true,
     @SerialName("tasks_default_visibility") val tasksDefaultVisibility: String = "all",
     @SerialName("tasks_default_locked") val tasksDefaultLocked: FlexBool = false,

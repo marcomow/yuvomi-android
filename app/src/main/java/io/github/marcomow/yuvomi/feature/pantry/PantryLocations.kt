@@ -112,7 +112,9 @@ class PantryLocationsViewModel(private val container: AppContainer) : ViewModel(
         } catch (e: ApiProblem) {
             // A location someone else deleted meanwhile: reload, as the manager's `_fail` does.
             if (e is ApiProblem.Http && e.status == 404) load()
-            Outcome(PantryText.locationErrorKey(e, deleting), false)
+            // PANTRY-R28: deleting one that is already gone simply counts as done.
+            if (deleting && e is ApiProblem.Http && e.reason == "pantry_location_not_found") Outcome(okKey, true)
+            else Outcome(PantryText.locationErrorKey(e, deleting), false)
         } finally {
             _state.update { it.copy(busy = false) }
         }

@@ -1,6 +1,6 @@
 # Spec: Tasks
 
-Status: ready for implementation · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007,
+Status: ready for implementation · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007,
 0010
 
 ## Purpose
@@ -247,6 +247,22 @@ Error `reason` values the app maps to messages: `tasks_task_not_found` (404), `t
   for `archived`. Upstream's own archive (`archived_at`) is separate and counts as archived in
   the Tags view.
 
+### Series another app owns, rotation, primary assignee (2.85.0 to 2.87.0)
+
+- **TASKS-R42** A task with `external_rrule` (a series from iOS Reminders or Tasks.org, #2506)
+  that Yuvomi cannot continue, by upstream's `repeatsElsewhere`, shows "Repeats in another app"
+  (`tasks.foreignSeries`) with the repeat icon in the list and, in the detail,
+  `tasks.foreignSeriesDetail`. Ticking it off is still offered; the server answers
+  `409 task_foreign_series`, shown as `tasks.errorForeignSeries`. Code: `TaskSeries`.
+- **TASKS-R43** A rotating task (`rotation_mode` `round_robin` with a pool of at least two,
+  #1763) shows a Rotation row under the recurrence: `tasks.rotationModeRoundRobin`, and
+  `tasks.rotationNext` with the member `rotation_next_user` names when the app knows them. The
+  app never predicts the next member itself. Setting or editing a rotation stays in the web app;
+  the editor never sends the rotation fields, so an edit leaves it untouched.
+- **TASKS-R44** `assigned_users` lists the primary assignee first (#2569). When an edit changes
+  the people, `assigned_to` starts with the current primary while they stay assigned, and the
+  others follow by id.
+
 ## Acceptance criteria
 
 | ID | Given / When / Then | Level |
@@ -269,6 +285,9 @@ Error `reason` values the app maps to messages: `tasks_task_not_found` (404), `t
 | TASKS-A16 | Given a member without Documents access then `documents` is `null` and the detail has no documents section. | contract + ui |
 | TASKS-A17 | Given a network failure on create then a retry sends the same `Idempotency-Key` and the server holds one task. | contract |
 | TASKS-A18 | Given a household of one then the editor has no assignee or visibility field and a saved edit sends neither. | ui |
+| TASKS-A19 | Given upstream's `repeatsElsewhere` cases (no rule, a weekly rule, monthly on the 31st, `BYMONTHDAY=-1`, 29 February, `UNTIL` with and without a time, a subtask) then the port answers the same. | unit |
+| TASKS-A20 | Given a rotating task then the detail names the member `rotation_next_user` names, the mode alone when that member is unknown, and no row with a pool of one or another mode. | unit |
+| TASKS-A21 | Given a task whose primary is Max when Kevin is added then `assigned_to` starts with Max; when Max is removed it is sorted by id. | unit |
 
 ## Strings
 

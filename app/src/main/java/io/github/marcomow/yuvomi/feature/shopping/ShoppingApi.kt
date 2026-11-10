@@ -74,6 +74,13 @@ class ShoppingApi(private val client: YuvomiClient) {
     suspend fun suggestions(q: String): List<Suggestion> =
         client.call(ShoppingOperation.SUGGESTIONS, query = listOf("q" to q)).decodeData(ListSerializer(Suggestion.serializer()))
 
+    /** SHOP-R40: the last purchase of an item's name, its own current one left out. */
+    suspend fun lastPurchase(name: String, excludeItemId: Int): Purchase? =
+        client.call(
+            ShoppingOperation.PRICE_HISTORY,
+            query = listOf("name" to name, "exclude_item_id" to excludeItemId.toString(), "limit" to "1"),
+        ).decodeData(ListSerializer(Purchase.serializer())).firstOrNull()
+
     suspend fun versions(): List<ListVersion> =
         client.call(ShoppingOperation.VERSIONS).decodeData(ListSerializer(ListVersion.serializer()))
 

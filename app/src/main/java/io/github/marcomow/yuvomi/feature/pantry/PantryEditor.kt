@@ -82,6 +82,8 @@ class PantryEditorViewModel(
         val expiresOn: LocalDate? = null,
         val minQuantity: String = "",
         val notes: String = "",
+        /** The minimum as the field first showed it: a save sends it only when it changed (PANTRY-R27). */
+        val initialMinQuantity: String = "",
         /** The "more details" fold: open when editing a batch with a minimum or a note. */
         val detailsOpen: Boolean = false,
     )
@@ -140,6 +142,9 @@ class PantryEditorViewModel(
                 expiresOn = form.expiresOn?.toString(),
                 minQuantity = if (minRaw.isEmpty()) null else PantryUnits.normalizeQuantity(PantryUnits.parse(minRaw), fallback = 0.0),
                 notes = form.notes.trim().ifEmpty { null },
+                // The minimum is the product's: a new batch, or a rename onto another product, must
+                // not overwrite it with what the field happened to show.
+                sendMinQuantity = minRaw != form.initialMinQuantity.trim(),
             )
         }
 
@@ -155,6 +160,7 @@ class PantryEditorViewModel(
                 expiresOn = item.expiresOn?.let { runCatching { LocalDate.parse(it.take(10)) }.getOrNull() },
                 minQuantity = item.minQuantity?.let(::plain).orEmpty(),
                 notes = item.notes.orEmpty(),
+                initialMinQuantity = item.minQuantity?.let(::plain).orEmpty(),
                 detailsOpen = item.minQuantity != null || !item.notes.isNullOrEmpty(),
             )
         }

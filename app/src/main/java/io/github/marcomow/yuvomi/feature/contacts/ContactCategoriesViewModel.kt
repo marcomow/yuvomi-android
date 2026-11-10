@@ -100,7 +100,12 @@ class ContactCategoriesViewModel(private val container: AppContainer, private va
     }
 
     fun delete(key: String) = run("category.deleted") { api ->
-        api.deleteCategory(key)
+        // Upstream 2.86.0: deleting a category that is already gone simply counts as done.
+        try {
+            api.deleteCategory(key)
+        } catch (e: ApiProblem.Http) {
+            if (e.reason != "contacts_category_not_found") throw e
+        }
         _state.update { s -> s.copy(categories = s.categories.filter { it.key != key }) }
     }
 }

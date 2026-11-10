@@ -294,6 +294,9 @@ object BudgetText {
             "subcategory_in_use" -> strings.t("category.errorSubInUse", "count" to (http.count ?: 0))
             "subcategory_last" -> strings.t("category.errorSubLast")
             "subcategory_exists" -> strings.t("category.errorSubExists")
+            // Upstream 2.86.0: the category or subcategory was deleted meanwhile.
+            "budget_category_not_found" -> strings.t("category.errorGone")
+            "budget_subcategory_not_found" -> strings.t("category.errorSubGone")
             else -> budgetError(e, strings).message
         }
     }

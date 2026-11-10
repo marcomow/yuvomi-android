@@ -1,6 +1,6 @@
 # Spec: Recipes
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0012,
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0012,
 0015
 
 ## Purpose

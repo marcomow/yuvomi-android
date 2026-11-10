@@ -72,6 +72,10 @@ class ShoppingViewModel(private val container: AppContainer, requestedList: Int?
     var strings: Strings? = null
 
     private val api: ShoppingApi? get() = container.session.connection?.client?.let { ShoppingApi(it) }
+
+    /** SHOP-R40: the item's last purchase, or null; a failure only leaves the line out. */
+    suspend fun lastPurchase(item: ShoppingItem): Purchase? =
+        runCatching { api?.lastPurchase(item.name, item.id) }.getOrNull()
     private val feed = LiveFeed()
     private val requested = requestedList
     var lastLoaded = 0L

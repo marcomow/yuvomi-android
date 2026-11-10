@@ -97,7 +97,7 @@ object OverviewBuilder {
     ): OverviewModel {
         val now = time.now()
         val today = now.toLocalDate()
-        val widgets = WidgetConfig.normalize(prefs.dashboardWidgets)
+        val widgets = WidgetConfig.forPhone(prefs.dashboardWidgets, prefs.dashboardWidgetsPhone)
 
         fun moduleOn(widget: String): Boolean {
             if (widget in prefs.disabledModules) return false

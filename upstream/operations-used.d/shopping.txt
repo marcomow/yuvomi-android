@@ -21,6 +21,7 @@ PUT /api/v1/shopping/stores/{id}
 DELETE /api/v1/shopping/stores/{id}
 GET /api/v1/shopping/suggestions
 GET /api/v1/shopping/versions
+GET /api/v1/shopping/price-history
 GET /api/v1/shopping/send-recipients
 POST /api/v1/shopping/{listId}/send
 POST /api/v1/shopping/{listId}/import-meal-plan

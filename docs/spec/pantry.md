@@ -1,6 +1,6 @@
 # Spec: Pantry
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/pantry/` (`PantryView`, `PantryStatus`,
 `PantryUnits` and `PantryText` are the pure ports; `PantryViewModel` the list, `PantryEditor`,
@@ -185,6 +185,31 @@ requirement says so ("Differs:").
   every change. Differs: the web app's drag handle is left out; the row menu's move up and down
   (which upstream offers too) do the same.
 
+### Minimum per product (2.85.0, part 3 of #1448)
+
+- **PANTRY-R23** Low and out belong to the product (`pantryProductStock`): the sum of its
+  batches against the product's `min_quantity` from `products` of `GET /pantry`. A batch without
+  a product stands for itself with its own minimum. A product without batches is out only when
+  it has a minimum above 0, and never low. Expired and soon still count batches; the "Running
+  low" chip counts products. `min_quantity` on a batch is deprecated upstream (removal on or
+  after 2027-03-01); it is read for a batch without a product, and on a server before 2.85.0,
+  whose products carry no minimum, the highest minimum of the batches counts.
+- **PANTRY-R24** "Running low" and "Out of stock" stand on the row that stands for the product:
+  a lone batch, or the product row of several batches, never a batch row under it. The cart
+  follows the badge.
+- **PANTRY-R25** The "Running low" chip lists products (`lowProducts`): out first, then the
+  lowest share of the minimum, then by name, each drawn like the plain list. "Add all to
+  shopping list" adds each product once.
+- **PANTRY-R26** The cart of a product hands over the batch for a product with one, otherwise
+  `{ pantry_product_id, quantity }` with the shortfall of the total to the minimum as text.
+- **PANTRY-R27** A product without batches shows its minimum ("min. 3 pcs",
+  `pantry.minimumShort`) and the cart only when it has one. The editor sends `min_quantity` only
+  when the field changed from what it first showed, so a new batch or a rename leaves the
+  product's minimum alone.
+- **PANTRY-R28** The location manager reads upstream's reasons (`pantry_location_not_found`,
+  `pantry_location_exists`, `pantry_location_last`, 2.86.0); deleting a location that is already
+  gone counts as done. Servers without the reasons keep the sentences of PANTRY-R20.
+
 ### Errors and offline
 
 - **PANTRY-R21** Failures read as upstream's `errorSentence`: offline `common.errorOfflineMutation`;
@@ -218,6 +243,13 @@ requirement says so ("Differs:").
 | PANTRY-A14 | Given a product without batches deleted from its row menu when undo is used then no `DELETE` goes out; without undo one goes out after the snackbar. Batches share the same path. | ui | passing (`PantryScreenTest`) |
 | PANTRY-A15 | Given several shopping lists when the cart is used then the picker asks, the transfer names the list, and undo sends the `added_ids`. | ui | passing (`PantryScreenTest`) |
 | PANTRY-A16 | Given seeded-like stock then the screen shows category sections, a product's total, places and badges, its batches when opened, and a flat list under a chip. | ui | passing (`PantryScreenTest`) |
+| PANTRY-A17 | Given toothpaste 1 + 8 against a minimum of 3, and milk 1 + 1 + 2 l against 5 l then toothpaste is not low and milk is low once, and every milk batch matches "Running low". | unit | passing (`PantryProductStockTest`) |
+| PANTRY-A18 | Given products without batches with minimum 3, none and 0 then only the first is out, and none is low. | unit | passing (`PantryProductStockTest`) |
+| PANTRY-A19 | Given three low products then the chip lists out first, then by share of the minimum, and the search narrows it. | unit | passing (`PantryProductStockTest`) |
+| PANTRY-A20 | Given a low product with two batches then its entry is the product with the shortfall; with one batch, the batch. | unit | passing (`PantryProductStockTest`) |
+| PANTRY-A21 | Given a product with several batches then a batch row carries no stock state; a lone batch does. | unit | passing (`PantryProductStockTest`) |
+| PANTRY-A22 | Given the editor when the minimum field is unchanged then `min_quantity` is not sent; cleared, it is sent as null. | unit | passing (`PantryLogicTest`) |
+| PANTRY-A23 | Given a batch with minimum 3 then `products` in `GET /pantry` carries `min_quantity` 3 and `total_quantity` 1, and a product goes to a list with a quantity. | contract | CI |
 
 ## Strings
 

@@ -24,12 +24,20 @@ object PantryView {
         val batches: List<PantryItem>,
         /** Matched through a batch only (a place, a note): shown open so the hit is visible. */
         val openForSearch: Boolean,
-    )
+        /** The product's low and out over all its batches (PANTRY-R23). */
+        val stock: PantryStatus.Stock = PantryStatus.Stock(key, null, 0.0, out = false, low = false),
+    ) {
+        val minQuantity: Double? get() = stock.min
+    }
 
     data class Section(val category: String, val products: List<ProductEntry>)
 
-    /** How a batch row is drawn (`rowOptions`). */
-    data class RowOptions(val batch: Boolean, val byDate: Boolean, val total: Double?)
+    /**
+     * How a batch row is drawn (`rowOptions`). `stock` is the product's low and out, only when
+     * the row stands for the product (its only batch); a batch of a product with several
+     * carries no "Running low" and no cart, those are on the product row (PANTRY-R24).
+     */
+    data class RowOptions(val batch: Boolean, val byDate: Boolean, val total: Double?, val stock: PantryStatus.Stock? = null)
 
     data class Chip(val id: String, val labelKey: String?, val location: PantryLocation?, val count: Int?)
 
@@ -94,9 +102,51 @@ object PantryView {
     /** Number of distinct places among [batches], "no place" counting as one. */
     fun placeCount(batches: List<PantryItem>): Int = batches.map { it.locationId ?: -1 }.toSet().size
 
+    /** `productStock`: the stock of every product as the rows show it. */
+    fun stock(input: Input): Map<String, PantryStatus.Stock> = PantryStatus.productStock(input.items, input.products)
+
     /** `productSections`: products in sections by category, batches under them. */
     fun sections(input: Input, matching: List<PantryItem>): List<Section> {
+        val products = entries(input, matching)
+        val catOrder = input.categories.withIndex().associate { (i, c) -> c.name to i }
+        fun rank(name: String) = catOrder[name] ?: input.categories.size
+        return products.groupBy { it.category }.entries
+            .sortedWith(compareBy<Map.Entry<String, List<ProductEntry>>> { rank(it.key) }.then { a, b -> compareNames(a.key, b.key) })
+            .map { (category, list) ->
+                Section(category, list.sortedWith(compareBy<ProductEntry, String>(::compareNames) { it.name }.thenBy { it.id ?: 0 }))
+            }
+    }
+
+    /**
+     * `lowProducts`: the "Running low" chip lists products (PANTRY-R25). Out first, then the
+     * lowest share of the minimum, then by name; the search narrows it like the plain list.
+     */
+    fun lowProducts(input: Input): List<ProductEntry> {
+        val q = input.query.trim().lowercase()
+        val matching = input.items.filter { item ->
+            q.isEmpty() ||
+                item.name.lowercase().contains(q) ||
+                item.notes?.lowercase()?.contains(q) == true ||
+                (item.locationName != null && input.placeLabel(item.locationName).lowercase().contains(q))
+        }
+        // A low product has a minimum above 0 (out wins at 0), so the share is defined.
+        fun share(p: ProductEntry) = if (p.stock.out) 0.0 else p.stock.total / (p.stock.min ?: 1.0)
+        return entries(input, matching)
+            .filter { it.stock.low || it.stock.out }
+            .sortedWith(
+                compareByDescending<ProductEntry> { it.stock.out }
+                    .thenBy { share(it) }
+                    .then { a, b -> compareNames(a.name, b.name) },
+            )
+    }
+
+    /**
+     * `productEntries`: the products the matching batches belong to, and the products without
+     * batches whose name matches the search; each with its batches in display order and its stock.
+     */
+    private fun entries(input: Input, matching: List<PantryItem>): List<ProductEntry> {
         val byProduct = batchesByProduct(input.items)
+        val stock = stock(input)
         val known = input.products.associateBy { "p${it.id}" }
         val q = input.query.trim().lowercase()
         val keys = LinkedHashSet(matching.map(::productKeyOf))
@@ -124,21 +174,32 @@ object PantryView {
                 category = product?.category?.takeIf { it.isNotEmpty() } ?: first?.category?.takeIf { it.isNotEmpty() } ?: DEFAULT_CATEGORY,
                 batches = batches,
                 openForSearch = q.isNotEmpty() && batches.size > 1 && !name.lowercase().contains(q),
+                stock = stock[key] ?: PantryStatus.Stock(key, product?.minQuantity, 0.0, PantryStatus.hasMinimum(product?.minQuantity), false),
             )
         }
-        val catOrder = input.categories.withIndex().associate { (i, c) -> c.name to i }
-        fun rank(name: String) = catOrder[name] ?: input.categories.size
-        return products.groupBy { it.category }.entries
-            .sortedWith(compareBy<Map.Entry<String, List<ProductEntry>>> { rank(it.key) }.then { a, b -> compareNames(a.key, b.key) })
-            .map { (category, list) ->
-                Section(category, list.sortedWith(compareBy<ProductEntry, String>(::compareNames) { it.name }.thenBy { it.id ?: 0 }))
-            }
+        return products
     }
 
     /** `rowOptions` for a batch row in the flat (filtered) list. */
-    fun flatRowOptions(item: PantryItem, byProduct: Map<String, List<PantryItem>>): RowOptions {
+    fun flatRowOptions(
+        item: PantryItem,
+        byProduct: Map<String, List<PantryItem>>,
+        stock: Map<String, PantryStatus.Stock> = emptyMap(),
+    ): RowOptions {
         val siblings = byProduct[productKeyOf(item)] ?: listOf(item)
-        return RowOptions(batch = false, byDate = false, total = if (siblings.size > 1) total(siblings) else null)
+        val several = siblings.size > 1
+        return RowOptions(
+            batch = false,
+            byDate = false,
+            total = if (several) total(siblings) else null,
+            stock = if (several) null else stock[productKeyOf(item)] ?: loneStock(item),
+        )
+    }
+
+    /** A batch read alone, against the minimum the API returns on it. */
+    fun loneStock(item: PantryItem): PantryStatus.Stock {
+        val (out, low) = PantryStatus.stockStatus(item.quantity, item.minQuantity)
+        return PantryStatus.Stock(productKeyOf(item), item.minQuantity, item.quantity, out, low)
     }
 
     /** The most urgent expiry among a product's batches (`productExpiryBadge`): its batch. */
@@ -157,8 +218,14 @@ object PantryView {
      * `renderFilters`: the chips to show (empty when the row is hidden) and the filter in force;
      * an active chip that lost its last hit falls back to "All".
      */
-    fun chips(items: List<PantryItem>, locations: List<PantryLocation>, filter: String, today: LocalDate): Chips {
-        val counts = PantryStatus.counts(items, today)
+    fun chips(
+        items: List<PantryItem>,
+        locations: List<PantryLocation>,
+        filter: String,
+        today: LocalDate,
+        products: List<PantryProduct> = emptyList(),
+    ): Chips {
+        val counts = PantryStatus.counts(items, today, products)
         val active = PantryStatus.FILTERS.filter { (counts[it] ?: 0) > 0 }
         val places = placeChips(items, locations)
         val ids = active + places.map { it.id }
@@ -171,9 +238,25 @@ object PantryView {
     }
 
     /** `shortfallText` as a number: what is missing to the minimum, or null. */
-    fun shortfall(item: PantryItem): Double? {
-        val min = item.minQuantity ?: return null
-        val missing = PantryUnits.normalizeQuantity(min - item.quantity, fallback = 0.0)
+    fun shortfall(item: PantryItem): Double? = shortfall(item.quantity, item.minQuantity)
+
+    /** The same for a product's total against its minimum. */
+    fun shortfall(quantity: Double, min: Double?): Double? {
+        if (min == null) return null
+        val missing = PantryUnits.normalizeQuantity(min - quantity, fallback = 0.0)
         return missing.takeIf { it > 0 }
+    }
+
+    /**
+     * `shoppingEntry`: the batch for a product with one, the product otherwise, each with the
+     * shortfall of the product's total to its minimum (PANTRY-R26).
+     */
+    fun shoppingEntry(product: ProductEntry, quantityText: (Double) -> String): PantryApi.TransferEntry? {
+        val quantity = shortfall(product.stock.total, product.minQuantity)?.let(quantityText)
+        val single = product.batches.singleOrNull()
+        return when {
+            product.id == null || single != null -> product.batches.firstOrNull()?.let { PantryApi.TransferEntry.Batch(it.id, quantity) }
+            else -> PantryApi.TransferEntry.Product(product.id, quantity)
+        }
     }
 }

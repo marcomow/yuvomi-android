@@ -288,4 +288,15 @@ class CalendarLogicTest {
         val one = CalendarStore.PendingDelete(5, RecurrenceScope.Scope.THIS, b.startDatetime)
         assertEquals(listOf(false, true, false, false), listOf(a, b, c, other).map { one.hides(it) })
     }
+
+    /** CAL-A36: an event the provider cancelled is marked, every other status is not. */
+    @Test fun `a provider-cancelled event is marked`() {
+        fun ev(status: String?) = ApiJson.decodeFromString(
+            CalendarEvent.serializer(),
+            if (status == null) """{"id":1,"title":"Swim"}""" else """{"id":1,"title":"Swim","provider_status":"$status"}""",
+        )
+        assertTrue(CalendarRules.isProviderCancelled(ev("CANCELLED")))
+        assertFalse(CalendarRules.isProviderCancelled(ev("TENTATIVE")))
+        assertFalse(CalendarRules.isProviderCancelled(ev(null)))
+    }
 }

@@ -1,6 +1,6 @@
 # Spec: Calendar
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 ## Purpose
 
@@ -137,6 +137,7 @@ Also used from other enums: `Operation.PREFERENCES`, `Operation.TASKS_LIST` (wit
 | CAL-R27 | `calendar: read` hides add, edit, delete and the manager's writes; changing someone else's event needs `calendar_edit_others` unless created by or assigned to the member. | `readOnly`, `mayChangeEvent` | done |
 | CAL-R28 | Errors show upstream's sentences (`calendar.*`, `common.*`), never the server's text. | `errorSentence`, `CASE_MESSAGES` | done |
 | CAL-R29 | Saving a whole series that is not a local one with its times untouched keeps the series start, and so a reminder row whose lead time, read against `reminder_anchor_start`, still lands on a stored instant keeps that instant instead of moving onto the opened occurrence; a new or changed row counts from the opened start as before (2.84.0). | `reminderTimesFromRows` (`untouched`), `saveEvent` | done |
+| CAL-R30 | An event the provider cancelled (`provider_status` `CANCELLED`, 2.86.0, #2499) stays in the calendar, struck through and marked "Cancelled" (`calendar.cancelled`) in the agenda, the time grid, the all-day chips and the detail. Leaving it out of reminders, the overview and countdowns is the server's job. | `isProviderCancelled` in pages/calendar.js | done |
 
 **Not built** (each small): the per-type filter under the waste layer, uploading a new
 attachment from the form (removing one works; adding one stays in the browser), the schedule
@@ -184,6 +185,7 @@ Yuvomi.
 | CAL-A33 | A child cannot enable the export (403). | contract | written |
 | CAL-A34 | An image attachment's preview is readable through the session; remove clears it. | contract | written |
 | CAL-A35 | Given an external series opened at an occurrence with untouched times then an unchanged reminder keeps its stored instant and a new one counts from the opened start. | unit | passing |
+| CAL-A36 | Given `provider_status` `CANCELLED` then the event is marked cancelled; `TENTATIVE` or none is not. | unit | passing |
 
 ## Strings
 

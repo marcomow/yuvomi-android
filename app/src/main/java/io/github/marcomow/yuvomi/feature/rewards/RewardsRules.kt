@@ -70,6 +70,19 @@ object RewardsRules {
     }
 
     /** `+12` / `−5` with the true minus sign, as `ledgerRowHtml`. */
+    /** The first release with late completion decay (REW-R26, REW-R27). */
+    const val LATE_DECAY_SINCE = "2.86.0"
+
+    /** `decayDaysOf`: the days a reduced earning was late, 0 for every other row. */
+    fun decayDays(entry: LedgerEntry): Int = entry.decayDays?.takeIf { it > 0 } ?: 0
+
+    /** `decayNoteHtml`: "3 days late" in the row's meta line, or null. */
+    fun decayNote(entry: LedgerEntry, strings: Strings): String? =
+        decayDays(entry).takeIf { it > 0 }?.let { strings.t("rewards.ledgerLateDecayNote", "count" to it) }
+
+    /** `decayBaseHtml`: the full value struck through beside the paid one, or null. */
+    fun decayBase(entry: LedgerEntry): Int? = if (decayDays(entry) > 0) kotlin.math.abs(entry.basePoints ?: 0) else null
+
     fun delta(delta: Int, strings: Strings): String = (if (delta > 0) "+" else "−") + points(kotlin.math.abs(delta), strings)
 
     /** `moneyRowKind`: what a money entry was, from its fields. */

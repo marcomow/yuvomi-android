@@ -1,6 +1,6 @@
 # Spec: Birthdays
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/birthdays/` (`BirthdaysRules` is the pure
 port, with `BirthdaysFormat` for the words ICU makes; `BirthdaysViewModel` the list, delete,

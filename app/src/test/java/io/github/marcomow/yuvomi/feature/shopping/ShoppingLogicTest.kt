@@ -151,4 +151,20 @@ class ShoppingLogicTest {
         assertEquals("Dairy", ShoppingLogic.categoryLabel("Milchprodukte", en))
         assertEquals("Hardware", ShoppingLogic.categoryLabel("Hardware", en))
     }
+
+    @Test fun `SHOP-A19 the last purchase reads price, store and date, or leaves the store out`() {
+        val en = Strings(
+            "en",
+            mapOf(
+                "shopping.lastPurchasedLine" to "{{price}} · {{store}} · {{date}}",
+                "shopping.lastPurchasedLineNoStore" to "{{price}} · {{date}}",
+            ),
+            emptyMap(),
+        ) { "other" }
+        val date = { d: String -> "on $d" }
+        val withStore = Purchase("Milk", 129, "Corner shop", "2026-11-07")
+        assertEquals("€1.29 · Corner shop · on 2026-11-07", ShoppingLogic.lastPurchaseLine(withStore, "EUR", java.util.Locale.UK, date, en))
+        assertEquals("€1.29 · on 2026-11-07", ShoppingLogic.lastPurchaseLine(withStore.copy(storeName = " "), "EUR", java.util.Locale.UK, date, en))
+        assertNull(ShoppingLogic.lastPurchaseLine(withStore.copy(priceCents = null), "EUR", java.util.Locale.UK, date, en))
+    }
 }

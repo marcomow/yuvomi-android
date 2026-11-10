@@ -91,8 +91,14 @@ object PantryText {
         else -> "common.errorGeneric"
     }
 
-    /** The location manager's sentences (PANTRY-R20): upstream shows the server's English text there. */
+    /**
+     * The location manager's sentences (PANTRY-R20). Since 2.86.0 the server names each case
+     * (`pantry_location_*`, PANTRY-R28); an older one answers without a reason.
+     */
     fun locationErrorKey(e: Throwable, deleting: Boolean = false): String = when {
+        e is ApiProblem.Http && e.reason == "pantry_location_not_found" -> "pantry.errorLocationGone"
+        e is ApiProblem.Http && e.reason == "pantry_location_exists" -> "pantry.errorLocationExists"
+        e is ApiProblem.Http && e.reason == "pantry_location_last" -> "pantry.errorLocationLast"
         e is ApiProblem.Http && e.status == 409 -> "android.pantry.locationExists"
         // The one 400 a delete can get: the last location stays.
         deleting && e is ApiProblem.Http && e.status == 400 -> "android.pantry.locationLast"

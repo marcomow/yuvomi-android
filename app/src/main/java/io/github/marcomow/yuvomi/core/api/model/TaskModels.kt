@@ -50,6 +50,14 @@ data class Task(
     @SerialName("archived_at") val archivedAt: String? = null,
     /** Never sent by the app; read only to prove partial updates keep it (TASKS-A5). */
     val countdown: FlexBool = false,
+    /** The rule of a series another app owns (iOS Reminders, Tasks.org), upstream 2.86.0 (TASKS-R42). */
+    @SerialName("external_rrule") val externalRrule: String? = null,
+    /** `round_robin` or null (upstream 2.85.0, #1763; TASKS-R43). Never sent by the app. */
+    @SerialName("rotation_mode") val rotationMode: String? = null,
+    /** Member ids in hand-over order, null when the task does not rotate. */
+    @SerialName("rotation_pool") val rotationPool: List<Int>? = null,
+    /** Who the next occurrence goes to, as the server will hand it out. */
+    @SerialName("rotation_next_user") val rotationNextUser: Int? = null,
 ) {
     val isDone: Boolean get() = status == STATUS_DONE
 

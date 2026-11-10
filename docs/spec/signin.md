@@ -1,6 +1,6 @@
 # Spec: Sign-in and session
 
-Status: ready for implementation · Upstream checked: 2.84.0 · Decisions: ADR 0004, 0006, 0007,
+Status: ready for implementation · Upstream checked: 2.87.0 · Decisions: ADR 0004, 0006, 0007,
 0008, 0011
 
 ## Purpose
@@ -144,6 +144,10 @@ header.
 - **SIGNIN-R18** Avatars: a relative `avatar_data` is loaded from `<server><avatar_data>` with
   the session cookie and cached by URL (the `v=` key changes when the picture does); a `data:`
   URL is decoded; `null` shows initials on `avatar_color`.
+
+- **SIGNIN-R19** Since 2.87.0 the expired second step carries `reason`
+  `two_factor_no_pending_sign_in` (401), read before the English text of SIGNIN-R8, which older
+  servers still need. `account_cannot_sign_in` (403) reads `login.accountCannotSignIn`.
 
 ## Acceptance criteria
 

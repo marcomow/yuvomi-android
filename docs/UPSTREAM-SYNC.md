@@ -114,7 +114,7 @@ and approve pull requests*.
 ### Moving the pin by hand
 
 ```bash
-./upstream/sync.sh 2.84.0     # or no argument to re-sync the current pin
+./upstream/sync.sh 2.87.0     # or no argument to re-sync the current pin
 git diff --stat
 cat upstream/.sync-report.md
 ```
@@ -126,7 +126,7 @@ upstream image at the pinned version:
 
 ```bash
 docker run -d --name yuvomi -p 3000:3000 \
-  -e SESSION_SECRET="$(openssl rand -hex 32)" -e DB_ENCRYPTION_KEY= \
+  -e SESSION_SECRET="$(openssl rand -hex 32)" -e DB_ENCRYPTION_KEY= -e DB_ENCRYPTION_AUTO_KEY=false \
   ghcr.io/ulsklyc/yuvomi:<pinned>
 docker exec yuvomi node scripts/seed-demo.js --locale en
 ```
@@ -160,7 +160,10 @@ the pin is read from `upstream/VERSION`. Both reach the app as `BuildConfig` fie
 
 Something a newer upstream added that an older server would silently drop is offered only from
 that version on, instead of moving the minimum: the "About" person of a document (2.84.0,
-`DocumentRules.SUBJECT_SINCE`, DOCS-R35) is not asked on a 2.83.0 server.
+`DocumentRules.SUBJECT_SINCE`, DOCS-R35) is not asked on a 2.83.0 server. The same holds for
+Shopping's "Last purchased" line (2.86.0, `ShoppingLogic.PRICE_HISTORY_SINCE`, SHOP-R40) and the
+late completion decay switch in Rewards settings (2.86.0, `RewardsRules.LATE_DECAY_SINCE`,
+REW-R27).
 
 Independently of the version, a `404` or `405` on an operation from `operations-used.txt` marks
 that feature as unavailable for this session instead of retrying, as upstream's `MODULES.md`

@@ -267,6 +267,21 @@ object ShoppingLogic {
         return value.replace('.', DecimalFormatSymbols.getInstance(locale).decimalSeparator)
     }
 
+    /** The first upstream release that records purchases (SHOP-R40). */
+    const val PRICE_HISTORY_SINCE = "2.86.0"
+
+    /** `lastPurchasedLine` / `lastPurchasedLineNoStore` of the item sheets (SHOP-R40); null without a price. */
+    fun lastPurchaseLine(p: Purchase, currency: String, locale: Locale, date: (String) -> String?, strings: Strings): String? {
+        val price = formatCents(p.priceCents ?: return null, currency, locale)
+        val day = p.purchasedAt?.let(date) ?: p.purchasedAt.orEmpty()
+        val store = p.storeName?.takeIf { it.isNotBlank() }
+        return if (store != null) {
+            strings.t("shopping.lastPurchasedLine", "price" to price, "store" to store, "date" to day)
+        } else {
+            strings.t("shopping.lastPurchasedLineNoStore", "price" to price, "date" to day)
+        }
+    }
+
     /** `formatMoney`. */
     fun formatCents(cents: Long, currency: String, locale: Locale): String {
         val format = NumberFormat.getCurrencyInstance(locale)

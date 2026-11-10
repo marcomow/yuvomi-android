@@ -123,6 +123,7 @@ fun TaskRow(
                 if (task.subtaskTotal > 0) Meta(Icons.Outlined.ChecklistRtl, "${task.subtaskDone}/${task.subtaskTotal}")
                 task.documentCount?.takeIf { it > 0 }?.let { Meta(Icons.Outlined.AttachFile, it.toString()) }
                 if (task.isRecurring) Meta(Icons.Outlined.Repeat, null, t("tasks.recurring"))
+                else if (TaskSeries.repeatsElsewhere(task)) Meta(Icons.Outlined.Repeat, null, t("tasks.foreignSeries"))
                 if (task.locked) Meta(Icons.Outlined.Lock, null, t("tasks.lockedBadge"))
                 when (task.visibility) {
                     "private" -> Meta(Icons.Outlined.VisibilityOff, null, t("common.visibility.private"))

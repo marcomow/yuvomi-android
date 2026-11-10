@@ -113,14 +113,14 @@ publishes a signed release APK (`.github/workflows/release.yml`, [RELEASING.md](
 
 ## Staying in sync with upstream
 
-`upstream/VERSION` pins the Yuvomi release this app is built against (currently **2.84.0**). A
+`upstream/VERSION` pins the Yuvomi release this app is built against (currently **2.87.0**). A
 weekly workflow checks for a newer release, regenerates the OpenAPI snapshot, strings and colours
 from upstream's source, and opens a pull request that reports which of the operations this app
 uses changed. See [UPSTREAM-SYNC.md](docs/UPSTREAM-SYNC.md).
 
 ```bash
 ./upstream/sync.sh          # re-sync the pinned version
-./upstream/sync.sh 2.84.0   # move the pin
+./upstream/sync.sh 2.87.0   # move the pin
 ```
 
 ## Licence

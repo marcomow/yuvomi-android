@@ -1,6 +1,6 @@
 # Spec: Health
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0012, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0012, 0015
 
 Code: `app/src/main/java/io/github/marcomow/yuvomi/feature/health/`. Pure ports: `HealthVitals`,
 `HealthMeds`, `HealthCycle`, `HealthLogic` (activity, labs, prevention, nutrition, fasting, error

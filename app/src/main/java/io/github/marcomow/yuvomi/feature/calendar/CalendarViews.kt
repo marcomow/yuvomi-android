@@ -54,6 +54,7 @@ import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -252,7 +253,19 @@ fun EventRow(ev: CalendarEvent, day: LocalDate, text: CalendarText, s: CalendarS
                         Icon(Icons.Outlined.Repeat, t("calendar.recurringEvent"), Modifier.size(14.dp), tint = Yuvomi.colors.textSecondary)
                         Spacer(Modifier.width(4.dp))
                     }
-                    Text(ev.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                    Text(
+                        ev.title,
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        textDecoration = if (CalendarRules.isProviderCancelled(ev)) TextDecoration.LineThrough else null,
+                        modifier = Modifier.weight(1f, fill = false),
+                    )
+                    if (CalendarRules.isProviderCancelled(ev)) {
+                        Spacer(Modifier.width(6.dp))
+                        Text(t("calendar.cancelled"), style = MaterialTheme.typography.labelSmall, color = Yuvomi.colors.danger)
+                    }
                 }
                 Meta(Icons.Outlined.Schedule, listOfNotNull(time, position).joinToString(" · "))
                 ev.location?.takeIf { it.isNotBlank() }?.let { Meta(Icons.Outlined.Place, flatLocation(it)) }
@@ -389,7 +402,10 @@ fun TimeGridView(store: CalendarStore, s: CalendarStore.State, days: List<LocalD
                             MiniChip(type.shortCode ?: type.name, color(type.color, Yuvomi.colors.textSecondary)) { actions.openSchedule(e) }
                         }
                         store.wasteOn(d, s).forEach { w -> MiniChip(w.typeName, color(w.typeColor, Yuvomi.colors.textSecondary)) { actions.openWaste(w) } }
-                        allDay.forEach { ev -> MiniChip(ev.title, color(CalendarRules.color(ev), Yuvomi.colors.textSecondary)) { actions.openEvent(ev) } }
+                        allDay.forEach { ev ->
+                            val label = if (CalendarRules.isProviderCancelled(ev)) "${t("calendar.cancelled")}: ${ev.title}" else ev.title
+                            MiniChip(label, color(CalendarRules.color(ev), Yuvomi.colors.textSecondary)) { actions.openEvent(ev) }
+                        }
                         store.tasksOn(d, s).forEach { task -> MiniChip("○ " + task.title, Yuvomi.colors.module("tasks")) { actions.openTask(task) } }
                     }
                 }
@@ -462,7 +478,13 @@ private fun DayColumn(store: CalendarStore, s: CalendarStore.State, day: LocalDa
                     .clickable { actions.openEvent(ev) }
                     .padding(horizontal = 4.dp, vertical = 2.dp),
             ) {
-                Text(ev.title, style = MaterialTheme.typography.labelMedium, maxLines = 2, overflow = TextOverflow.Ellipsis)
+                Text(
+                    if (CalendarRules.isProviderCancelled(ev)) "${t("calendar.cancelled")}: ${ev.title}" else ev.title,
+                    style = MaterialTheme.typography.labelMedium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    textDecoration = if (CalendarRules.isProviderCancelled(ev)) TextDecoration.LineThrough else null,
+                )
                 Text(text.rowTime(ev, day), style = MaterialTheme.typography.labelSmall.copy(fontSize = 10.sp),
                     color = Yuvomi.colors.textSecondary, maxLines = 1)
             }

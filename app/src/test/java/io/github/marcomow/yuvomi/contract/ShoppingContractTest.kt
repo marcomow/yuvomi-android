@@ -362,4 +362,10 @@ class ShoppingContractTest : ContractTestBase() {
             assertTrue(api.pantry().data.none { it.name == name })
         }
     }
+
+    /** SHOP-A20 (GET /shopping/price-history, upstream 2.86.0): a name never bought has no purchase. */
+    @Test fun `SHOP-A20 a name never bought has no last purchase`() = runBlocking<Unit> {
+        val (api, _) = alex()
+        assertNull(api.lastPurchase("Never bought ${System.nanoTime()}", 1))
+    }
 }

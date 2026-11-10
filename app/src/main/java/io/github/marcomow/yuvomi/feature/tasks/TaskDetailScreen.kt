@@ -213,6 +213,13 @@ fun TaskDetailScreen(taskId: Int, back: () -> Unit, edit: (Int) -> Unit, addSubt
                             val text = RRuleText.describe(task.recurrenceRule, task.recurrenceFromCompletion, strings, shell.formats, today)
                             Fact(t("rrule.labelRepeat"), text.ifEmpty { t("android.tasks.ruleCustom") })
                         }
+                        // TASKS-R42: a series another app owns is ticked off there.
+                        if (TaskSeries.repeatsElsewhere(task)) Fact(t("tasks.foreignSeries"), t("tasks.foreignSeriesDetail"))
+                        // TASKS-R43: the rotation and who is next, as the server names them.
+                        TaskSeries.rotationNext(task, s.meta.users)?.let { next ->
+                            val mode = t("tasks.rotationModeRoundRobin")
+                            Fact(t("tasks.rotationLabel"), if (next.isEmpty()) mode else t("tasks.rotationNext", "mode" to mode, "name" to next))
+                        }
                         if (task.assignedUsers.isNotEmpty()) {
                             Row(Modifier.padding(horizontal = 16.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                                 Text(t("tasks.assignedLabel"), color = Yuvomi.colors.textSecondary, modifier = Modifier.width(120.dp))

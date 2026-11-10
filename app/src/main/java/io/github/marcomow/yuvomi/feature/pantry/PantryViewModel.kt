@@ -283,12 +283,16 @@ class PantryViewModel(
     /** The cart of a batch row. */
     fun cart(item: PantryItem) = toShopping(listOf(PantryApi.TransferEntry.Batch(item.id, PantryText.shortfall(item, host.strings))))
 
-    /** The cart of a product without batches: by its id, without a quantity. */
-    fun cartProduct(productId: Int) = toShopping(listOf(PantryApi.TransferEntry.Product(productId)))
+    /**
+     * The cart of a product row (several batches, or none): the product with the shortfall of
+     * its total to its minimum (PANTRY-R26).
+     */
+    fun cartProduct(product: PantryView.ProductEntry) = cartProducts(listOf(product))
 
-    /** "Add all to shopping list": every row the low chip and the search show. */
-    fun cartAll(items: List<PantryItem>) =
-        toShopping(items.map { PantryApi.TransferEntry.Batch(it.id, PantryText.shortfall(it, host.strings)) })
+    /** "Add all to shopping list": each product the low chip and the search show, once. */
+    fun cartProducts(products: List<PantryView.ProductEntry>) = toShopping(
+        products.mapNotNull { p -> PantryView.shoppingEntry(p) { PantryUnits.quantityLabel(it, p.unit, host.strings) } },
+    )
 
     private fun toShopping(entries: List<PantryApi.TransferEntry>) {
         val api = api ?: return

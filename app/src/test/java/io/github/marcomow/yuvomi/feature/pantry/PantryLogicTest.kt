@@ -228,7 +228,12 @@ class PantryLogicTest {
         assertEquals(2, (json["location_id"] as JsonPrimitive).content.toInt())
         assertNull(PantryEditorViewModel.fieldsOf(form.copy(name = " ")))
         val empty = PantryEditorViewModel.fieldsOf(form.copy(minQuantity = "", locationId = null, expiresOn = null))!!.toJson()
-        assertEquals(JsonNull, empty["min_quantity"])
+        // PANTRY-A22: the minimum is the product's and goes only when the field changed.
+        assertFalse("min_quantity" in empty)
+        val cleared = PantryEditorViewModel.fieldsOf(form.copy(minQuantity = "", initialMinQuantity = "3"))!!.toJson()
+        assertEquals(JsonNull, cleared["min_quantity"])
+        val kept = PantryEditorViewModel.fieldsOf(form.copy(minQuantity = "3", initialMinQuantity = "3"))!!.toJson()
+        assertFalse("min_quantity" in kept)
         assertEquals(JsonNull, empty["location_id"])
         assertEquals(JsonNull, empty["expires_on"])
     }

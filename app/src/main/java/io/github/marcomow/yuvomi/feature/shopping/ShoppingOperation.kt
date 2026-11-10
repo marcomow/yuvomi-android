@@ -28,6 +28,7 @@ enum class ShoppingOperation(override val method: String, override val template:
     STORE_DELETE("DELETE", "/api/v1/shopping/stores/{id}"),
     SUGGESTIONS("GET", "/api/v1/shopping/suggestions"),
     VERSIONS("GET", "/api/v1/shopping/versions"),
+    PRICE_HISTORY("GET", "/api/v1/shopping/price-history"),
     SEND_RECIPIENTS("GET", "/api/v1/shopping/send-recipients"),
     SEND("POST", "/api/v1/shopping/{listId}/send"),
     IMPORT_MEAL_PLAN("POST", "/api/v1/shopping/{listId}/import-meal-plan"),

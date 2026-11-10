@@ -38,6 +38,13 @@ data class CalendarSource(val key: String, val name: String, val color: String?)
 /** The rules of the web page that decide what shows and who may change it. */
 object CalendarRules {
 
+    /**
+     * `isProviderCancelled` (CAL-R30): the provider cancelled the event without deleting it.
+     * It stays in the calendar, struck through and marked, and reminds no one (the server's job).
+     */
+    fun isProviderCancelled(ev: CalendarEvent): Boolean = ev.providerStatus == "CANCELLED"
+
+
     // ── Colours (public/utils/event-color.js) ──
 
     const val FALLBACK_COLOR = "#8E8E93"

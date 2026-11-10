@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
@@ -21,6 +22,7 @@ import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.ExpandLess
 import androidx.compose.material.icons.outlined.ExpandMore
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.DatePicker
@@ -45,6 +47,7 @@ import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
@@ -59,6 +62,8 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import io.github.marcomow.yuvomi.core.design.Yuvomi
+import io.github.marcomow.yuvomi.core.session.VersionGate
+import io.github.marcomow.yuvomi.core.time.HouseholdTime
 import io.github.marcomow.yuvomi.core.i18n.LocalStrings
 import io.github.marcomow.yuvomi.core.i18n.t
 import io.github.marcomow.yuvomi.feature.shell.LocalShell
@@ -112,7 +117,7 @@ internal fun ShoppingOverlay(
         }
         is Overlay.ReadItem -> {
             val item = s.items.firstOrNull { it.id == o.id }
-            if (item == null) LaunchedEffect(o) { close() } else ItemReadView(item, s, close)
+            if (item == null) LaunchedEffect(o) { close() } else ItemReadView(item, s, vm, close)
         }
         is Overlay.Send -> SendDialog(o, s, vm, close)
         is Overlay.Pantry -> PantrySheet(o.stock, s, vm, rights, close)
@@ -342,6 +347,9 @@ private fun ItemEditor(item: ShoppingItem, s: ShoppingViewModel.UiState, vm: Sho
     var error by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
     val targets = s.lists.filter { it.id == s.activeListId || it.acceptsNewItems }
+    val last = lastPurchaseLine(item, s, vm)
+    // Upstream opens the details when there is a last purchase to show.
+    LaunchedEffect(last) { if (last != null) more = true }
 
     ModalBottomSheet(onDismissRequest = close, sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)) {
         Column(
@@ -375,6 +383,12 @@ private fun ItemEditor(item: ShoppingItem, s: ShoppingViewModel.UiState, vm: Sho
                     suffix = { Text(s.currency) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), singleLine = true, modifier = Modifier.fillMaxWidth(),
                 )
+                last?.let {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(Icons.Outlined.History, null, Modifier.size(16.dp), tint = Yuvomi.colors.textSecondary)
+                        Text(" $it", style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
+                    }
+                }
                 StoreField(store, s.stores) { store = it }
                 OutlinedTextField(
                     url, { url = it }, label = { Text(t("shopping.urlLabel")) }, placeholder = { Text(t("shopping.urlPlaceholder")) },
@@ -435,10 +449,11 @@ private fun StoreField(value: String, stores: List<ShoppingStore>, onChange: (St
 
 /** SHOP-R24 (`itemReadHtml`): the read view for members without write access. */
 @Composable
-private fun ItemReadView(item: ShoppingItem, s: ShoppingViewModel.UiState, close: () -> Unit) {
+private fun ItemReadView(item: ShoppingItem, s: ShoppingViewModel.UiState, vm: ShoppingViewModel, close: () -> Unit) {
     val strings = LocalStrings.current
     val uri = LocalUriHandler.current
     val locale = Locale.forLanguageTag(strings.locale)
+    val last = lastPurchaseLine(item, s, vm)
     AlertDialog(
         onDismissRequest = close,
         title = { Text(item.name) },
@@ -448,6 +463,7 @@ private fun ItemReadView(item: ShoppingItem, s: ShoppingViewModel.UiState, close
                 ReadRow(t("shopping.categoryLabel"), item.category?.let { ShoppingLogic.categoryLabel(it, strings) })
                 ReadRow(t("shopping.priceLabel"), item.priceCents?.let { ShoppingLogic.formatCents(it, s.currency, locale) })
                 ReadRow(t("shopping.storeLabel"), s.stores.firstOrNull { it.id == item.storeId }?.name)
+                ReadRow(t("shopping.lastPurchased"), last)
                 item.url?.takeIf { it.isNotBlank() }?.let { link ->
                     Column {
                         Text(t("shopping.urlLabel"), style = MaterialTheme.typography.labelMedium, color = Yuvomi.colors.textSecondary)
@@ -690,5 +706,20 @@ private fun ManagerRow(
         }
         IconButton(onClick = onRename) { Icon(Icons.Outlined.Edit, renameLabel) }
         IconButton(onClick = onDelete) { Icon(Icons.Outlined.Delete, deleteLabel, tint = Yuvomi.colors.danger) }
+    }
+}
+
+/** SHOP-R40: the "Last purchased" line of an item, asked once per sheet, from 2.86.0 on. */
+@Composable
+private fun lastPurchaseLine(item: ShoppingItem, s: ShoppingViewModel.UiState, vm: ShoppingViewModel): String? {
+    val shell = LocalShell.current
+    val strings = LocalStrings.current
+    val supported = (VersionGate.compare(shell.session.serverVersion, ShoppingLogic.PRICE_HISTORY_SINCE) ?: 0) >= 0
+    val purchase by produceState<Purchase?>(null, item.id, item.name, supported) {
+        value = if (supported && item.name.isNotBlank()) vm.lastPurchase(item) else null
+    }
+    val today = shell.time.today()
+    return purchase?.let { p ->
+        ShoppingLogic.lastPurchaseLine(p, s.currency, Locale.forLanguageTag(strings.locale), { d -> HouseholdTime.date(d)?.let { shell.formats.date(it, today) } }, strings)
     }
 }

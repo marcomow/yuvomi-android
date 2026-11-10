@@ -148,4 +148,19 @@ class RewardsLogicTest {
         assertEquals("🎬 Movie night #family", items[0].title)
         assertEquals(RewardsRoutes.catalog(), items[1].route)
     }
+
+    /** REW-A13: a reduced earning names its lateness and its full value; other rows stay as they were. */
+    @Test fun `late completion decay on ledger rows`() {
+        val reduced = ApiJson.decodeFromString(
+            LedgerEntry.serializer(),
+            """{"id":1,"delta":3,"type":"earn","decay_days":2,"base_points":5}""",
+        )
+        assertEquals("2 days late", RewardsRules.decayNote(reduced, strings))
+        assertEquals(5, RewardsRules.decayBase(reduced))
+        assertEquals("1 day late", RewardsRules.decayNote(reduced.copy(decayDays = 1), strings))
+        val plain = LedgerEntry(2, delta = 5, type = "earn")
+        assertNull(RewardsRules.decayNote(plain, strings))
+        assertNull(RewardsRules.decayBase(plain))
+        assertNull(RewardsRules.decayBase(reduced.copy(decayDays = 0)))
+    }
 }

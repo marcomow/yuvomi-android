@@ -282,7 +282,15 @@ private fun MemberDialog(ctx: SectionContext, member: JsonObject?, ssoAvailable:
                         val http = e as? ApiProblem.Http
                         when {
                             http?.reason == "email_in_use" -> problems = mapOf("email" to "common.emailInUse")
-                            http?.status == 409 -> problems = mapOf("username" to "android.settings.usernameTaken")
+                            // SET-R79: upstream 2.86.0 names the username cases; older servers answer a bare 409.
+                            http?.reason == "members_username_taken" -> problems = mapOf("username" to "settings.memberErrorUsernameTaken")
+                            http?.reason == "members_username_invalid" -> problems = mapOf("username" to "settings.memberErrorUsernameInvalid")
+                            http?.reason == "members_member_not_found" -> {
+                                // Another administrator removed the member meanwhile: close and reload.
+                                ctx.notifyKey("settings.memberErrorGone")
+                                saved()
+                            }
+                            http?.status == 409 && http.reason == null -> problems = mapOf("username" to "android.settings.usernameTaken")
                             else -> ctx.notifyKey(SettingsErrors.key(e))
                         }
                     }
@@ -400,7 +408,8 @@ private fun InviteDialog(ctx: SectionContext, onDismiss: () -> Unit, created: ()
                         emailSent = d.bool("email_sent")
                         created()
                     }.onFailure { e ->
-                        error = ctx.strings.t(if ((e as? ApiProblem.Http)?.status == 409) "android.settings.usernameTaken" else SettingsErrors.key(e))
+                        val http = e as? ApiProblem.Http
+                        error = ctx.strings.t(if (http?.status == 409 && http.reason == null) "android.settings.usernameTaken" else SettingsErrors.key(e))
                     }
                     busy = false
                 }

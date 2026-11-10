@@ -1,6 +1,6 @@
 # Spec: Shopping
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 ## Purpose
 
@@ -220,6 +220,12 @@ Error reasons mapped (`friendly-error.js`): `shopping_list_not_found`, `shopping
   unfolds the item's category or the "Checked off" section and scrolls it into view.
   (`revealHighlightedItem`)
 
+- **SHOP-R40** Last purchased (2.86.0, part 1 of #1003): the item editor and the read view ask
+  `GET /shopping/price-history?name=&exclude_item_id=&limit=1` once and, when there is a
+  purchase, show `shopping.lastPurchasedLine` (price, shop, date) or `lastPurchasedLineNoStore`;
+  the editor then opens its details. A failure only leaves the line out. Not asked on servers
+  before 2.86.0. Recording purchases is the server's job when an item is ticked or cleared.
+
 ## Acceptance criteria
 
 | ID | Given / When / Then | Level | Status |
@@ -242,6 +248,8 @@ Error reasons mapped (`friendly-error.js`): `shopping_list_not_found`, `shopping
 | SHOP-A16 | Given "Bread" is checked when " bread" is added with quantity 2 then one `PATCH` sends `is_checked: 0` and the quantity, no category, and nothing is created. | ui | done |
 | SHOP-A17 | Given an item is deleted when the member taps Undo then no `DELETE` is sent and the row is back; when the window closes the `DELETE` goes out. | ui | done |
 | SHOP-A18 | Given `highlight` names an item in the closed "Checked off" section then the section opens and the item shows. | ui | done |
+| SHOP-A19 | Given a purchase with and without a shop then the line reads price, shop and date, or price and date; without a price there is none. | unit | done |
+| SHOP-A20 | Given the seeded server then a name never bought has no last purchase. | contract | CI |
 
 ## Strings
 

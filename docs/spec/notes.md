@@ -1,6 +1,6 @@
 # Spec: Notes
 
-Status: implemented · Upstream checked: 2.84.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0006, 0007, 0011, 0015
 
 ## Purpose
 
@@ -184,6 +184,10 @@ Error `reason` values read: `notes_note_not_found` (404), `notes_selected_catego
   name renames.
 - **NOTES-R26** A deleted category leaves every note and the filter at once; after every change
   the board's categories and notes are read again, as the web manager's `refresh` does.
+
+- **NOTES-R32** A category deleted meanwhile, or another person's personal one (2.86.0,
+  `notes_category_not_found`), reads `category.errorGone`; deleting one that is already gone
+  counts as done, as before.
 
 ### Permissions, errors, offline
 

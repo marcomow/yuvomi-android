@@ -84,6 +84,7 @@ jobs:
           docker run -d --name yuvomi -p 3000:3000 \
             -e SESSION_SECRET="$(openssl rand -hex 32)" \
             -e DB_ENCRYPTION_KEY= \
+            -e DB_ENCRYPTION_AUTO_KEY=false \
             -e DB_PATH=/data/yuvomi.db \
             -e RATE_LIMIT_MAX_ATTEMPTS=50 \
             "ghcr.io/ulsklyc/yuvomi:${version}"
