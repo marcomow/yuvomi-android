@@ -36,7 +36,26 @@ object PantryStatus {
      * `GET /pantry`. A batch without a product stands for itself with its own minimum; a
      * product without batches is out only when it has a minimum, and never low.
      */
-    fun productStock(items: List<PantryItem>, products: List<PantryProduct>): Map<String, Stock> {
+    /** The release that moved the minimum to the product (part 3 of #1448; PANTRY-R29). */
+    const val PRODUCT_MINIMUM_SINCE = "2.85.0"
+
+    /** An unreadable version counts as new, like the version gate (SIGNIN-R14). */
+    fun productMinimums(serverVersion: String?): Boolean =
+        (io.github.marcomow.yuvomi.core.session.VersionGate.compare(serverVersion, PRODUCT_MINIMUM_SINCE) ?: 0) >= 0
+
+    /**
+     * PANTRY-R29: a batch's minimum without the deprecated `min_quantity` on the batch where
+     * the server knows better. From 2.85.0 on, the minimum of a batch with a product is the
+     * product's, read from `products`; the batch field is only read for a batch without a
+     * product, for a product the list does not carry, and on servers before 2.85.0.
+     */
+    fun minimumOf(item: PantryItem, products: List<PantryProduct>, productMinimums: Boolean): Double? {
+        if (!productMinimums || item.productId == null) return item.minQuantity
+        val product = products.firstOrNull { it.id == item.productId } ?: return item.minQuantity
+        return product.minQuantity
+    }
+
+    fun productStock(items: List<PantryItem>, products: List<PantryProduct>, productMinimums: Boolean = true): Map<String, Stock> {
         val mins = LinkedHashMap<String, Double?>()
         val batches = LinkedHashMap<String, MutableList<PantryItem>>()
         for (p in products) {
@@ -53,8 +72,10 @@ object PantryStatus {
         }
         return batches.mapValues { (key, list) ->
             // A server before 2.85.0 has no minimum on the product: the highest of its batches,
-            // as upstream's migration keeps it (from 2.85.0 on every batch returns the product's).
-            val min = mins[key] ?: list.mapNotNull { it.minQuantity }.maxOrNull()
+            // as upstream's migration keeps it. From 2.85.0 on the product's own is the answer,
+            // also when it is none (PANTRY-R29).
+            val min = if (productMinimums || key !in products.map { "p${it.id}" }) mins[key]
+            else mins[key] ?: list.mapNotNull { it.minQuantity }.maxOrNull()
             val total = PantryView.total(list)
             if (list.isEmpty()) {
                 Stock(key, min, total, out = hasMinimum(min), low = false)

@@ -305,7 +305,7 @@ internal fun EmptyProductRow(
 /** The read-only view of a batch (`openItemReadModal`, PANTRY-R16). */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun PantryDetailsSheet(item: PantryItem, locations: List<PantryLocation>, onDismiss: () -> Unit) {
+internal fun PantryDetailsSheet(item: PantryItem, locations: List<PantryLocation>, minimum: Double? = item.minQuantity, onDismiss: () -> Unit) {
     val strings = LocalStrings.current
     val shell = LocalShell.current
     val today = shell.time.today()
@@ -324,7 +324,7 @@ internal fun PantryDetailsSheet(item: PantryItem, locations: List<PantryLocation
             row(t("pantry.locationLabel"), location?.let { PantryText.locationLabel(it, strings) } ?: strings.t("pantry.unlocated"))
             row(t("pantry.categoryLabel"), item.category?.let { PantryText.categoryLabel(it, strings) }.orEmpty())
             row(t("pantry.expiresLabel"), HouseholdTime.date(item.expiresOn)?.let { shell.formats.date(it, today) }.orEmpty())
-            row(t("pantry.minQuantityLabel"), item.minQuantity?.let { PantryUnits.quantityLabel(it, item.unit, strings) }.orEmpty())
+            row(t("pantry.minQuantityLabel"), minimum?.let { PantryUnits.quantityLabel(it, item.unit, strings) }.orEmpty())
             row(t("pantry.notesLabel"), item.notes.orEmpty())
             Box(Modifier.size(8.dp))
         }

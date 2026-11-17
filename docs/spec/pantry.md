@@ -210,6 +210,13 @@ requirement says so ("Differs:").
   `pantry_location_exists`, `pantry_location_last`, 2.86.0); deleting a location that is already
   gone counts as done. Servers without the reasons keep the sentences of PANTRY-R20.
 
+- **PANTRY-R29** The deprecated `min_quantity` on a batch (#15) is read only where it must be.
+  From 2.85.0 on (`PantryStatus.PRODUCT_MINIMUM_SINCE`), a batch's minimum is its product's from
+  `products`, in the stock, the editor and the read view, and a product without a minimum has
+  none. The batch field is read for a batch without a product, for a product the list does not
+  carry, and on servers before 2.85.0, where the highest batch minimum stands for the product.
+  Writing still goes through the batch field: upstream has no write on the product yet.
+
 ### Errors and offline
 
 - **PANTRY-R21** Failures read as upstream's `errorSentence`: offline `common.errorOfflineMutation`;
@@ -250,6 +257,9 @@ requirement says so ("Differs:").
 | PANTRY-A21 | Given a product with several batches then a batch row carries no stock state; a lone batch does. | unit | passing (`PantryProductStockTest`) |
 | PANTRY-A22 | Given the editor when the minimum field is unchanged then `min_quantity` is not sent; cleared, it is sent as null. | unit | passing (`PantryLogicTest`) |
 | PANTRY-A23 | Given a batch with minimum 3 then `products` in `GET /pantry` carries `min_quantity` 3 and `total_quantity` 1, and a product goes to a list with a quantity. | contract | CI |
+| PANTRY-A24 | Given batches with minimums 2 and 3 of a product without one then a 2.84.0 server reads the product as low, a 2.85.0 server does not. | unit | passing (`PantryProductStockTest`) |
+| PANTRY-A25 | Given a batch with its own minimum 9 then from 2.85.0 on its minimum is the product's (4 or none); without a product, or before 2.85.0, it is 9. | unit | passing (`PantryProductStockTest`) |
+| PANTRY-A26 | Given the product's minimum 4 then the editor shows 4 and opens its details. | unit | passing (`PantryProductStockTest`) |
 
 ## Strings
 
