@@ -71,6 +71,8 @@ class PantryEditorViewModel(
     /** The batch as its row shows it (a pending step included), or null for a new one. */
     val item: PantryItem?,
     categories: List<PantryCategory>,
+    /** The batch's minimum as `PantryStatus.minimumOf` reads it (PANTRY-R29). */
+    minimum: Double? = item?.minQuantity,
 ) : ViewModel() {
 
     data class Form(
@@ -96,7 +98,7 @@ class PantryEditorViewModel(
         val errorKey: String? = null,
     )
 
-    private val _state = MutableStateFlow(UiState(initialForm(item, categories)))
+    private val _state = MutableStateFlow(UiState(initialForm(item, categories, minimum)))
     val state: StateFlow<UiState> = _state.asStateFlow()
 
     /** One key per new batch, reused when the member retries (ADR 0007). */
@@ -148,7 +150,7 @@ class PantryEditorViewModel(
             )
         }
 
-        fun initialForm(item: PantryItem?, categories: List<PantryCategory>): Form = if (item == null) {
+        fun initialForm(item: PantryItem?, categories: List<PantryCategory>, minimum: Double? = item?.minQuantity): Form = if (item == null) {
             Form(category = categories.firstOrNull { it.name == PantryView.DEFAULT_CATEGORY }?.name ?: categories.firstOrNull()?.name ?: PantryView.DEFAULT_CATEGORY)
         } else {
             Form(
@@ -158,10 +160,10 @@ class PantryEditorViewModel(
                 locationId = item.locationId,
                 category = item.category ?: PantryView.DEFAULT_CATEGORY,
                 expiresOn = item.expiresOn?.let { runCatching { LocalDate.parse(it.take(10)) }.getOrNull() },
-                minQuantity = item.minQuantity?.let(::plain).orEmpty(),
+                minQuantity = minimum?.let(::plain).orEmpty(),
                 notes = item.notes.orEmpty(),
-                initialMinQuantity = item.minQuantity?.let(::plain).orEmpty(),
-                detailsOpen = item.minQuantity != null || !item.notes.isNullOrEmpty(),
+                initialMinQuantity = minimum?.let(::plain).orEmpty(),
+                detailsOpen = minimum != null || !item.notes.isNullOrEmpty(),
             )
         }
 
@@ -181,7 +183,8 @@ fun PantryEditorScreen(list: PantryViewModel, itemId: Int?, close: () -> Unit) {
         LaunchedEffect(Unit) { close() }
         return
     }
-    val vm = viewModel(key = "pantry-editor-$itemId") { PantryEditorViewModel(shell.container, item, stock.categories) }
+    val minimum = item?.let { PantryStatus.minimumOf(it, stock.products, PantryStatus.productMinimums(shell.session.serverVersion)) }
+    val vm = viewModel(key = "pantry-editor-$itemId") { PantryEditorViewModel(shell.container, item, stock.categories, minimum) }
     val s by vm.state.collectAsState()
     val f = s.form
 

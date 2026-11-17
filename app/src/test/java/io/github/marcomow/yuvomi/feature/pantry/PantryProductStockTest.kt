@@ -39,8 +39,11 @@ class PantryProductStockTest {
         // Every batch of a low product matches "Running low".
         assertTrue(milk.all { PantryStatus.matches(it, "low", today, stock) })
         // A server before 2.85.0 sends no minimum on the product: the highest of its batches counts.
-        val old = PantryStatus.productStock(listOf(batch(7, 12, 1.0, min = 2.0), batch(8, 12, 1.0, min = 3.0)), listOf(product(12, null)))
+        val oldBatches = listOf(batch(7, 12, 1.0, min = 2.0), batch(8, 12, 1.0, min = 3.0))
+        val old = PantryStatus.productStock(oldBatches, listOf(product(12, null)), productMinimums = false)
         assertTrue(old.getValue("p12").low)
+        // PANTRY-A24: from 2.85.0 on the product's own minimum is the answer, also when it is none.
+        assertFalse(PantryStatus.productStock(oldBatches, listOf(product(12, null))).getValue("p12").low)
         // A batch without a product stands for itself, with its own minimum.
         val lone = PantryStatus.productStock(listOf(batch(6, null, 1.0, min = 2.0)), emptyList())
         assertTrue(lone.getValue("b6").low)
@@ -88,5 +91,28 @@ class PantryProductStockTest {
         val byProduct = PantryView.batchesByProduct(items)
         assertNull(PantryView.flatRowOptions(items[0], byProduct, stock).stock)
         assertTrue(PantryView.flatRowOptions(items[2], byProduct, stock).stock!!.low)
+    }
+
+    /** PANTRY-A25: a batch's minimum comes from its product, the deprecated batch field only where it must. */
+    @Test fun `the minimum of a batch is read from its product`() {
+        val products = listOf(product(1, 4.0), product(2, null))
+        assertEquals(4.0, PantryStatus.minimumOf(batch(1, 1, 1.0, min = 9.0), products, productMinimums = true)!!, 0.0)
+        assertNull(PantryStatus.minimumOf(batch(2, 2, 1.0, min = 9.0), products, productMinimums = true))
+        // A batch without a product, or a product the list does not carry, keeps its own.
+        assertEquals(9.0, PantryStatus.minimumOf(batch(3, null, 1.0, min = 9.0), products, productMinimums = true)!!, 0.0)
+        assertEquals(9.0, PantryStatus.minimumOf(batch(4, 7, 1.0, min = 9.0), products, productMinimums = true)!!, 0.0)
+        // Before 2.85.0 the batch field is the minimum.
+        assertEquals(9.0, PantryStatus.minimumOf(batch(1, 1, 1.0, min = 9.0), products, productMinimums = false)!!, 0.0)
+        assertTrue(PantryStatus.productMinimums("2.85.0"))
+        assertTrue(PantryStatus.productMinimums(null))
+        assertFalse(PantryStatus.productMinimums("2.84.0"))
+    }
+
+    /** PANTRY-A26: the editor starts from the product's minimum. */
+    @Test fun `the editor shows the product's minimum`() {
+        val form = PantryEditorViewModel.initialForm(batch(1, 1, 1.0, min = 9.0), emptyList(), minimum = 4.0)
+        assertEquals("4", form.minQuantity)
+        assertEquals("4", form.initialMinQuantity)
+        assertTrue(form.detailsOpen)
     }
 }

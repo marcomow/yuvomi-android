@@ -50,6 +50,8 @@ object PantryView {
         val query: String,
         val filter: String,
         val today: LocalDate,
+        /** The server keeps the minimum on the product (2.85.0 on, PANTRY-R29). */
+        val productMinimums: Boolean = true,
         /** `locationLabel`: seeded German names translated, others as typed. */
         val placeLabel: (String) -> String,
     )
@@ -103,7 +105,7 @@ object PantryView {
     fun placeCount(batches: List<PantryItem>): Int = batches.map { it.locationId ?: -1 }.toSet().size
 
     /** `productStock`: the stock of every product as the rows show it. */
-    fun stock(input: Input): Map<String, PantryStatus.Stock> = PantryStatus.productStock(input.items, input.products)
+    fun stock(input: Input): Map<String, PantryStatus.Stock> = PantryStatus.productStock(input.items, input.products, input.productMinimums)
 
     /** `productSections`: products in sections by category, batches under them. */
     fun sections(input: Input, matching: List<PantryItem>): List<Section> {

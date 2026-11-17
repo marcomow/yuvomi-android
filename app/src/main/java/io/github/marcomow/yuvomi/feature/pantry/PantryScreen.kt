@@ -85,7 +85,8 @@ fun PantryScreen(vm: PantryViewModel, openItem: (Int?) -> Unit, openLocations: (
     val chips = PantryView.chips(s.items, s.stock.locations, s.filter, s.today, s.products)
     val filter = chips.filter
     LaunchedEffect(filter) { if (filter != s.filter) vm.setFilter(filter) }
-    val input = PantryView.Input(s.items, s.products, s.stock.locations, s.stock.categories, s.query, filter, s.today, placeLabel)
+    val productMinimums = PantryStatus.productMinimums(shell.session.serverVersion)
+    val input = PantryView.Input(s.items, s.products, s.stock.locations, s.stock.categories, s.query, filter, s.today, productMinimums, placeLabel)
     val stock = PantryView.stock(input)
     val visible = PantryView.visibleItems(input)
     // PANTRY-R25: "Running low" lists products, as one flat group without a heading.
@@ -197,7 +198,7 @@ fun PantryScreen(vm: PantryViewModel, openItem: (Int?) -> Unit, openLocations: (
         }
     }
 
-    details?.let { item -> PantryDetailsSheet(item, s.stock.locations) { details = null } }
+    details?.let { item -> PantryDetailsSheet(item, s.stock.locations, PantryStatus.minimumOf(item, s.products, productMinimums)) { details = null } }
 
     s.pickList?.let { choice ->
         // `resolveShoppingTarget` with several lists: ask once.
