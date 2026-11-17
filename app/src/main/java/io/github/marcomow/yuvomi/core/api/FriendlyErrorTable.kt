@@ -15,6 +15,7 @@ internal object FriendlyErrorTable {
         "amounts_hidden" to "housekeeping.errorAmountsHidden",
         "not_owner" to "common.errorNotOwner",
         "reorder_not_allowed" to "tasks.errorReorderNotAllowed",
+        "admin_required" to "common.errorNoPermission",
     )
 
     /** `CASE_MESSAGES`: a case the server names (`reason`) -> its sentence key. */

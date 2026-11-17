@@ -104,6 +104,11 @@ fun AppearanceSection(ctx: SectionContext) {
         }
     } else {
         SettingsGroup(title = t("settings.regionTitle"), footer = t("settings.regionAdminOnly")) {
+            // SET-R82 (2.91.0): the household currency is admin-only to change, but every member reads it.
+            currency?.let { code ->
+                val name = runCatching { java.util.Currency.getInstance(code).getDisplayName(ui) }.getOrNull()?.takeIf { it != code }
+                ValueRow(t("settings.currencyLabel"), code, name)
+            }
             ValueRow(t("settings.timezoneTitle"), zone?.replace('_', ' ') ?: t("settings.timezoneAuto"), hintWith(t("settings.timezoneAdminOnly"), if (zone == null) effective else null))
         }
     }

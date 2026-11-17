@@ -216,22 +216,44 @@ fun BackupSection(ctx: SectionContext) {
         ActionRow(t("settings.backupRestoreButton"), hint = t("android.browser.opensInBrowser")) { ctx.openWeb() }
     }
     if (scheduler != null) {
+        // SET-R80: "Last backup" is always the last success; a failed run and its reason get rows of their own.
+        val s = BackupRules.scheduler(scheduler)
+        val now = java.time.Instant.now()
+        val overdue = BackupRules.overdue(s, now)
         SettingsGroup(title = t("settings.backupSchedulerTitle"), footer = t("settings.backupSchedulerHint")) {
-            ValueRow(t("settings.backupSchedulerStatus"), t(if (scheduler.bool("enabled")) "settings.backupSchedulerEnabled" else "settings.backupSchedulerDisabled"))
-            if (scheduler.bool("enabled")) {
-                ValueRow(t("settings.backupSchedulerSchedule"), scheduler.str("schedule"))
+            ValueRow(
+                t("settings.backupSchedulerStatus"),
+                t(if (s.enabled) "settings.backupSchedulerEnabled" else "settings.backupSchedulerDisabled"),
+                tone = if (BackupRules.statusOk(s, now)) Yuvomi.colors.success else null,
+            )
+            if (s.enabled) {
+                ValueRow(t("settings.backupSchedulerSchedule"), s.schedule)
                 ValueRow(t("settings.backupSchedulerKeep"), ctx.strings.t("settings.backupSchedulerKeepCount", "count" to (scheduler.int("keepCount") ?: 0)))
+                val lastSuccess = BackupRules.lastSuccessful(s)
+                ValueRow(
+                    t("settings.backupSchedulerLastBackup"),
+                    lastSuccess?.let { ctx.strings.t("settings.backupSchedulerLastSuccess", "date" to ctx.dateTime(it)) } ?: t("settings.backupSchedulerNever"),
+                    hint = if (overdue && lastSuccess != null) t("settings.backupSchedulerOverdue") else null,
+                    tone = if (overdue) Yuvomi.colors.warning else null,
+                )
+                BackupRules.failedAttempt(s)?.let { at ->
+                    ValueRow(t("settings.backupSchedulerLastAttempt"), ctx.strings.t("settings.backupSchedulerLastFail", "date" to ctx.dateTime(at)))
+                }
+                if (s.hasLastError) {
+                    ValueRow(t("settings.backupSchedulerLastError"), t(BackupRules.reasonKey(s.lastErrorReason)), tone = Yuvomi.colors.danger)
+                }
+                BackupRules.nextRun(s)?.let { ValueRow(t("settings.backupSchedulerNextRun"), ctx.dateTime(s.nextRun!!)) }
             }
-            val last = scheduler.child("lastBackup")
-            val lastText = last.str("timestamp")?.let { ts ->
-                ctx.strings.t(if (last.bool("success")) "settings.backupSchedulerLastSuccess" else "settings.backupSchedulerLastFail", "date" to ctx.dateTime(ts))
-            } ?: t("settings.backupSchedulerNever")
-            ValueRow(t("settings.backupSchedulerLastBackup"), lastText)
-            if (ctx.editable) ActionRow(t("settings.backupSchedulerTrigger"), enabled = !busy) {
+            if (ctx.editable && s.enabled) ActionRow(t("settings.backupSchedulerTrigger"), enabled = !busy) {
                 busy = true
                 ctx.scope.launch {
-                    val failed = ctx.vm.write { it.call(SettingsOperation.BACKUP_TRIGGER, idempotencyKey = YuvomiClient.newIdempotencyKey()) }
-                    ctx.notifyKey(failed ?: "settings.backupSchedulerTriggeredToast")
+                    // SET-R81: a failed run answers 200 with `success: false`; read the answer, not just the status.
+                    ctx.vm.attempt { it.data(SettingsOperation.BACKUP_TRIGGER, idempotencyKey = YuvomiClient.newIdempotencyKey()).obj() }
+                        .onSuccess { data ->
+                            val success = if (data.containsKey("success")) data.bool("success") else true
+                            ctx.notifyKey(BackupRules.triggerKey(success, data.str("reason")))
+                        }
+                        .onFailure { ctx.notifyKey(SettingsErrors.key(it)) }
                     ctx.vm.load("backup-status", force = true) { it.data(SettingsOperation.BACKUP_STATUS) }
                     busy = false
                 }

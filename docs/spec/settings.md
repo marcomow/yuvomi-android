@@ -1,6 +1,6 @@
 # Spec: Settings
 
-Status: implemented · Upstream checked: 2.87.0 · Decisions: ADR 0003, 0005, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.91.0 · Decisions: ADR 0003, 0005, 0006, 0007, 0011, 0015
 
 ## Purpose
 
@@ -192,6 +192,21 @@ Not under `/settings` but only called by settings sheets (other builders may als
   "username taken". Every other new reason (API tokens, two-factor, SSO, displays) reads the
   shared table through SET-R78.
 
+- **SET-R80** The backup card (2.89.0, 2.90.0, #2525; `BackupRules`): "Last backup" is always
+  the last run that succeeded (`scheduler.lastSuccess`, else a successful `lastBackup`). A failed
+  run adds "Last attempt" and "Last error" with the sentence of `lastError.reason`
+  (`backup_dir_not_writable`, `disk_full`, `backup_verify_failed`, `unknown`), and "Next backup"
+  shows `nextRun`. The last backup turns amber with `settings.backupSchedulerOverdue` when it is
+  older than two intervals of a recognised schedule (`cronScheduleIntervalMs`), or when a run was
+  tried and none ever succeeded. "Active" is green only while nothing asks for attention. With the
+  schedule off, the card shows its status only.
+- **SET-R81** "Create backup now" reads the answer: a failed run is a `200` with
+  `success: false` and a `reason`, and the toast names that reason. The card reloads either way.
+- **SET-R82** A member who is not an admin sees the household currency read-only next to the
+  time zone (2.91.0); `currency`, `app_name`, `housekeeping_payment_tasks` and
+  `calendar_default_duration` are admin-only on the server, and the app offered them to admins
+  only already.
+
 ## Acceptance criteria
 
 | ID | Criterion | Test | Status |
@@ -203,3 +218,6 @@ Not under `/settings` but only called by settings sheets (other builders may als
 | SET-A16 | A module switch writes `disabled_modules` | `SettingsScreenTest` | ✅ |
 | SET-A17 | A browser-only section names itself and opens the browser | `SettingsScreenTest` | ✅ |
 | SET-A20–A40 | Every operation against the real server | `SettingsContractTest` | CI |
+| SET-A41 | Backup schedule intervals as upstream's `cronScheduleIntervalMs`; lists and ranges have none | `BackupRulesTest` | ✅ |
+| SET-A42 | Last success, failed attempt, reason, next run and overdue from `scheduler` | `BackupRulesTest` | ✅ |
+| SET-A43 | A failed manual backup names its reason; only an explicit success reads as one | `BackupRulesTest` | ✅ |

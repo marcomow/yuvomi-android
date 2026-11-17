@@ -2,7 +2,7 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Yuvomi API",
-    "version": "2.87.0",
+    "version": "2.91.0",
     "description": "OpenAPI documentation for the Yuvomi family organizer backend."
   },
   "servers": [
@@ -143,6 +143,74 @@
             }
           }
         }
+      }
+    },
+    "/readyz": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Readiness check",
+        "operationId": "getReadiness",
+        "responses": {
+          "200": {
+            "description": "The instance is ready",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReadinessResponse"
+                }
+              }
+            }
+          },
+          "503": {
+            "description": "The instance is not ready; `reason` says why",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NotReadyResponse"
+                }
+              }
+            }
+          }
+        },
+        "description": "Whether this instance can serve right now. Unlike `/health`, which only says that the process answers and stays 200 during a restore, this answers 503 with a `reason` while a restore is running, the database connection is closed, the applied schema is behind this build, or the data directory is not writable. It does not write to the database. Point a load balancer or an uptime monitor here; keep a container healthcheck on `/health`, or the container is restarted in the middle of a restore."
+      }
+    },
+    "/api/v1/system/diagnostics": {
+      "get": {
+        "tags": [
+          "System"
+        ],
+        "summary": "Get system diagnostics",
+        "operationId": "getSystemDiagnostics",
+        "responses": {
+          "200": {
+            "description": "Diagnostics of this installation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SystemDiagnosticsResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          }
+        },
+        "description": "What this installation runs on, for a bug report or a look at the last backup: version, runtime, schema, sizes, backup status, readiness. Never a key, a path, a hostname, the value of an environment variable or anything about a member. A single value that cannot be read is `null` (`schema_version`: 0) and does not fail the answer. Not cached.\n\nAdmin-only endpoint.",
+        "security": [
+          {
+            "bearerAuth": []
+          },
+          {
+            "apiKeyAuth": []
+          },
+          {
+            "cookieAuth": []
+          }
+        ]
       }
     },
     "/api/v1/version": {
@@ -3902,7 +3970,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "`database_key` (see DatabaseKeyStatus) says where the database key comes from, never its value; `GET /api/v1/backup/database-key` returns a generated one.\n\nAdmin-only endpoint.",
+        "description": "`database_key` (see DatabaseKeyStatus) says where the database key comes from, never its value; `GET /api/v1/backup/database-key` returns a generated one. `scheduler.lastBackup` is the last local run (`timestamp`, `success`, and on a failure `reason` and `error`), `scheduler.lastSuccess` the time of the last run that wrote a verified backup, `scheduler.nextRun` when the schedule fires next (`null` without a running schedule), `scheduler.timezone` the IANA zone the schedule runs in (`TZ`, otherwise `UTC`; `schedule` is wall-clock time there), and `scheduler.lastError` is `null` after a successful run and `{ timestamp, reason, message }` after a failed one. `reason` is always one of `backup_dir_not_writable`, `disk_full`, `backup_verify_failed`, `unknown`, and `message` (like `lastBackup.error`) is the fixed English sentence of that reason, never the text of the error - that is in the server log. A client shows its own sentence per `reason`. The three values are stored in the database: they survive a restart, and a restore keeps the ones of this installation.\n\nAdmin-only endpoint.",
         "security": [
           {
             "bearerAuth": []
@@ -4103,6 +4171,7 @@
           "Backup"
         ],
         "summary": "Run a manual local backup",
+        "operationId": "triggerLocalBackup",
         "responses": {
           "200": {
             "description": "Successful response"
@@ -4127,6 +4196,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
+        "description": "Answers 200 also when the backup failed: `data.success` is `false` then, `data.reason` one of `backup_dir_not_writable`, `disk_full`, `backup_verify_failed`, `unknown` and `data.error` the fixed English sentence of that reason. The outcome is what `GET /api/v1/backup/status` shows as `scheduler.lastBackup` afterwards.\n\nAdmin-only endpoint.",
         "security": [
           {
             "bearerAuth": []
@@ -4138,7 +4208,6 @@
             "cookieAuth": []
           }
         ],
-        "description": "Admin-only endpoint.",
         "parameters": [
           {
             "name": "X-CSRF-Token",
@@ -4498,7 +4567,7 @@
             "name": "audience",
             "in": "query",
             "required": false,
-            "description": "`household` asks for the version for a shared surface (wall mode): an allowlist. The response then carries only the keys a wall draws: `users`, `upcomingEvents`, `birthdays`, `urgentTasks`, `tasksDoneToday`, `wallTasks`, `todayMeals`, `shoppingOpenCount`, `wastePickups`, of `pantryExpiring` the fields `todayItems` and `todayCount`, and of `housekeeping` the fields `present`, `presentSince` and `workerName`. Tasks and appointments in them are those the whole household may see - visibility `all`, appointments from ICS subscriptions only from shared ones - whoever the caller is, creator and assignees included; `events_scope=mine` is ignored. Every other key keeps its place in the same empty form as for a caller without the module - notes, `budget`, `splitBalance`, `quicklinks`, `countdowns`, the counters and week/family slices of tasks and calendar, `housekeeping.unpaidAmount`, and what belongs to the caller alone (`health`, `fasting`, `nutrition`, `myShiftsToday`, `rewards`); `shoppingTile` is absent. A key added to this response later is empty for this audience until it is put on the list. The parameter only narrows the response, so it needs no scope of its own. Anything else means the personal version.",
+            "description": "`household` asks for the version for a shared surface (wall mode): an allowlist. The response then carries only the keys a wall draws: `users`, `upcomingEvents`, `birthdays`, `urgentTasks`, `tasksDoneToday`, `wallTasks`, `todayMeals`, `shoppingOpenCount`, `wastePickups`, of `pantryExpiring` the fields `todayItems` and `todayCount`, and of `housekeeping` the fields `present`, `presentSince` and `workerName`. Tasks and appointments in them are those the whole household may see - visibility `all`, appointments from ICS subscriptions only from shared ones - whoever the caller is, creator and assignees included; `events_scope=mine` is ignored. Every other key keeps its place in the same empty form as for a caller without the module - notes, `budget`, `splitBalance`, `quicklinks`, `countdowns`, the counters and week/family slices of tasks and calendar, `housekeeping.unpaidAmount`, and what belongs to the caller alone (`health`, `fasting`, `nutrition`, `myShiftsToday`, `rewards`); `shoppingTile` is absent. A key added to this response later is empty for this audience until it is put on the list. The parameter only narrows the response, so it needs no scope of its own. Anything else means the personal version; for a paired display its task parts (`urgentTasks`, the task counts, `memberTodayTasks`, `tasksDoneToday` and the task countdowns) still hold only tasks with visibility `all` and its event parts (`upcomingEvents`, `weekEvents`, `familyEvents` and the event countdowns) only the appointments of this audience (the wall rule), even one that names the display as an assignee.",
             "schema": {
               "type": "string",
               "enum": [
@@ -4864,7 +4933,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "The household history of who completed which task, and when (#791). Each entry carries both people: `user_id` is who ticked it off and `done_by_user_id` is who was named as having done it (#1205, null when nobody was), with `person_user_id` resolving the two into the one the entry displays. `source` is `null` for a completion in Yuvomi and `\"caldav\"` for one taken over by the inbound CalDAV sync when the task was ticked off in a reminders app (#1836); such an entry carries no person, since the sync cannot tell who ticked it off, and its time is the COMPLETED stamp of the reminder where it has one. Recording started with the release that introduced it, so nothing before that appears. Timestamps are UTC instants; which calendar day one belongs to is a question for the display timezone, which is why there is no date range here. Only tasks the caller may see are returned, evaluated live against the task - a task later set to private disappears from the history too. Subtasks are never recorded: a checklist item is part of its parent instruction, and the completion of the parent is the event.",
+        "description": "The household history of who completed which task, and when (#791). Each entry carries both people: `user_id` is who ticked it off and `done_by_user_id` is who was named as having done it (#1205, null when nobody was), with `person_user_id` resolving the two into the one the entry displays. `source` is `null` for a completion in Yuvomi and `\"caldav\"` for one taken over by the inbound CalDAV sync when the task was ticked off in a reminders app (#1836); such an entry carries no person, since the sync cannot tell who ticked it off, and its time is the COMPLETED stamp of the reminder where it has one. Recording started with the release that introduced it, so nothing before that appears. Timestamps are UTC instants; which calendar day one belongs to is a question for the display timezone, which is why there is no date range here. Only tasks the caller may see are returned, evaluated live against the task - a task later set to private disappears from the history too; a paired display gets only tasks with visibility `all` (the wall rule), even one that names it as an assignee. Subtasks are never recorded: a checklist item is part of its parent instruction, and the completion of the parent is the event.",
         "security": [
           {
             "bearerAuth": []
@@ -5338,7 +5407,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Every visible tag in use with its task count. Tags are free-form and have no registry: the list follows from the tasks themselves. Mirrored from VTODO CATEGORIES on CalDAV task lists, and distinct from the single category a task carries. Tags on tasks the caller cannot see are omitted, counts included.",
+        "description": "Every visible tag in use with its task count. Tags are free-form and have no registry: the list follows from the tasks themselves. Mirrored from VTODO CATEGORIES on CalDAV task lists, and distinct from the single category a task carries. Tags on tasks the caller cannot see are omitted, counts included; a paired display sees only tasks with visibility `all` (the wall rule), even one that names it as an assignee.",
         "security": [
           {
             "bearerAuth": []
@@ -6253,7 +6322,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Returns family documents linked to the task that are visible to the current user. Needs access to the Documents module (for API tokens a `documents:read` scope): without it the answer is 403, after the task itself was found (an invisible task stays 404).\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private), `cross_module_access` (403, reading linked documents needs access to the documents module).",
+        "description": "Returns family documents linked to the task that are visible to the current user. Needs access to the Documents module (for API tokens a `documents:read` scope): without it the answer is 403, after the task itself was found (an invisible task stays 404). A paired display sees only tasks with visibility `all` (the wall rule), even one that names it as an assignee: any other task answers 404 like an unknown id.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private), `cross_module_access` (403, reading linked documents needs access to the documents module).",
         "security": [
           {
             "bearerAuth": []
@@ -6362,7 +6431,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Answers \"when was this last done\" for a recurring task (#791). A completed repeating task spawns a follow-up instance, so its history is spread across a chain of rows; this walks the chain to its root and returns the whole series, newest first. A task the caller cannot see answers 404.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private).",
+        "description": "Answers \"when was this last done\" for a recurring task (#791). A completed repeating task spawns a follow-up instance, so its history is spread across a chain of rows; this walks the chain to its root and returns the whole series, newest first. A task the caller cannot see answers 404; a paired display sees only tasks with visibility `all` (the wall rule), even one that names it as an assignee.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private).",
         "security": [
           {
             "bearerAuth": []
@@ -6415,7 +6484,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Oldest first. Anyone who may see the task may read its comments; a task the caller cannot see answers 404.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private).",
+        "description": "Oldest first. Anyone who may see the task may read its comments; a task the caller cannot see answers 404. A paired display sees only tasks with visibility `all` (the wall rule), even one that names it as an assignee.\n\nA refusal a user can reach carries a `reason` next to `error` (#1909): `tasks_task_not_found` (404, the task does not exist or is not visible to you - deleted, or made private).",
         "security": [
           {
             "bearerAuth": []
@@ -7022,7 +7091,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Every entry carries its person, points and type. `reason` and `task_id` of an entry that belongs to a task are `null` unless the entry is the caller's own or the caller can see that task (same rule as GET /tasks, no admin bypass); once the task is deleted they stay with the entry's owner. Bonus, adjustment and redemption entries keep their `reason` for everyone. Points only: pocket money entries live in the same ledger but never appear here (see GET /rewards/money/ledger). LATE COMPLETION DECAY (household setting `tasks_late_decay_enabled`, off by default): an earn entry booked after the task's due day carries `decay_days` (calendar days past due at booking) and `base_points` (the point value before the reduction, `max(1, base - days)` was booked); both are `null` when nothing was reduced, and both follow the same visibility rule as `reason` and `task_id` - `null` for a task the caller may not see.",
+        "description": "Every entry carries its person, points and type. `reason` and `task_id` of an entry that belongs to a task are `null` unless the entry is the caller's own or the caller can see that task (same rule as GET /tasks, no admin bypass; a paired display sees only tasks with visibility `all`, the wall rule); once the task is deleted they stay with the entry's owner. Bonus, adjustment and redemption entries keep their `reason` for everyone. Points only: pocket money entries live in the same ledger but never appear here (see GET /rewards/money/ledger). LATE COMPLETION DECAY (household setting `tasks_late_decay_enabled`, off by default): an earn entry booked after the task's due day carries `decay_days` (calendar days past due at booking) and `base_points` (the point value before the reduction, `max(1, base - days)` was booked); both are `null` when nothing was reduced, and both follow the same visibility rule as `reason` and `task_id` - `null` for a task the caller may not see.",
         "security": [
           {
             "bearerAuth": []
@@ -13515,7 +13584,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Events generated from the birthdays module carry `birthday_name` and `birthday_date` (null for a birthday whose year is unknown, `year_unknown` on the birthday). Their `title` is stored in the household data language (see `language` in `/preferences`), so API consumers, the ICS feed and calendar sync all read the same wording; clients that display in a different language can re-render the title from `birthday_name`. While the household has the birthdays module switched off (`disabled_modules` in `/preferences`), these events are left out of this list, of `/calendar/upcoming`, of `/calendar/search` and of the ICS feed; a single one stays reachable by id, and the birthdays routes keep answering. A series comes as one row per occurrence in the range, all with the `id` of the series; `series_id` and `recurrence_id` tell them apart.",
+        "description": "Events generated from the birthdays module carry `birthday_name` and `birthday_date` (null for a birthday whose year is unknown, `year_unknown` on the birthday). Their `title` is stored in the household data language (see `language` in `/preferences`), so API consumers, the ICS feed and calendar sync all read the same wording; clients that display in a different language can re-render the title from `birthday_name`. While the household has the birthdays module switched off (`disabled_modules` in `/preferences`), these events are left out of this list, of `/calendar/upcoming`, of `/calendar/search` and of the ICS feed; a single one stays reachable by id, and the birthdays routes keep answering. A paired display reads this list, `/calendar/upcoming`, `/calendar/search`, a single event and the event count of `/calendar/calendars` under the wall rule: only events with visibility `all`, from ICS subscriptions only shared ones, even one that names the display as an assignee; a hidden event by id answers the same 404 as an unknown one. A series comes as one row per occurrence in the range, all with the `id` of the series; `series_id` and `recurrence_id` tell them apart.",
         "security": [
           {
             "bearerAuth": []
@@ -25217,7 +25286,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "`language` is admin-only: an ISO-639-1 code with a locale file, or `null`/`\"\"` to fall back to automatic derivation from `region`. Changing it (or `region`, or `date_format`) re-titles the stored birthday events so every channel stays consistent. `timezone` is admin-only too: an IANA zone (validated against ICU, so aliases like `Europe/Kiev` are accepted), or `null`/`\"\"` to fall back to the `TZ` env var, then the host zone, then UTC. It is the household zone used wherever a time carries none of its own - the calendar day server-side jobs call \"today\", the zone of the exported ICS feed, and the clock time events arrive with in Google and Outlook. The GET response carries both views: `timezone` (what is chosen, `null` for automatic) and `timezone_effective` (what applies, never `null`). `timezone_hint_dismissed` (admin-only boolean, household-wide) records that an admin has answered the question whether the household should adopt the browser zone; every accepted `timezone` write sets it to `true` as well. Weather fields (`weather_provider`, `weather_lat`, `weather_lon`, `weather_city`, `weather_units`) and holiday fields (`holiday_country`, `holiday_subdivision`, `holiday_group`, `holiday_show_public`, `holiday_show_school`, `holiday_public_color`, `holiday_school_color`) are admin-only. `weather_lat`/`weather_lon` are validated to ±90 / ±180, and `null` deletes them; colors must be 6-digit hex. Module feature toggles `health_cycle_enabled` (show the health cycle tab household-wide) and `rewards_require_approval` (redemptions need admin approval) are admin-only booleans, both default `true`. `tasks_late_decay_enabled` (admin-only boolean, default `false`) is the late-completion decay: a task completed after its `due_date` earns one point less per full overdue day (calendar days in the household zone), never below one point; the ledger rows of a reduced earning carry `decay_days` and `base_points`, other earn rows keep both `null`. `health_cycle_enabled_user` is the per-user opt-out for the same tab and is writable by anyone for themselves; it can only narrow the household setting, never widen it. The GET response exposes all three views: `health_cycle_enabled` (household), `health_cycle_enabled_user` (mine) and the read-only `health_cycle_effective` (both combined, which is what the UI renders). Overview fields: `dashboard_widgets` (array of `{id, visible, order, size, options?}`; `options` is stored but not interpreted - the server validates only its shape: a flat object, at most 8 keys, values boolean, finite number, short string or list of short strings) and `dashboard_today_glance` are personal and writable by anyone for themselves; sending `null` for either deletes the personal value, so the caller follows the household default again - including every later change to it. `dashboard_widgets_default` and `dashboard_today_glance_default` are the household default and admin-only; they never overwrite a member who has an arrangement of their own, and `null` removes the default.",
+        "description": "`language` is admin-only: an ISO-639-1 code with a locale file, or `null`/`\"\"` to fall back to automatic derivation from `region`. Changing it (or `region`, or `date_format`) re-titles the stored birthday events so every channel stays consistent. `timezone` is admin-only too: an IANA zone (validated against ICU, so aliases like `Europe/Kiev` are accepted), or `null`/`\"\"` to fall back to the `TZ` env var, then the host zone, then UTC. It is the household zone used wherever a time carries none of its own - the calendar day server-side jobs call \"today\", the zone of the exported ICS feed, and the clock time events arrive with in Google and Outlook. The GET response carries both views: `timezone` (what is chosen, `null` for automatic) and `timezone_effective` (what applies, never `null`). `timezone_hint_dismissed` (admin-only boolean, household-wide) records that an admin has answered the question whether the household should adopt the browser zone; every accepted `timezone` write sets it to `true` as well. Weather fields (`weather_provider`, `weather_lat`, `weather_lon`, `weather_city`, `weather_units`) and holiday fields (`holiday_country`, `holiday_subdivision`, `holiday_group`, `holiday_show_public`, `holiday_show_school`, `holiday_public_color`, `holiday_school_color`) are admin-only. `weather_lat`/`weather_lon` are validated to ±90 / ±180, and `null` deletes them; colors must be 6-digit hex. Module feature toggles `health_cycle_enabled` (show the health cycle tab household-wide) and `rewards_require_approval` (redemptions need admin approval) are admin-only booleans, both default `true`. `tasks_late_decay_enabled` (admin-only boolean, default `false`) is the late-completion decay: a task completed after its `due_date` earns one point less per full overdue day (calendar days in the household zone), never below one point; the ledger rows of a reduced earning carry `decay_days` and `base_points`, other earn rows keep both `null`. `health_cycle_enabled_user` is the per-user opt-out for the same tab and is writable by anyone for themselves; it can only narrow the household setting, never widen it. The GET response exposes all three views: `health_cycle_enabled` (household), `health_cycle_enabled_user` (mine) and the read-only `health_cycle_effective` (both combined, which is what the UI renders). Overview fields: `dashboard_widgets` (array of `{id, visible, order, size, options?}`; `options` is stored but not interpreted - the server validates only its shape: a flat object, at most 8 keys, values boolean, finite number, short string or list of short strings) and `dashboard_today_glance` are personal and writable by anyone for themselves; sending `null` for either deletes the personal value, so the caller follows the household default again - including every later change to it. `dashboard_widgets_default` and `dashboard_today_glance_default` are the household default and admin-only; they never overwrite a member who has an arrangement of their own, and `null` removes the default. The household fields `currency`, `app_name`, `housekeeping_payment_tasks` and `calendar_default_duration` are admin-only as well; a member who sends one of them gets `403` with `reason: 'admin_required'`, also for an invalid value, and nothing of the patch is written.",
         "security": [
           {
             "bearerAuth": []
@@ -26054,7 +26123,7 @@
             "$ref": "#/components/responses/InternalServerError"
           }
         },
-        "description": "Query `q` (at least 2 characters). Every word must match (AND); from 3 characters a word also matches inside longer words (\"milk\" finds \"oatmilk\"), accents and ß/ss are folded. Returns one list per result type, at most 5 hits each: `tasks`, `events`, `notes`, `contacts`, `items`, `meds`, `activities`, `waste`, `recipes`, `pantry`, `inventory`, `documents`, `birthdays`, `budget`. A type stays an empty list when its module is denied to the caller (role or token scope) or switched off for the household; rows follow the visibility rules of the module list they come from. A hit whose words are not all in its `title` carries `excerpt`: a short piece of the first visible field that holds a missing word (description, note text, notes), cut at word boundaries with `…` where it was shortened. A recurring event in `events` carries the `start_datetime` of its next occurrence from today (household time zone, looking two years ahead), as `GET /api/v1/calendar/search` does; `id` stays the id of the series. A series without an upcoming occurrence keeps the start of its first one. Up to v2.71.0 the series start was returned. A hit in `birthdays` carries `year_unknown` (boolean): only day and month of its `birth_date` are known (#2095).",
+        "description": "Query `q` (at least 2 characters). Every word must match (AND); from 3 characters a word also matches inside longer words (\"milk\" finds \"oatmilk\"), accents and ß/ss are folded. Returns one list per result type, at most 5 hits each: `tasks`, `events`, `notes`, `contacts`, `items`, `meds`, `activities`, `waste`, `recipes`, `pantry`, `inventory`, `documents`, `birthdays`, `budget`. A type stays an empty list when its module is denied to the caller (role or token scope) or switched off for the household; rows follow the visibility rules of the module list they come from. A hit whose words are not all in its `title` carries `excerpt`: a short piece of the first visible field that holds a missing word (description, note text, notes), cut at word boundaries with `…` where it was shortened. A hit in `tasks` carries `archived_at` like the task list does (a timestamp, or `null`): archived tasks are found and stand last, so with five or more other hits an archived one is not among them. A recurring event in `events` carries the `start_datetime` of its next occurrence from today (household time zone, looking two years ahead), as `GET /api/v1/calendar/search` does; `id` stays the id of the series. A series without an upcoming occurrence keeps the start of its first one. Up to v2.71.0 the series start was returned. A hit in `birthdays` carries `year_unknown` (boolean): only day and month of its `birth_date` are known (#2095).",
         "security": [
           {
             "bearerAuth": []
@@ -46019,11 +46088,12 @@
               "string",
               "null"
             ],
-            "maxLength": 5000
+            "maxLength": 5000,
+            "description": "Stored without leading and trailing whitespace; an empty or whitespace-only value is stored as `null`."
           },
           "category": {
             "type": "string",
-            "description": "Key of a category of the household, see `GET /tasks/meta/options`; anything else answers 400. Defaults to `misc` on create."
+            "description": "Key of a category of the household, see `GET /tasks/meta/options`; anything else answers 400. An empty string counts as not given. Defaults to `misc` on create."
           },
           "priority": {
             "type": "string",
@@ -46034,7 +46104,7 @@
               "high",
               "urgent"
             ],
-            "description": "Defaults to `none` on create."
+            "description": "An empty string counts as not given. Defaults to `none` on create."
           },
           "start_date": {
             "type": [
@@ -46204,11 +46274,12 @@
               "string",
               "null"
             ],
-            "maxLength": 5000
+            "maxLength": 5000,
+            "description": "Stored without leading and trailing whitespace; an empty or whitespace-only value is stored as `null`."
           },
           "category": {
             "type": "string",
-            "description": "Key of a category of the household, see `GET /tasks/meta/options`; anything else answers 400. Defaults to `misc` on create."
+            "description": "Key of a category of the household, see `GET /tasks/meta/options`; anything else answers 400. An empty string counts as not given. Defaults to `misc` on create."
           },
           "priority": {
             "type": "string",
@@ -46219,7 +46290,7 @@
               "high",
               "urgent"
             ],
-            "description": "Defaults to `none` on create."
+            "description": "An empty string counts as not given. Defaults to `none` on create."
           },
           "start_date": {
             "type": [
@@ -47665,6 +47736,257 @@
         "required": [
           "status",
           "timestamp"
+        ]
+      },
+      "ReadinessResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "ready"
+            ]
+          }
+        },
+        "required": [
+          "status"
+        ],
+        "additionalProperties": false
+      },
+      "NotReadyResponse": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "not_ready"
+            ]
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "restore_in_progress",
+              "database_closed",
+              "schema_behind",
+              "data_dir_not_writable"
+            ]
+          }
+        },
+        "required": [
+          "status",
+          "reason"
+        ],
+        "additionalProperties": false
+      },
+      "SystemDiagnostics": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "version": {
+            "type": "string",
+            "description": "The application version."
+          },
+          "build_revision": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The revision the image was built from (`APP_BUILD_REVISION`), or `null`."
+          },
+          "node": {
+            "type": "string",
+            "description": "The Node.js version, as in `process.version`."
+          },
+          "platform": {
+            "type": "string",
+            "example": "linux"
+          },
+          "arch": {
+            "type": "string",
+            "example": "x64"
+          },
+          "sqlite": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "version": {
+                "type": [
+                  "string",
+                  "null"
+                ]
+              },
+              "encrypted": {
+                "type": "boolean",
+                "description": "Whether the database is encrypted with a key."
+              }
+            },
+            "required": [
+              "version",
+              "encrypted"
+            ]
+          },
+          "schema_version": {
+            "type": "integer",
+            "description": "The highest applied migration; 0 when it cannot be read."
+          },
+          "last_migration_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "database_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Size of the database file."
+          },
+          "wal_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Size of the write-ahead log next to it; 0 without one."
+          },
+          "data_dir_free_bytes": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Free space on the volume of the database file."
+          },
+          "uptime_seconds": {
+            "type": "integer"
+          },
+          "backup": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "last_attempt": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "The last local backup run, whatever its outcome."
+              },
+              "last_success": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "The last run that wrote a verified backup."
+              },
+              "reason": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "enum": [
+                  "backup_dir_not_writable",
+                  "disk_full",
+                  "backup_verify_failed",
+                  "unknown",
+                  null
+                ],
+                "description": "Why the last run failed; `null` after a success or before the first run."
+              },
+              "next_run": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "format": "date-time",
+                "description": "When the schedule fires next; `null` without a running schedule."
+              },
+              "local": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether scheduled local backups are on."
+              },
+              "webdav": {
+                "type": [
+                  "boolean",
+                  "null"
+                ],
+                "description": "Whether a WebDAV target is switched on and complete."
+              }
+            },
+            "required": [
+              "last_attempt",
+              "last_success",
+              "reason",
+              "next_run",
+              "local",
+              "webdav"
+            ]
+          },
+          "key_source": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "env",
+              "file",
+              "stored",
+              "generated",
+              null
+            ],
+            "description": "Where the database key comes from, as `origin` in DatabaseKeyStatus. Never the key."
+          },
+          "ready": {
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/ReadinessResponse"
+              },
+              {
+                "$ref": "#/components/schemas/NotReadyResponse"
+              }
+            ],
+            "description": "What `GET /readyz` answers at this moment."
+          },
+          "modules_installed": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "description": "Number of installed extension modules."
+          }
+        },
+        "required": [
+          "version",
+          "build_revision",
+          "node",
+          "platform",
+          "arch",
+          "sqlite",
+          "schema_version",
+          "last_migration_at",
+          "database_bytes",
+          "wal_bytes",
+          "data_dir_free_bytes",
+          "uptime_seconds",
+          "backup",
+          "key_source",
+          "ready",
+          "modules_installed"
+        ]
+      },
+      "SystemDiagnosticsResponse": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SystemDiagnostics"
+          }
+        },
+        "required": [
+          "data"
         ]
       },
       "VersionResponse": {

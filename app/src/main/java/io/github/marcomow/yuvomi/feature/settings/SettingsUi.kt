@@ -92,12 +92,12 @@ fun SwitchRow(label: String, checked: Boolean, enabled: Boolean = true, hint: St
 
 /** A label with its value; tapping it runs [onClick] when given. */
 @Composable
-fun ValueRow(label: String, value: String?, hint: String? = null, enabled: Boolean = true, onClick: (() -> Unit)? = null) {
+fun ValueRow(label: String, value: String?, hint: String? = null, enabled: Boolean = true, tone: androidx.compose.ui.graphics.Color? = null, onClick: (() -> Unit)? = null) {
     ListItem(
         headlineContent = { Text(label) },
         supportingContent = if (value != null || hint != null) ({
             Column {
-                if (value != null) Text(value, color = if (onClick != null && enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
+                if (value != null) Text(value, color = tone ?: if (onClick != null && enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface)
                 if (hint != null) Text(hint, style = MaterialTheme.typography.bodySmall, color = Yuvomi.colors.textSecondary)
             }
         }) else null,
