@@ -114,7 +114,7 @@ and approve pull requests*.
 ### Moving the pin by hand
 
 ```bash
-./upstream/sync.sh 2.91.0     # or no argument to re-sync the current pin
+./upstream/sync.sh 2.94.0     # or no argument to re-sync the current pin
 git diff --stat
 cat upstream/.sync-report.md
 ```

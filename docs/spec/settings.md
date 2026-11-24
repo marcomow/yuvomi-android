@@ -1,6 +1,6 @@
 # Spec: Settings
 
-Status: implemented · Upstream checked: 2.91.0 · Decisions: ADR 0003, 0005, 0006, 0007, 0011, 0015
+Status: implemented · Upstream checked: 2.94.0 · Decisions: ADR 0003, 0005, 0006, 0007, 0011, 0015
 
 ## Purpose
 

@@ -1,6 +1,6 @@
 # Spec: Overview
 
-Status: ready for implementation · Upstream checked: 2.91.0 · Decisions: ADR 0002, 0006, 0007,
+Status: ready for implementation · Upstream checked: 2.94.0 · Decisions: ADR 0002, 0006, 0007,
 0010
 
 ## Purpose

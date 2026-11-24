@@ -7,29 +7,29 @@ spec; fix whichever is wrong.
 
 | Spec | Status | Upstream version checked |
 |---|---|---|
-| [Sign-in and session](signin.md) | Implemented | 2.91.0 |
-| [Overview](overview.md) | Implemented | 2.91.0 |
-| [Tasks](tasks.md) | Implemented (tiers 1 and 2) | 2.91.0 |
-| [Shopping](shopping.md) | Implemented | 2.91.0 |
-| [Meals](meals.md) | Implemented | 2.91.0 |
-| [Recipes](recipes.md) | Implemented | 2.91.0 |
-| [Notes](notes.md) | Implemented | 2.91.0 |
-| [Pantry](pantry.md) | Implemented | 2.91.0 |
-| [Calendar](calendar.md) | Implemented | 2.91.0 |
-| [Schedule](schedule.md) | Implemented | 2.91.0 |
-| [Documents](documents.md) | Implemented | 2.91.0 |
-| [Health](health.md) | Implemented | 2.91.0 |
-| [Budget](budget.md) | Implemented | 2.91.0 |
-| [Subscriptions](subscriptions.md) | Implemented | 2.91.0 |
-| [Split expenses](splitexpenses.md) | Implemented | 2.91.0 |
-| [Settings](settings.md) | Implemented | 2.91.0 |
-| [Rewards](rewards.md) | Implemented | 2.91.0 |
-| [Birthdays](birthdays.md) | Implemented | 2.91.0 |
-| [Contacts](contacts.md) | Implemented | 2.91.0 |
-| [Inventory](inventory.md) | Implemented | 2.91.0 |
-| [Housekeeping](housekeeping.md) | Implemented | 2.91.0 |
-| [Waste](waste.md) | Implemented | 2.91.0 |
-| [Tags](tags.md) | Implemented | 2.91.0 |
+| [Sign-in and session](signin.md) | Implemented | 2.94.0 |
+| [Overview](overview.md) | Implemented | 2.94.0 |
+| [Tasks](tasks.md) | Implemented (tiers 1 and 2) | 2.94.0 |
+| [Shopping](shopping.md) | Implemented | 2.94.0 |
+| [Meals](meals.md) | Implemented | 2.94.0 |
+| [Recipes](recipes.md) | Implemented | 2.94.0 |
+| [Notes](notes.md) | Implemented | 2.94.0 |
+| [Pantry](pantry.md) | Implemented | 2.94.0 |
+| [Calendar](calendar.md) | Implemented | 2.94.0 |
+| [Schedule](schedule.md) | Implemented | 2.94.0 |
+| [Documents](documents.md) | Implemented | 2.94.0 |
+| [Health](health.md) | Implemented | 2.94.0 |
+| [Budget](budget.md) | Implemented | 2.94.0 |
+| [Subscriptions](subscriptions.md) | Implemented | 2.94.0 |
+| [Split expenses](splitexpenses.md) | Implemented | 2.94.0 |
+| [Settings](settings.md) | Implemented | 2.94.0 |
+| [Rewards](rewards.md) | Implemented | 2.94.0 |
+| [Birthdays](birthdays.md) | Implemented | 2.94.0 |
+| [Contacts](contacts.md) | Implemented | 2.94.0 |
+| [Inventory](inventory.md) | Implemented | 2.94.0 |
+| [Housekeeping](housekeeping.md) | Implemented | 2.94.0 |
+| [Waste](waste.md) | Implemented | 2.94.0 |
+| [Tags](tags.md) | Implemented | 2.94.0 |
 
 Where each acceptance criterion is tested: see the `@Test` names and KDoc in `app/src/test/`,
 which carry the criterion IDs (`SIGNIN-A6`, `TASKS-A17`, ...). Criteria tagged **ui** are covered
