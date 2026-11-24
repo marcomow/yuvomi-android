@@ -356,7 +356,8 @@ object HousekeepingRules {
     ): kotlinx.serialization.json.JsonObject = kotlinx.serialization.json.buildJsonObject {
         put("date", jsonString(date))
         put("original_date", jsonString(originalDate))
-        if (visit.hourly) put("minutes_worked", jsonNumber(minutes ?: 0.0)) else put("daily_rate", jsonNumber(dailyRate ?: 0.0))
+        // `minutes_worked` is an integer in the 2.93.0 description: send `90`, never `90.0` or a fraction.
+        if (visit.hourly) put("minutes_worked", jsonNumber(Math.round(max(0.0, minutes ?: 0.0)))) else put("daily_rate", jsonNumber(dailyRate ?: 0.0))
         put("extras", jsonNumber(extras))
         put("receipt_document_id", receiptDocumentId?.let(::jsonNumber) ?: kotlinx.serialization.json.JsonNull)
         put("event_title", jsonString(texts.eventTitle))

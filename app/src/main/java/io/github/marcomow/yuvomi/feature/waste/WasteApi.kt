@@ -62,7 +62,7 @@ class WasteApi(private val client: YuvomiClient) {
         client.call(
             WasteOperation.OVERRIDE_SET,
             mapOf("id" to scheduleId, "originalDate" to originalDate),
-            body = buildJsonObject { put("replacement_date", replacement?.let(::JsonPrimitive) ?: JsonNull) },
+            body = overrideBody(replacement),
         )
     }
 
@@ -172,6 +172,16 @@ class WasteApi(private val client: YuvomiClient) {
             put("name", name)
             put("icon", icon)
             put("color", color)
+        }
+
+        /**
+         * Upstream 2.94.0 requires both fields: `replacement_date` (null skips) and `note`. The app
+         * edits no override note, and a left-out note cleared the stored one on older servers
+         * already, so `note: null` keeps that behaviour.
+         */
+        fun overrideBody(replacement: String?): JsonObject = buildJsonObject {
+            put("replacement_date", replacement?.let(::JsonPrimitive) ?: JsonNull)
+            put("note", JsonNull)
         }
 
         fun decodeData(json: String): WasteData = ApiJson.decodeFromString(WasteData.serializer(), json)

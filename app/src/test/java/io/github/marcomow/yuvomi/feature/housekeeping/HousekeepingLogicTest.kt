@@ -132,7 +132,10 @@ class HousekeepingLogicTest {
         assertEquals("Housekeeping: Housekeeper", texts.eventTitle)
         assertEquals("Housekeeping visit on Nov 2. Amount due: €45.00.", texts.paymentDescription)
         val hourly = HousekeepingRules.visitBody(Visit(1, rateType = "hourly"), "2026-11-02", "2026-11-01", 90.0, null, 5.0, null, texts)
-        assertEquals("90.0", hourly["minutes_worked"]!!.jsonPrimitive.content)
+        // Upstream 2.93.0: `minutes_worked` is an integer, so a whole number goes out without `.0`.
+        assertEquals("90", hourly["minutes_worked"]!!.jsonPrimitive.content)
+        val fraction = HousekeepingRules.visitBody(Visit(1, rateType = "hourly"), "2026-11-02", "2026-11-02", 12.5, null, 0.0, null, texts)
+        assertEquals("13", fraction["minutes_worked"]!!.jsonPrimitive.content)
         assertFalse("daily_rate" in hourly)
         assertEquals(JsonNull, hourly["receipt_document_id"])
         val daily = HousekeepingRules.visitBody(Visit(1), "2026-11-02", "2026-11-02", null, 45.0, 0.0, 7, texts)
